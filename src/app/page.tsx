@@ -12,6 +12,7 @@ import { AnimatedCard, AnimatedSection } from "@/components/AnimatedCard";
 
 export interface BrandCheckResult {
     brand: string;
+    category: string; // Added to persist context for competitor checks
     score: number;
     responses: {
         model: string;
@@ -74,13 +75,22 @@ export default function Home() {
 
     const handleCompetitorCheck = async (competitorBrand: string) => {
         if (!result) return;
+
+        // Smart Deduplication: If comparing against itself, reuse the result
+        if (competitorBrand.trim().toLowerCase() === result.brand.trim().toLowerCase()) {
+            setCompetitor(result);
+            addToast("Brand matches original! Reusing score.", "success");
+            return;
+        }
+
         setCompetitorLoading(true);
 
         try {
             const response = await fetch("/api/check-brand", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ brand: competitorBrand }),
+                // Fix: Pass the same category context to ensure consistent scoring
+                body: JSON.stringify({ brand: competitorBrand, category: result.category }),
             });
 
             const data = await response.json();
