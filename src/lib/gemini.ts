@@ -22,9 +22,27 @@ export async function queryGemini(brand: string, category: string) {
     const model = getClient().getGenerativeModel({
         model: modelName,
         generationConfig: {
-            maxOutputTokens: 2000,
+            maxOutputTokens: 5000,
             temperature: 0.7,
         },
+        safetySettings: [
+            {
+                category: "HARM_CATEGORY_HARASSMENT",
+                threshold: "BLOCK_NONE",
+            },
+            {
+                category: "HARM_CATEGORY_HATE_SPEECH",
+                threshold: "BLOCK_NONE",
+            },
+            {
+                category: "HARM_CATEGORY_SEXUALLY_EXPLICIT",
+                threshold: "BLOCK_NONE",
+            },
+            {
+                category: "HARM_CATEGORY_DANGEROUS_CONTENT",
+                threshold: "BLOCK_NONE",
+            },
+        ],
     });
 
     const categoryContext = category && category !== "general"
@@ -52,9 +70,27 @@ export async function queryGeminiRecommendation(brand: string, category: string)
     const model = getClient().getGenerativeModel({
         model: modelName,
         generationConfig: {
-            maxOutputTokens: 2000,
+            maxOutputTokens: 5000,
             temperature: 0.7,
         },
+        safetySettings: [
+            {
+                category: "HARM_CATEGORY_HARASSMENT",
+                threshold: "BLOCK_NONE",
+            },
+            {
+                category: "HARM_CATEGORY_HATE_SPEECH",
+                threshold: "BLOCK_NONE",
+            },
+            {
+                category: "HARM_CATEGORY_SEXUALLY_EXPLICIT",
+                threshold: "BLOCK_NONE",
+            },
+            {
+                category: "HARM_CATEGORY_DANGEROUS_CONTENT",
+                threshold: "BLOCK_NONE",
+            },
+        ],
     });
 
     const prompt = generateRecommendationPrompt(brand, category);
