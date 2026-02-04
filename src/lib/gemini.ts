@@ -22,7 +22,7 @@ export async function queryGemini(brand: string, category: string) {
     const model = getClient().getGenerativeModel({
         model: modelName,
         generationConfig: {
-            maxOutputTokens: 500,
+            maxOutputTokens: 5000,
             temperature: 0.7,
         },
     });
