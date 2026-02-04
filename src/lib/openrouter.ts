@@ -10,28 +10,8 @@ export async function queryOpenRouter(brand: string, category: string) {
         throw new Error("OPENROUTER_API_KEY is not configured");
     }
 
-    // Using a free/low-cost model available on OpenRouter
-    // Liquid LFM 40B is often free or very cheap and good quality
-    // Alternative: "microsoft/phi-3-medium-128k-instruct:free" or similar if available
-    // Using openrouter/free as requested by user
-    //const modelName = "google/gemini-2.0-flash-lite-preview-02-05:free";
-    // constant fallback: "openrouter/free" is a router, but "google/gemini-2.0-flash-lite-preview-02-05:free" is a specific free model often available.
-    // However, user explicitly put "model": "openrouter/free" in the curl command. I should probably use exactly that or a safer specific free model.
-    // "openrouter/free" includes multiple models.
-    // Let's stick to what allows the curl to work? 
-    // Actually, let's use a very reliable free one or the one user asked. User asked "openrouter/free" in the curl example. 
-    // But in the text they said "fix gemini response and openrouter to this one". 
-    // Maybe they want Gemini to be used via OpenRouter? 
-    // No, I'll stick to 'google/gemini-2.0-flash-lite-preview-02-05:free' or 'openrouter/free'.
-    // The previous code had "liquid/lfm-40b:free".
-    // I will try 'google/gemini-2.0-flash-lite-preview-02-05:free' as it is a high quality free model on OR, 
-    // AND the user complained about "gemini response" - maybe they want the *OpenRouter* one to be Gemini too?
-    // Let's look closer at the request "fix gemini response AND openrouter to this one".
-    // "This one" refers to the curl command. The curl command has `"model": "openrouter/free"`.
-    // I will use `openrouter/free` for the OpenRouter integration.
-
+    // Using openrouter/free as requested
     const modelName = "openrouter/free";
-    // Fallback or better option if user has credits: "meta-llama/llama-3-8b-instruct:free"
 
     const prompt = generateBrandAnalysisPrompt(brand, category);
 
@@ -50,7 +30,7 @@ export async function queryOpenRouter(brand: string, category: string) {
                     { "role": "user", "content": prompt }
                 ],
                 "temperature": 0.7,
-                "max_tokens": 500,
+                "max_tokens": 5000,
             })
         });
 
@@ -97,7 +77,7 @@ export async function queryOpenRouterRecommendation(brand: string, category: str
                     { "role": "user", "content": prompt }
                 ],
                 "temperature": 0.7,
-                "max_tokens": 300,
+                "max_tokens": 5000,
             })
         });
 
