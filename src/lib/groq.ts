@@ -29,7 +29,7 @@ export async function queryGroq(brand: string, category: string) {
         const chatCompletion = await getClient().chat.completions.create({
             messages: [{ role: "user", content: prompt }],
             model: modelName,
-            max_tokens: 5000,
+            max_tokens: 500,
             temperature: 0.7,
         });
 
@@ -53,7 +53,7 @@ export async function queryGroqRecommendation(brand: string, category: string) {
         const chatCompletion = await getClient().chat.completions.create({
             messages: [{ role: "user", content: prompt }],
             model: modelName,
-            max_tokens: 5000,
+            max_tokens: 500,
             temperature: 0.7,
         });
 

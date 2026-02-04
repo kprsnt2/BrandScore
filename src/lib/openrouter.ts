@@ -30,7 +30,7 @@ export async function queryOpenRouter(brand: string, category: string) {
                     { "role": "user", "content": prompt }
                 ],
                 "temperature": 0.7,
-                "max_tokens": 5000,
+                "max_tokens": 500,
             })
         });
 
@@ -77,7 +77,7 @@ export async function queryOpenRouterRecommendation(brand: string, category: str
                     { "role": "user", "content": prompt }
                 ],
                 "temperature": 0.7,
-                "max_tokens": 5000,
+                "max_tokens": 500,
             })
         });
 
