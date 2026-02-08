@@ -1,18 +1,18 @@
 "use client";
 
 import { useState } from "react";
-import { BrandCheckResult } from "@/app/page";
+import { BrandCheckResult, ComparisonResult } from "@/app/page";
 
 interface CompetitorComparisonProps {
     brandResult: BrandCheckResult;
-    competitorResult: BrandCheckResult | null;
+    comparisonResult: ComparisonResult | null;
     onCompare: (competitor: string) => void;
     loading: boolean;
 }
 
 export default function CompetitorComparison({
     brandResult,
-    competitorResult,
+    comparisonResult,
     onCompare,
     loading
 }: CompetitorComparisonProps) {
@@ -25,9 +25,8 @@ export default function CompetitorComparison({
         }
     };
 
-    const advantage = competitorResult
-        ? brandResult.score - competitorResult.score
-        : null;
+    // Calculate advantage from comparison result
+    const advantage = comparisonResult?.advantage ?? null;
 
     return (
         <div className="card p-6">
@@ -52,25 +51,25 @@ export default function CompetitorComparison({
                         className="px-6 py-2 bg-gray-700 hover:bg-gray-600 rounded-lg font-medium
                        transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                        {loading ? "Checking..." : "Compare"}
+                        {loading ? "Comparing..." : "Compare"}
                     </button>
                 </div>
             </form>
 
             {/* Comparison Results */}
-            {competitorResult && (
+            {comparisonResult && (
                 <div className="space-y-4">
-                    {/* Score Comparison */}
+                    {/* Score Comparison - Use scores from comparison result */}
                     <div className="grid grid-cols-3 gap-4 text-center">
                         <div className="p-4 bg-primary-500/10 rounded-lg border border-primary-500/30">
                             <p className="text-sm text-gray-400 mb-1">Your Brand</p>
-                            <p className="text-2xl font-bold text-primary-400">{brandResult.score}</p>
-                            <p className="text-sm text-gray-500">{brandResult.brand}</p>
+                            <p className="text-2xl font-bold text-primary-400">{comparisonResult.brand1.totalScore}</p>
+                            <p className="text-sm text-gray-500">{comparisonResult.brand1.name}</p>
                         </div>
 
                         <div className="p-4 flex items-center justify-center">
                             <div className={`text-2xl font-bold ${advantage && advantage > 0 ? "text-green-400" :
-                                    advantage && advantage < 0 ? "text-red-400" : "text-gray-400"
+                                advantage && advantage < 0 ? "text-red-400" : "text-gray-400"
                                 }`}>
                                 {advantage !== null && (
                                     <>
@@ -85,20 +84,20 @@ export default function CompetitorComparison({
 
                         <div className="p-4 bg-gray-800/50 rounded-lg border border-gray-700">
                             <p className="text-sm text-gray-400 mb-1">Competitor</p>
-                            <p className="text-2xl font-bold text-gray-300">{competitorResult.score}</p>
-                            <p className="text-sm text-gray-500">{competitorResult.brand}</p>
+                            <p className="text-2xl font-bold text-gray-300">{comparisonResult.brand2.totalScore}</p>
+                            <p className="text-sm text-gray-500">{comparisonResult.brand2.name}</p>
                         </div>
                     </div>
 
-                    {/* Detailed Breakdown */}
+                    {/* Detailed Breakdown - Use comparison result scores */}
                     <div className="mt-6">
                         <h4 className="text-sm font-semibold text-gray-400 mb-3">Score Breakdown</h4>
                         <div className="space-y-2">
                             {[
-                                { label: "Recommendation", you: brandResult.breakdown.recommendation, them: competitorResult.breakdown.recommendation, max: 40 },
-                                { label: "Sentiment", you: brandResult.breakdown.sentiment, them: competitorResult.breakdown.sentiment, max: 30 },
-                                { label: "Prominence", you: brandResult.breakdown.prominence, them: competitorResult.breakdown.prominence, max: 20 },
-                                { label: "Accuracy", you: brandResult.breakdown.accuracy, them: competitorResult.breakdown.accuracy, max: 10 },
+                                { label: "Recommendation", you: comparisonResult.brand1.scores.recommendation, them: comparisonResult.brand2.scores.recommendation, max: 40 },
+                                { label: "Sentiment", you: comparisonResult.brand1.scores.sentiment, them: comparisonResult.brand2.scores.sentiment, max: 30 },
+                                { label: "Prominence", you: comparisonResult.brand1.scores.prominence, them: comparisonResult.brand2.scores.prominence, max: 20 },
+                                { label: "Accuracy", you: comparisonResult.brand1.scores.accuracy, them: comparisonResult.brand2.scores.accuracy, max: 10 },
                             ].map((item) => (
                                 <div key={item.label} className="space-y-1">
                                     <div className="flex justify-between text-sm">
@@ -126,20 +125,22 @@ export default function CompetitorComparison({
                         </div>
                     </div>
 
-                    {/* Competitive Insight */}
+                    {/* Competitive Insight - Use comparison summary */}
                     <div className="mt-4 p-4 bg-gray-800/30 rounded-lg border border-gray-700">
                         <p className="text-sm text-gray-300">
                             <span className="font-semibold">🎯 Competitive Analysis:</span>{" "}
-                            {advantage && advantage > 10 ? (
-                                <>You have a strong lead over {competitorResult.brand}. Maintain your AI presence!</>
-                            ) : advantage && advantage > 0 ? (
-                                <>Slight advantage over {competitorResult.brand}. Room to extend your lead.</>
-                            ) : advantage && advantage < -10 ? (
-                                <>{competitorResult.brand} has better AI visibility. Focus on content optimization.</>
-                            ) : advantage && advantage < 0 ? (
-                                <>{competitorResult.brand} is slightly ahead. Small improvements can flip this.</>
-                            ) : (
-                                <>Evenly matched with {competitorResult.brand}. Differentiation is key.</>
+                            {comparisonResult.comparisonSummary || (
+                                advantage && advantage > 10 ? (
+                                    <>You have a strong lead over {comparisonResult.brand2.name}. Maintain your AI presence!</>
+                                ) : advantage && advantage > 0 ? (
+                                    <>Slight advantage over {comparisonResult.brand2.name}. Room to extend your lead.</>
+                                ) : advantage && advantage < -10 ? (
+                                    <>{comparisonResult.brand2.name} has better AI visibility. Focus on content optimization.</>
+                                ) : advantage && advantage < 0 ? (
+                                    <>{comparisonResult.brand2.name} is slightly ahead. Small improvements can flip this.</>
+                                ) : (
+                                    <>Evenly matched with {comparisonResult.brand2.name}. Differentiation is key.</>
+                                )
                             )}
                         </p>
                     </div>
@@ -147,7 +148,7 @@ export default function CompetitorComparison({
             )}
 
             {/* Empty State */}
-            {!competitorResult && !loading && (
+            {!comparisonResult && !loading && (
                 <p className="text-gray-500 text-center py-4">
                     Enter a competitor brand name to compare AI visibility scores
                 </p>
@@ -157,7 +158,7 @@ export default function CompetitorComparison({
             {loading && (
                 <div className="flex items-center justify-center py-8">
                     <div className="w-8 h-8 border-2 border-primary-500 border-t-transparent rounded-full animate-spin"></div>
-                    <span className="ml-3 text-gray-400">Analyzing competitor...</span>
+                    <span className="ml-3 text-gray-400">Comparing brands head-to-head...</span>
                 </div>
             )}
         </div>
