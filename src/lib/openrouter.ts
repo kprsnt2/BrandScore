@@ -37,7 +37,7 @@ export async function queryOpenRouter(brand: string, category: string): Promise<
                 "messages": [
                     { "role": "user", "content": prompt }
                 ],
-                "temperature": 0.7,
+                "temperature": 0,
                 "max_tokens": 1000,
             })
         });
@@ -95,7 +95,7 @@ Provide a helpful recommendation response. Discuss leading options and mention $
                 "messages": [
                     { "role": "user", "content": prompt }
                 ],
-                "temperature": 0.7,
+                "temperature": 0,
                 "max_tokens": 500,
             })
         });

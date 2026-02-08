@@ -104,7 +104,7 @@ export async function POST(request: NextRequest) {
             model: "gemini-2.5-flash",
             generationConfig: {
                 maxOutputTokens: 2000,
-                temperature: 0.5, // Lower temperature for more consistent results
+                temperature: 0, // Zero temperature for deterministic results
             },
             safetySettings: [
                 { category: HarmCategory.HARM_CATEGORY_HARASSMENT, threshold: HarmBlockThreshold.BLOCK_NONE },

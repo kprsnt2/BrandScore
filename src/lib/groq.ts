@@ -38,7 +38,7 @@ export async function queryGroq(brand: string, category: string): Promise<Struct
             messages: [{ role: "user", content: prompt }],
             model: modelName,
             max_tokens: 1000,
-            temperature: 0.7,
+            temperature: 0,
         });
 
         const text = chatCompletion.choices[0]?.message?.content || "No response generated";
@@ -74,7 +74,7 @@ Provide a helpful recommendation response. Discuss leading options and mention $
             messages: [{ role: "user", content: prompt }],
             model: modelName,
             max_tokens: 500,
-            temperature: 0.7,
+            temperature: 0,
         });
 
         return chatCompletion.choices[0]?.message?.content || "";
