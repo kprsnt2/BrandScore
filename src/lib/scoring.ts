@@ -1,3 +1,5 @@
+import { AIScoreResponse } from "./prompts";
+
 export interface ScoringInput {
     text: string;
     brand: string;
@@ -10,6 +12,63 @@ export interface Breakdown {
     accuracy: number;        // 0-10
 }
 
+// Aggregate scores from multiple AI responses (averaging)
+export function aggregateStructuredScores(responses: AIScoreResponse[]): {
+    score: number;
+    breakdown: Breakdown;
+    tips: string[];
+    overallSentiment: "positive" | "neutral" | "negative";
+} {
+    if (responses.length === 0) {
+        return {
+            score: 0,
+            breakdown: { recommendation: 0, sentiment: 0, prominence: 0, accuracy: 0 },
+            tips: [],
+            overallSentiment: "neutral"
+        };
+    }
+
+    // Average all scores
+    const totals = responses.reduce((acc, r) => ({
+        recommendation: acc.recommendation + r.scores.recommendation,
+        sentiment: acc.sentiment + r.scores.sentiment,
+        prominence: acc.prominence + r.scores.prominence,
+        accuracy: acc.accuracy + r.scores.accuracy,
+    }), { recommendation: 0, sentiment: 0, prominence: 0, accuracy: 0 });
+
+    const count = responses.length;
+    const breakdown: Breakdown = {
+        recommendation: Math.round(totals.recommendation / count),
+        sentiment: Math.round(totals.sentiment / count),
+        prominence: Math.round(totals.prominence / count),
+        accuracy: Math.round(totals.accuracy / count),
+    };
+
+    const score = Math.min(100, breakdown.recommendation + breakdown.sentiment + breakdown.prominence + breakdown.accuracy);
+
+    // Aggregate tips (take unique tips from all responses, max 4)
+    const allTips = responses.flatMap(r => r.tips);
+    const uniqueTips = [...new Set(allTips)].slice(0, 4);
+
+    // Determine overall sentiment by majority
+    const sentimentCounts = responses.reduce((acc, r) => {
+        acc[r.overallSentiment] = (acc[r.overallSentiment] || 0) + 1;
+        return acc;
+    }, {} as Record<string, number>);
+
+    let overallSentiment: "positive" | "neutral" | "negative" = "neutral";
+    let maxCount = 0;
+    for (const [sentiment, count] of Object.entries(sentimentCounts)) {
+        if (count > maxCount) {
+            maxCount = count;
+            overallSentiment = sentiment as "positive" | "neutral" | "negative";
+        }
+    }
+
+    return { score, breakdown, tips: uniqueTips, overallSentiment };
+}
+
+// FALLBACK: Original keyword-based scoring for when AI doesn't return structured data
 export function calculateLLMOScore(responses: ScoringInput[]): { score: number; breakdown: Breakdown } {
     if (responses.length === 0) {
         return { score: 0, breakdown: { recommendation: 0, sentiment: 0, prominence: 0, accuracy: 0 } };
