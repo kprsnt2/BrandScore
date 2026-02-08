@@ -114,7 +114,7 @@ export async function POST(request: NextRequest) {
                 console.warn("Gemini failed, falling back to NVIDIA DeepSeek:", geminiError);
                 if (apiKeys.nvidia) {
                     try {
-                        return await queryNvidia(brand, category, "deepseek-ai/deepseek-v3");
+                        return await queryNvidia(brand, category, "deepseek-ai/deepseek-v3.2");
                     } catch (nvidiaError) {
                         console.error("NVIDIA DeepSeek fallback failed:", nvidiaError);
                         throw geminiError;
@@ -172,9 +172,9 @@ export async function POST(request: NextRequest) {
         } else if (apiKeys.nvidia) {
             // If Gemini not available but NVIDIA is, use NVIDIA DeepSeek directly as primary
             modelQueries.push(
-                queryNvidia(brand, category, "deepseek-ai/deepseek-v3").catch(e => ({
+                queryNvidia(brand, category, "deepseek-ai/deepseek-v3.2").catch(e => ({
                     text: "Unable to fetch response from NVIDIA DeepSeek",
-                    model: "DeepSeek V3 (NVIDIA)",
+                    model: "DeepSeek V3.2 (NVIDIA)",
                     modelType: "free" as const,
                     error: e
                 }))
