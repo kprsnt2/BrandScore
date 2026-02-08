@@ -29,7 +29,7 @@ export async function queryGemini(brand: string, category: string): Promise<Stru
         model: modelName,
         generationConfig: {
             maxOutputTokens: 2000,
-            temperature: 0,
+            temperature: 0.7,
         },
         safetySettings: [
             {
@@ -81,7 +81,7 @@ export async function queryGeminiRecommendation(brand: string, category: string)
         model: modelName,
         generationConfig: {
             maxOutputTokens: 2000,
-            temperature: 0,
+            temperature: 0.7,
         },
         safetySettings: [
             {
