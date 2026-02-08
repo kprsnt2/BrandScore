@@ -106,22 +106,57 @@ export async function POST(request: NextRequest) {
             error?: unknown;
         }>[] = [];
 
-        // Helper function: Gemini with NVIDIA fallback
+        // Helper function: Gemini with NVIDIA DeepSeek fallback
         const queryGeminiWithFallback = async () => {
             try {
                 return await queryGemini(brand, category);
             } catch (geminiError) {
                 console.warn("Gemini failed, falling back to NVIDIA DeepSeek:", geminiError);
-                // Try NVIDIA DeepSeek as fallback
                 if (apiKeys.nvidia) {
                     try {
-                        return await queryNvidia(brand, category);
+                        return await queryNvidia(brand, category, "deepseek-ai/deepseek-v3");
                     } catch (nvidiaError) {
-                        console.error("NVIDIA fallback also failed:", nvidiaError);
-                        throw geminiError; // Throw original error
+                        console.error("NVIDIA DeepSeek fallback failed:", nvidiaError);
+                        throw geminiError;
                     }
                 }
                 throw geminiError;
+            }
+        };
+
+        // Helper function: Groq with NVIDIA Step-3.5 fallback
+        const queryGroqWithFallback = async () => {
+            try {
+                return await queryGroq(brand, category);
+            } catch (groqError) {
+                console.warn("Groq failed, falling back to NVIDIA Step-3.5:", groqError);
+                if (apiKeys.nvidia) {
+                    try {
+                        return await queryNvidia(brand, category, "stepfun-ai/step-3.5-flash");
+                    } catch (nvidiaError) {
+                        console.error("NVIDIA Step-3.5 fallback failed:", nvidiaError);
+                        throw groqError;
+                    }
+                }
+                throw groqError;
+            }
+        };
+
+        // Helper function: OpenRouter with NVIDIA GLM-4.7 fallback
+        const queryOpenRouterWithFallback = async () => {
+            try {
+                return await queryOpenRouter(brand, category);
+            } catch (openRouterError) {
+                console.warn("OpenRouter failed, falling back to NVIDIA GLM-4.7:", openRouterError);
+                if (apiKeys.nvidia) {
+                    try {
+                        return await queryNvidia(brand, category, "z-ai/glm4.7");
+                    } catch (nvidiaError) {
+                        console.error("NVIDIA GLM-4.7 fallback failed:", nvidiaError);
+                        throw openRouterError;
+                    }
+                }
+                throw openRouterError;
             }
         };
 
@@ -135,9 +170,9 @@ export async function POST(request: NextRequest) {
                 }))
             );
         } else if (apiKeys.nvidia) {
-            // If Gemini not available but NVIDIA is, use NVIDIA directly
+            // If Gemini not available but NVIDIA is, use NVIDIA DeepSeek directly as primary
             modelQueries.push(
-                queryNvidia(brand, category).catch(e => ({
+                queryNvidia(brand, category, "deepseek-ai/deepseek-v3").catch(e => ({
                     text: "Unable to fetch response from NVIDIA DeepSeek",
                     model: "DeepSeek V3 (NVIDIA)",
                     modelType: "free" as const,
@@ -148,7 +183,7 @@ export async function POST(request: NextRequest) {
 
         if (apiKeys.groq) {
             modelQueries.push(
-                queryGroq(brand, category).catch(e => ({
+                queryGroqWithFallback().catch(e => ({
                     text: "Unable to fetch response from Groq",
                     model: "Llama 3.3 70B (Groq)",
                     modelType: "free" as const,
@@ -159,7 +194,7 @@ export async function POST(request: NextRequest) {
 
         if (apiKeys.openrouter) {
             modelQueries.push(
-                queryOpenRouter(brand, category).catch(e => ({
+                queryOpenRouterWithFallback().catch(e => ({
                     text: "Unable to fetch response from OpenRouter",
                     model: "LFM 40B (OpenRouter)",
                     modelType: "free" as const,
