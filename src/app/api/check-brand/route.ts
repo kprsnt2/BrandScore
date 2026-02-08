@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { queryGemini } from "@/lib/gemini";
 import { queryGroq } from "@/lib/groq";
 import { queryOpenRouter } from "@/lib/openrouter";
+import { queryNvidia } from "@/lib/nvidia";
 import { calculateLLMOScore, analyzeSentiment, countBrandMentions, generateTips } from "@/lib/scoring";
 import { validateBrandInput } from "@/lib/validation";
 import { getEnv, hasApiKeys } from "@/lib/env";
@@ -89,7 +90,7 @@ export async function POST(request: NextRequest) {
 
         // Check API key availability
         const apiKeys = hasApiKeys();
-        if (!apiKeys.gemini && !apiKeys.groq && !apiKeys.openrouter) {
+        if (!apiKeys.gemini && !apiKeys.groq && !apiKeys.openrouter && !apiKeys.nvidia) {
             return errorResponse(
                 "No AI providers configured. Please set API keys.",
                 503,
@@ -105,11 +106,40 @@ export async function POST(request: NextRequest) {
             error?: unknown;
         }>[] = [];
 
+        // Helper function: Gemini with NVIDIA fallback
+        const queryGeminiWithFallback = async () => {
+            try {
+                return await queryGemini(brand, category);
+            } catch (geminiError) {
+                console.warn("Gemini failed, falling back to NVIDIA DeepSeek:", geminiError);
+                // Try NVIDIA DeepSeek as fallback
+                if (apiKeys.nvidia) {
+                    try {
+                        return await queryNvidia(brand, category);
+                    } catch (nvidiaError) {
+                        console.error("NVIDIA fallback also failed:", nvidiaError);
+                        throw geminiError; // Throw original error
+                    }
+                }
+                throw geminiError;
+            }
+        };
+
         if (apiKeys.gemini) {
             modelQueries.push(
-                queryGemini(brand, category).catch(e => ({
+                queryGeminiWithFallback().catch(e => ({
                     text: "Unable to fetch response from Gemini",
                     model: "Gemini 2.5 Flash",
+                    modelType: "free" as const,
+                    error: e
+                }))
+            );
+        } else if (apiKeys.nvidia) {
+            // If Gemini not available but NVIDIA is, use NVIDIA directly
+            modelQueries.push(
+                queryNvidia(brand, category).catch(e => ({
+                    text: "Unable to fetch response from NVIDIA DeepSeek",
+                    model: "DeepSeek V3 (NVIDIA)",
                     modelType: "free" as const,
                     error: e
                 }))
