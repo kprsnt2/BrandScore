@@ -5,15 +5,25 @@ import { generateStructuredBrandPrompt, parseAIScoreResponse, AIScoreResponse } 
 // Lazy initialization
 let genAI: GoogleGenerativeAI | null = null;
 
-function getClient(): GoogleGenerativeAI {
-    if (!genAI) {
-        const env = getEnv();
-        if (!env.GEMINI_API_KEY) {
-            throw new Error("GEMINI_API_KEY is not configured");
-        }
-        genAI = new GoogleGenerativeAI(env.GEMINI_API_KEY);
+function getClient(usePro: boolean = false): { genAI: GoogleGenerativeAI, isPro: boolean } {
+    const env = getEnv();
+    let apiKey = env.GEMINI_API_KEY;
+    let isPro = false;
+
+    if (usePro && env.GEMINI_API_KEY_PAID) {
+         apiKey = env.GEMINI_API_KEY_PAID;
+         isPro = true;
+    } else if (!apiKey && env.GEMINI_API_KEY_PAID) {
+         apiKey = env.GEMINI_API_KEY_PAID;
+         isPro = true;
     }
-    return genAI;
+
+    if (!apiKey) {
+        throw new Error("GEMINI_API_KEY or GEMINI_API_KEY_PAID is not configured");
+    }
+
+    // Always create a new client since it depends on the key
+    return { genAI: new GoogleGenerativeAI(apiKey), isPro };
 }
 
 export interface StructuredModelResponse {
@@ -23,9 +33,12 @@ export interface StructuredModelResponse {
     structured?: AIScoreResponse;
 }
 
-export async function queryGemini(brand: string, category: string): Promise<StructuredModelResponse> {
-    const modelName = "gemini-2.5-flash";
-    const model = getClient().getGenerativeModel({
+export async function queryGemini(brand: string, category: string, useProIfAvailable: boolean = true): Promise<StructuredModelResponse> {
+    const { genAI, isPro } = getClient(useProIfAvailable);
+    const modelName = isPro ? "gemini-pro-latest" : "gemini-2.5-flash-lite";
+    const modelDisplayName = isPro ? "Gemini Pro Latest" : "Gemini 2.5 Flash Lite";
+
+    const model = genAI.getGenerativeModel({
         model: modelName,
         generationConfig: {
             maxOutputTokens: 2000,
@@ -64,8 +77,8 @@ export async function queryGemini(brand: string, category: string): Promise<Stru
 
         return {
             text,
-            model: "Gemini 2.5 Flash",
-            modelType: "free" as const,
+            model: modelDisplayName,
+            modelType: isPro ? "pro" : "free",
             structured: structured || undefined,
         };
     } catch (error) {
@@ -75,9 +88,11 @@ export async function queryGemini(brand: string, category: string): Promise<Stru
 }
 
 // Keep the recommendation function for backward compatibility
-export async function queryGeminiRecommendation(brand: string, category: string) {
-    const modelName = "gemini-2.5-flash";
-    const model = getClient().getGenerativeModel({
+export async function queryGeminiRecommendation(brand: string, category: string, useProIfAvailable: boolean = true) {
+    const { genAI, isPro } = getClient(useProIfAvailable);
+    const modelName = isPro ? "gemini-pro-latest" : "gemini-2.5-flash-lite";
+
+    const model = genAI.getGenerativeModel({
         model: modelName,
         generationConfig: {
             maxOutputTokens: 2000,

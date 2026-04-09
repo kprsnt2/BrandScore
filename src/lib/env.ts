@@ -3,6 +3,7 @@ import { z } from "zod";
 // Environment variable schema
 const envSchema = z.object({
     GEMINI_API_KEY: z.string().optional().default(""),
+    GEMINI_API_KEY_PAID: z.string().optional().default(""),
     ANTHROPIC_API_KEY: z.string().optional().default(""), // Made optional since we are not using it actively in new plan
     GROQ_API_KEY: z.string().optional().default(""),
     OPENROUTER_API_KEY: z.string().optional().default(""),
@@ -37,6 +38,7 @@ export function getEnv(): Env {
             // Return defaults for development
             cachedEnv = {
                 GEMINI_API_KEY: process.env.GEMINI_API_KEY || "",
+                GEMINI_API_KEY_PAID: process.env.GEMINI_API_KEY_PAID || "",
                 ANTHROPIC_API_KEY: process.env.ANTHROPIC_API_KEY || "",
                 GROQ_API_KEY: process.env.GROQ_API_KEY || "",
                 OPENROUTER_API_KEY: process.env.OPENROUTER_API_KEY || "",
@@ -61,7 +63,7 @@ export function getEnv(): Env {
 export function hasApiKeys(): { gemini: boolean; anthropic: boolean; groq: boolean; openrouter: boolean } {
     const env = getEnv();
     return {
-        gemini: env.GEMINI_API_KEY.length > 0,
+        gemini: env.GEMINI_API_KEY.length > 0 || env.GEMINI_API_KEY_PAID.length > 0,
         anthropic: env.ANTHROPIC_API_KEY.length > 0,
         groq: env.GROQ_API_KEY.length > 0,
         openrouter: env.OPENROUTER_API_KEY.length > 0,

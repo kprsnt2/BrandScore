@@ -98,10 +98,19 @@ export async function POST(request: NextRequest) {
 
         // Generate comparison using Gemini
         const env = getEnv();
-        const genAI = new GoogleGenerativeAI(env.GEMINI_API_KEY!);
+        let apiKey = env.GEMINI_API_KEY;
+        let isPro = false;
+        
+        if (env.GEMINI_API_KEY_PAID) {
+            apiKey = env.GEMINI_API_KEY_PAID;
+            isPro = true;
+        }
+
+        const genAI = new GoogleGenerativeAI(apiKey!);
+        const modelName = isPro ? "gemini-pro-latest" : "gemini-2.5-flash-lite";
 
         const model = genAI.getGenerativeModel({
-            model: "gemini-2.5-flash",
+            model: modelName,
             generationConfig: {
                 maxOutputTokens: 2000,
                 temperature: 0.7,
