@@ -35,8 +35,8 @@ export interface StructuredModelResponse {
 
 export async function queryGemini(brand: string, category: string, useProIfAvailable: boolean = true): Promise<StructuredModelResponse> {
     const { genAI, isPro } = getClient(useProIfAvailable);
-    const modelName = isPro ? "gemini-pro-latest" : "gemini-2.5-flash-lite";
-    const modelDisplayName = isPro ? "Gemini Pro Latest" : "Gemini 2.5 Flash Lite";
+    const modelName = isPro ? "gemini-pro-latest" : "gemini-2.5-flash";
+    const modelDisplayName = isPro ? "Gemini Pro Latest" : "Gemini 2.5 Flash";
 
     const model = genAI.getGenerativeModel({
         model: modelName,
@@ -90,7 +90,7 @@ export async function queryGemini(brand: string, category: string, useProIfAvail
 // Keep the recommendation function for backward compatibility
 export async function queryGeminiRecommendation(brand: string, category: string, useProIfAvailable: boolean = true) {
     const { genAI, isPro } = getClient(useProIfAvailable);
-    const modelName = isPro ? "gemini-pro-latest" : "gemini-2.5-flash-lite";
+    const modelName = isPro ? "gemini-pro-latest" : "gemini-2.5-flash";
 
     const model = genAI.getGenerativeModel({
         model: modelName,

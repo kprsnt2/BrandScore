@@ -59,10 +59,8 @@ export async function POST(request: NextRequest) {
 
         // Initialize pipeline with very conservative settings
         const pipeline = new BrandAnalysisPipeline({
-            maxConcurrentBrands: 1,
-            delayBetweenRequests: 3000,
+            delayBetweenIndustries: 5000,
             timeoutMs: 120000,
-            retryAttempts: 1
         });
 
         console.log("Starting full pipeline analysis for all industries");
@@ -101,12 +99,12 @@ export async function POST(request: NextRequest) {
                 responseTime,
                 timestamp: new Date().toISOString(),
                 pipelineConfig: {
-                    maxConcurrentBrands: 1,
-                    delayBetweenRequests: 3000,
+                    batchMode: true,
+                    delayBetweenIndustries: 5000,
                     timeoutMs: 120000
                 },
                 estimatedCost: {
-                    apiCalls: allBrandResults.length * 3, // Approximate
+                    apiCalls: results.length * 3, // 1 per industry per model
                     processingTime: `${Math.round(responseTime / 1000)}s`
                 }
             }

@@ -82,6 +82,81 @@ Scoring guidelines:
 Be objective and fair in your scoring. Provide 2-4 actionable tips for improving brand visibility.`;
 }
 
+// Batch prompt: score ALL brands in an industry in a single request
+export interface BatchBrandScore {
+  brand: string;
+  score: number;
+  breakdown: {
+    recommendation: number;
+    sentiment: number;
+    prominence: number;
+    accuracy: number;
+  };
+}
+
+export function generateBatchIndustryPrompt(brands: string[], category: string): string {
+  const brandList = brands.map((b, i) => `${i + 1}. ${b}`).join('\n');
+
+  return `Score these ${brands.length} brands in the Indian ${category} industry for AI visibility.
+
+Brands:
+${brandList}
+
+Respond ONLY with valid JSON (no markdown, no explanation):
+{
+  "brands": [
+    {
+      "brand": "Brand Name",
+      "score": <number 0-100>,
+      "breakdown": {
+        "recommendation": <number 0-40>,
+        "sentiment": <number 0-30>,
+        "prominence": <number 0-20>,
+        "accuracy": <number 0-10>
+      }
+    }
+  ]
+}
+
+Scoring guidelines:
+- recommendation (0-40): 40=highly recommend, 30=would recommend, 20=neutral, 10=concerns, 0=would not recommend
+- sentiment (0-30): 30=excellent reputation, 20=positive, 15=neutral, 10=mixed, 0=negative
+- prominence (0-20): 20=household name, 15=well-known, 10=known in industry, 5=niche, 0=unknown
+- accuracy (0-10): 10=extensive data, 5=moderate data, 0=very limited info
+- score = sum of all breakdown values (max 100)
+
+Score ALL ${brands.length} brands. Be objective and fair.`;
+}
+
+export function parseBatchIndustryResponse(text: string): BatchBrandScore[] {
+  try {
+    let jsonStr = text.trim();
+    if (jsonStr.startsWith("```json")) jsonStr = jsonStr.slice(7);
+    else if (jsonStr.startsWith("```")) jsonStr = jsonStr.slice(3);
+    if (jsonStr.endsWith("```")) jsonStr = jsonStr.slice(0, -3);
+    jsonStr = jsonStr.trim();
+
+    const parsed = JSON.parse(jsonStr);
+    const brands = parsed.brands || parsed;
+
+    if (!Array.isArray(brands)) return [];
+
+    return brands.map((b: any) => ({
+      brand: String(b.brand || b.name || ''),
+      score: Math.min(100, Math.max(0, Number(b.score || b.totalScore) || 0)),
+      breakdown: {
+        recommendation: Math.min(40, Math.max(0, Number(b.breakdown?.recommendation || b.scores?.recommendation) || 0)),
+        sentiment: Math.min(30, Math.max(0, Number(b.breakdown?.sentiment || b.scores?.sentiment) || 0)),
+        prominence: Math.min(20, Math.max(0, Number(b.breakdown?.prominence || b.scores?.prominence) || 0)),
+        accuracy: Math.min(10, Math.max(0, Number(b.breakdown?.accuracy || b.scores?.accuracy) || 0)),
+      }
+    })).filter((b: BatchBrandScore) => b.brand.length > 0);
+  } catch (error) {
+    console.warn('Failed to parse batch industry response:', error);
+    return [];
+  }
+}
+
 // Parse and validate AI response JSON
 export function parseAIScoreResponse(text: string): AIScoreResponse | null {
     try {

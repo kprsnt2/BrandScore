@@ -95,10 +95,8 @@ async function main() {
   console.log(`📊 ${industries.length} industries, ${totalBrandCount} brands total`);
 
   const pipeline = new BrandAnalysisPipeline({
-    maxConcurrentBrands: 2,
-    delayBetweenRequests: 2000,
-    timeoutMs: 90000,
-    retryAttempts: 2
+    delayBetweenIndustries: 5000,   // 5s between industries to respect rate limits
+    timeoutMs: 120000,              // 2 min timeout per industry
   });
 
   console.log('\n🚀 Starting analysis...\n');

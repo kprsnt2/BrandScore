@@ -79,10 +79,8 @@ export async function POST(request: NextRequest) {
 
         // Initialize pipeline with conservative settings for API usage
         const pipeline = new BrandAnalysisPipeline({
-            maxConcurrentBrands: 2,
-            delayBetweenRequests: 2000,
-            timeoutMs: 90000,
-            retryAttempts: 1
+            delayBetweenIndustries: 5000,
+            timeoutMs: 120000,
         });
 
         // Run pipeline analysis
@@ -110,8 +108,8 @@ export async function POST(request: NextRequest) {
                 responseTime,
                 timestamp: result.timestamp,
                 pipelineConfig: {
-                    maxConcurrentBrands: 2,
-                    delayBetweenRequests: 2000
+                    batchMode: true,
+                    timeoutMs: 120000
                 }
             }
         });
