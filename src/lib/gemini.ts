@@ -1,25 +1,98 @@
 import { GoogleGenerativeAI, HarmCategory, HarmBlockThreshold } from "@google/generative-ai";
 import { getEnv } from "./env";
-import { generateBrandAnalysisPrompt, generateRecommendationPrompt } from "./prompts";
+import { generateStructuredBrandPrompt, parseAIScoreResponse, AIScoreResponse } from "./prompts";
 
 // Lazy initialization
 let genAI: GoogleGenerativeAI | null = null;
 
-function getClient(): GoogleGenerativeAI {
-    if (!genAI) {
-        const env = getEnv();
-        if (!env.GEMINI_API_KEY) {
-            throw new Error("GEMINI_API_KEY is not configured");
-        }
-        genAI = new GoogleGenerativeAI(env.GEMINI_API_KEY);
+function getClient(usePro: boolean = false): { genAI: GoogleGenerativeAI, isPro: boolean } {
+    const env = getEnv();
+    let apiKey = env.GEMINI_API_KEY;
+    let isPro = false;
+
+    if (usePro && env.GEMINI_API_KEY_PAID) {
+         apiKey = env.GEMINI_API_KEY_PAID;
+         isPro = true;
+    } else if (!apiKey && env.GEMINI_API_KEY_PAID) {
+         apiKey = env.GEMINI_API_KEY_PAID;
+         isPro = true;
     }
-    return genAI;
+
+    if (!apiKey) {
+        throw new Error("GEMINI_API_KEY or GEMINI_API_KEY_PAID is not configured");
+    }
+
+    // Always create a new client since it depends on the key
+    return { genAI: new GoogleGenerativeAI(apiKey), isPro };
 }
 
-export async function queryGemini(brand: string, category: string) {
-    // Using Gemini 2.5 Flash (free tier) automatically
-    const modelName = "gemini-2.5-flash";
-    const model = getClient().getGenerativeModel({
+export interface StructuredModelResponse {
+    text: string;
+    model: string;
+    modelType: "free" | "pro";
+    structured?: AIScoreResponse;
+}
+
+export async function queryGemini(brand: string, category: string, useProIfAvailable: boolean = true): Promise<StructuredModelResponse> {
+    const { genAI, isPro } = getClient(useProIfAvailable);
+    const modelName = isPro ? "gemini-pro-latest" : "gemini-2.5-flash-lite";
+    const modelDisplayName = isPro ? "Gemini Pro Latest" : "Gemini 2.5 Flash Lite";
+
+    const model = genAI.getGenerativeModel({
+        model: modelName,
+        generationConfig: {
+            maxOutputTokens: 2000,
+            temperature: 0.7,
+        },
+        safetySettings: [
+            {
+                category: HarmCategory.HARM_CATEGORY_HARASSMENT,
+                threshold: HarmBlockThreshold.BLOCK_NONE,
+            },
+            {
+                category: HarmCategory.HARM_CATEGORY_HATE_SPEECH,
+                threshold: HarmBlockThreshold.BLOCK_NONE,
+            },
+            {
+                category: HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT,
+                threshold: HarmBlockThreshold.BLOCK_NONE,
+            },
+            {
+                category: HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT,
+                threshold: HarmBlockThreshold.BLOCK_NONE,
+            },
+        ],
+    });
+
+    // Use the new structured prompt
+    const prompt = generateStructuredBrandPrompt(brand, category);
+
+    try {
+        const result = await model.generateContent(prompt);
+        const response = result.response;
+        const text = response.text();
+
+        // Try to parse structured response
+        const structured = parseAIScoreResponse(text);
+
+        return {
+            text,
+            model: modelDisplayName,
+            modelType: isPro ? "pro" : "free",
+            structured: structured || undefined,
+        };
+    } catch (error) {
+        console.error("Gemini API error:", error);
+        throw error;
+    }
+}
+
+// Keep the recommendation function for backward compatibility
+export async function queryGeminiRecommendation(brand: string, category: string, useProIfAvailable: boolean = true) {
+    const { genAI, isPro } = getClient(useProIfAvailable);
+    const modelName = isPro ? "gemini-pro-latest" : "gemini-2.5-flash-lite";
+
+    const model = genAI.getGenerativeModel({
         model: modelName,
         generationConfig: {
             maxOutputTokens: 2000,
@@ -46,54 +119,12 @@ export async function queryGemini(brand: string, category: string) {
     });
 
     const categoryContext = category && category !== "general"
-        ? `in the ${category} industry/category`
-        : "";
+        ? category
+        : "brand in this category";
 
-    const prompt = generateBrandAnalysisPrompt(brand, category);
+    const prompt = `A user asks: "What is the best ${categoryContext}?"
 
-    try {
-        const result = await model.generateContent(prompt);
-        const response = result.response;
-        return {
-            text: response.text(),
-            model: "Gemini 2.5 Flash",
-            modelType: "free" as const,
-        };
-    } catch (error) {
-        console.error("Gemini API error:", error);
-        throw error;
-    }
-}
-
-export async function queryGeminiRecommendation(brand: string, category: string) {
-    const modelName = "gemini-2.5-flash";
-    const model = getClient().getGenerativeModel({
-        model: modelName,
-        generationConfig: {
-            maxOutputTokens: 2000,
-            temperature: 0.7,
-        },
-        safetySettings: [
-            {
-                category: HarmCategory.HARM_CATEGORY_HARASSMENT,
-                threshold: HarmBlockThreshold.BLOCK_NONE,
-            },
-            {
-                category: HarmCategory.HARM_CATEGORY_HATE_SPEECH,
-                threshold: HarmBlockThreshold.BLOCK_NONE,
-            },
-            {
-                category: HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT,
-                threshold: HarmBlockThreshold.BLOCK_NONE,
-            },
-            {
-                category: HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT,
-                threshold: HarmBlockThreshold.BLOCK_NONE,
-            },
-        ],
-    });
-
-    const prompt = generateRecommendationPrompt(brand, category);
+Provide a helpful recommendation response. Discuss leading options and mention ${brand} if it is a relevant and competitive choice in this space. Be balanced, objective, and informative.`;
 
     try {
         const result = await model.generateContent(prompt);
@@ -103,21 +134,4 @@ export async function queryGeminiRecommendation(brand: string, category: string)
         console.error("Gemini recommendation error:", error);
         throw error;
     }
-}
-
-function getBrandCategory(brand: string): string {
-    const categories: Record<string, string> = {
-        "apple": "smartphone",
-        "samsung": "smartphone",
-        "nike": "athletic shoe brand",
-        "adidas": "athletic shoe brand",
-        "tesla": "electric car",
-        "toyota": "car",
-        "google": "search engine",
-        "amazon": "e-commerce platform",
-        "microsoft": "technology company",
-        "coca-cola": "soft drink",
-    };
-
-    return categories[brand.toLowerCase()] || "brand in their category";
 }

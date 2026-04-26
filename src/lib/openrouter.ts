@@ -1,10 +1,17 @@
 import { getEnv } from "./env";
-import { generateBrandAnalysisPrompt, generateRecommendationPrompt } from "./prompts";
+import { generateStructuredBrandPrompt, parseAIScoreResponse, AIScoreResponse } from "./prompts";
 
 // OpenRouter API base URL
 const OPENROUTER_API_URL = "https://openrouter.ai/api/v1/chat/completions";
 
-export async function queryOpenRouter(brand: string, category: string) {
+export interface StructuredModelResponse {
+    text: string;
+    model: string;
+    modelType: "free" | "pro";
+    structured?: AIScoreResponse;
+}
+
+export async function queryOpenRouter(brand: string, category: string): Promise<StructuredModelResponse> {
     const env = getEnv();
     if (!env.OPENROUTER_API_KEY) {
         throw new Error("OPENROUTER_API_KEY is not configured");
@@ -13,7 +20,8 @@ export async function queryOpenRouter(brand: string, category: string) {
     // Using openrouter/free as requested
     const modelName = "openrouter/free";
 
-    const prompt = generateBrandAnalysisPrompt(brand, category);
+    // Use the new structured prompt
+    const prompt = generateStructuredBrandPrompt(brand, category);
 
     try {
         const response = await fetch(OPENROUTER_API_URL, {
@@ -30,7 +38,7 @@ export async function queryOpenRouter(brand: string, category: string) {
                     { "role": "user", "content": prompt }
                 ],
                 "temperature": 0.7,
-                "max_tokens": 500,
+                "max_tokens": 1000,
             })
         });
 
@@ -42,10 +50,14 @@ export async function queryOpenRouter(brand: string, category: string) {
         const data = await response.json();
         const text = data.choices?.[0]?.message?.content || "No response generated";
 
+        // Try to parse structured response
+        const structured = parseAIScoreResponse(text);
+
         return {
             text,
             model: "OpenRouter (Free)",
             modelType: "free" as const,
+            structured: structured || undefined,
         };
     } catch (error) {
         console.error("OpenRouter API error:", error);
@@ -60,7 +72,14 @@ export async function queryOpenRouterRecommendation(brand: string, category: str
     }
 
     const modelName = "openrouter/free";
-    const prompt = generateRecommendationPrompt(brand, category);
+
+    const categoryContext = category && category !== "general"
+        ? category
+        : "brand in this category";
+
+    const prompt = `A user asks: "What is the best ${categoryContext}?"
+
+Provide a helpful recommendation response. Discuss leading options and mention ${brand} if it is a relevant and competitive choice in this space. Be balanced, objective, and informative.`;
 
     try {
         const response = await fetch(OPENROUTER_API_URL, {

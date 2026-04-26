@@ -3,9 +3,10 @@ import { queryGemini } from "@/lib/gemini";
 import { queryGroq } from "@/lib/groq";
 import { queryOpenRouter } from "@/lib/openrouter";
 import { queryNvidia } from "@/lib/nvidia";
-import { calculateLLMOScore, analyzeSentiment, countBrandMentions, generateTips } from "@/lib/scoring";
+import { calculateLLMOScore, analyzeSentiment, countBrandMentions, generateTips, aggregateStructuredScores, Breakdown } from "@/lib/scoring";
 import { validateBrandInput } from "@/lib/validation";
 import { getEnv, hasApiKeys } from "@/lib/env";
+import { AIScoreResponse } from "@/lib/prompts";
 
 // Simple in-memory rate limiter
 import { LRUCache } from "@/lib/cache";
@@ -39,11 +40,6 @@ function checkRateLimit(key: string): { allowed: boolean; remaining: number; res
 
     // Update count
     existing.count++;
-    // We need to re-set to update the LRU position, though technically modifying the object reference 
-    // works for the data, LRU order isn't updated unless we 'get' or 'set' again.
-    // However, our custom LRUCache 'get' moves it to the end, so we are good on order.
-    // But we need to ensure the data is persisted if we fetched a copy. 
-    // The current LRUCache returns the object reference, so modifying 'existing' works.
 
     return { allowed: true, remaining: maxRequests - existing.count, resetIn: existing.resetTime - now };
 }
@@ -102,7 +98,8 @@ export async function POST(request: NextRequest) {
         const modelQueries: Promise<{
             text: string;
             model: string;
-            modelType: "free" | "pro"; // Kept for type compatibility but will always be "free"
+            modelType: "free" | "pro";
+            structured?: AIScoreResponse;
             error?: unknown;
         }>[] = [];
 
@@ -196,7 +193,7 @@ export async function POST(request: NextRequest) {
             modelQueries.push(
                 queryOpenRouterWithFallback().catch(e => ({
                     text: "Unable to fetch response from OpenRouter",
-                    model: "LFM 40B (OpenRouter)",
+                    model: "OpenRouter (Free)",
                     modelType: "free" as const,
                     error: e
                 }))
@@ -223,21 +220,58 @@ export async function POST(request: NextRequest) {
             );
         }
 
-        // Process responses
-        const responses = validResults.map(result => ({
-            model: result.model,
-            modelType: result.modelType,
-            text: result.text,
-            sentiment: analyzeSentiment(result.text),
-            mentionsCount: countBrandMentions(result.text, brand),
-        }));
+        // Collect structured responses for aggregation
+        const structuredResponses: AIScoreResponse[] = validResults
+            .filter(r => r.structured)
+            .map(r => r.structured as AIScoreResponse);
 
-        // Calculate LLMO score
-        const scoringInputs = responses.map(r => ({ text: r.text, brand }));
-        const { score, breakdown } = calculateLLMOScore(scoringInputs);
+        let score: number;
+        let breakdown: Breakdown;
+        let tips: string[];
+        let overallSentiment: "positive" | "neutral" | "negative";
 
-        // Generate tips
-        const tips = generateTips(score, breakdown, brand);
+        // Use structured scoring if we have at least one structured response
+        if (structuredResponses.length > 0) {
+            const aggregated = aggregateStructuredScores(structuredResponses);
+            score = aggregated.score;
+            breakdown = aggregated.breakdown;
+            tips = aggregated.tips;
+            overallSentiment = aggregated.overallSentiment;
+        } else {
+            // FALLBACK: Use keyword-based scoring
+            const scoringInputs = validResults.map(r => ({ text: r.text, brand }));
+            const calculated = calculateLLMOScore(scoringInputs);
+            score = calculated.score;
+            breakdown = calculated.breakdown;
+            tips = generateTips(score, breakdown, brand);
+            // Use first valid response for sentiment
+            overallSentiment = validResults.length > 0
+                ? analyzeSentiment(validResults[0].text)
+                : "neutral";
+        }
+
+        // Process responses for display (include analysis from structured data if available)
+        const responses = validResults.map(result => {
+            if (result.structured) {
+                return {
+                    model: result.model,
+                    modelType: result.modelType,
+                    text: result.structured.analysis.description,
+                    sentiment: result.structured.overallSentiment,
+                    mentionsCount: countBrandMentions(result.text, brand),
+                    analysis: result.structured.analysis,
+                    scores: result.structured.scores,
+                };
+            }
+            // Fallback for non-structured responses
+            return {
+                model: result.model,
+                modelType: result.modelType,
+                text: result.text,
+                sentiment: analyzeSentiment(result.text),
+                mentionsCount: countBrandMentions(result.text, brand),
+            };
+        });
 
         const responseTime = Date.now() - startTime;
 
@@ -249,9 +283,11 @@ export async function POST(request: NextRequest) {
             responses,
             breakdown,
             tips,
+            overallSentiment,
             meta: {
                 responseTime,
                 modelsQueried: validResults.length,
+                structuredResponses: structuredResponses.length,
                 timestamp: new Date().toISOString(),
             },
         });
@@ -286,4 +322,3 @@ export async function OPTIONS() {
         },
     });
 }
-
