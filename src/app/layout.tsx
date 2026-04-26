@@ -147,10 +147,10 @@ export default function RootLayout({
                                                 About
                                             </a>
                                             <a
-                                                href="/check"
+                                                href="/dashboard"
                                                 className="px-4 py-1.5 bg-gradient-to-r from-primary-500 to-purple-600 text-white rounded-lg font-medium hover:shadow-lg hover:shadow-primary-500/25 transition-all text-sm"
                                             >
-                                                🔍 Check Brand
+                                                🇮🇳 India AI Index
                                             </a>
                                         </nav>
                                     </div>

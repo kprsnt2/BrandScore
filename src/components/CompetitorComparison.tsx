@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { BrandCheckResult } from "@/app/check/page";
+import { BrandCheckResult } from "@/app/page";
 
 interface CompetitorComparisonProps {
     brandResult: BrandCheckResult;
