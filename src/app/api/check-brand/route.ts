@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { queryGemini } from "@/lib/gemini";
 import { queryGroq } from "@/lib/groq";
-import { queryOpenRouter } from "@/lib/openrouter";
 import { queryNvidia } from "@/lib/nvidia";
 import { calculateLLMOScore, analyzeSentiment, countBrandMentions, generateTips, aggregateStructuredScores, Breakdown } from "@/lib/scoring";
 import { validateBrandInput } from "@/lib/validation";
@@ -86,7 +85,7 @@ export async function POST(request: NextRequest) {
 
         // Check API key availability
         const apiKeys = hasApiKeys();
-        if (!apiKeys.gemini && !apiKeys.groq && !apiKeys.openrouter && !apiKeys.nvidia) {
+        if (!apiKeys.gemini && !apiKeys.groq && !apiKeys.nvidia) {
             return errorResponse(
                 "No AI providers configured. Please set API keys.",
                 503,
@@ -108,12 +107,12 @@ export async function POST(request: NextRequest) {
             try {
                 return await queryGemini(brand, category);
             } catch (geminiError) {
-                console.warn("Gemini failed, falling back to NVIDIA DeepSeek:", geminiError);
+                console.warn("Gemini failed, falling back to NVIDIA MiniMax:", geminiError);
                 if (apiKeys.nvidia) {
                     try {
-                        return await queryNvidia(brand, category, "deepseek-ai/deepseek-v3.2");
+                        return await queryNvidia(brand, category, "minimaxai/minimax-m2.7");
                     } catch (nvidiaError) {
-                        console.error("NVIDIA DeepSeek fallback failed:", nvidiaError);
+                        console.error("NVIDIA MiniMax fallback failed:", nvidiaError);
                         throw geminiError;
                     }
                 }
@@ -126,34 +125,16 @@ export async function POST(request: NextRequest) {
             try {
                 return await queryGroq(brand, category);
             } catch (groqError) {
-                console.warn("Groq failed, falling back to NVIDIA Step-3.5:", groqError);
+                console.warn("Groq failed, falling back to NVIDIA GLM-5.1:", groqError);
                 if (apiKeys.nvidia) {
                     try {
-                        return await queryNvidia(brand, category, "stepfun-ai/step-3.5-flash");
+                        return await queryNvidia(brand, category, "z-ai/glm-5.1");
                     } catch (nvidiaError) {
-                        console.error("NVIDIA Step-3.5 fallback failed:", nvidiaError);
+                        console.error("NVIDIA GLM-5.1 fallback failed:", nvidiaError);
                         throw groqError;
                     }
                 }
                 throw groqError;
-            }
-        };
-
-        // Helper function: OpenRouter with NVIDIA GLM-4.7 fallback
-        const queryOpenRouterWithFallback = async () => {
-            try {
-                return await queryOpenRouter(brand, category);
-            } catch (openRouterError) {
-                console.warn("OpenRouter failed, falling back to NVIDIA GLM-4.7:", openRouterError);
-                if (apiKeys.nvidia) {
-                    try {
-                        return await queryNvidia(brand, category, "z-ai/glm4.7");
-                    } catch (nvidiaError) {
-                        console.error("NVIDIA GLM-4.7 fallback failed:", nvidiaError);
-                        throw openRouterError;
-                    }
-                }
-                throw openRouterError;
             }
         };
 
@@ -169,9 +150,9 @@ export async function POST(request: NextRequest) {
         } else if (apiKeys.nvidia) {
             // If Gemini not available but NVIDIA is, use NVIDIA DeepSeek directly as primary
             modelQueries.push(
-                queryNvidia(brand, category, "deepseek-ai/deepseek-v3.2").catch(e => ({
+                queryNvidia(brand, category, "deepseek-ai/deepseek-v4-pro").catch(e => ({
                     text: "Unable to fetch response from NVIDIA DeepSeek",
-                    model: "DeepSeek V3.2 (NVIDIA)",
+                    model: "DeepSeek V4 Pro (NVIDIA)",
                     modelType: "free" as const,
                     error: e
                 }))
@@ -183,17 +164,6 @@ export async function POST(request: NextRequest) {
                 queryGroqWithFallback().catch(e => ({
                     text: "Unable to fetch response from Groq",
                     model: "Llama 3.3 70B (Groq)",
-                    modelType: "free" as const,
-                    error: e
-                }))
-            );
-        }
-
-        if (apiKeys.openrouter) {
-            modelQueries.push(
-                queryOpenRouterWithFallback().catch(e => ({
-                    text: "Unable to fetch response from OpenRouter",
-                    model: "OpenRouter (Free)",
                     modelType: "free" as const,
                     error: e
                 }))

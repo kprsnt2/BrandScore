@@ -55,7 +55,7 @@ async function callNvidiaAPI(messages: NvidiaMessage[], model: string, maxTokens
     return data.choices[0]?.message?.content || "";
 }
 
-export async function queryNvidia(brand: string, category: string, model: string = "deepseek-ai/deepseek-v3.2") {
+export async function queryNvidia(brand: string, category: string, model: string = "deepseek-ai/deepseek-v4-pro") {
     const prompt = generateBrandAnalysisPrompt(brand, category);
 
     try {
@@ -80,7 +80,7 @@ export async function queryNvidiaRecommendation(brand: string, category: string)
 
     try {
         // Use DeepSeek V3.2 for recommendations as fallback
-        const text = await callNvidiaAPI([{ role: "user", content: prompt }], "deepseek-ai/deepseek-v3.2", 500);
+        const text = await callNvidiaAPI([{ role: "user", content: prompt }], "deepseek-ai/deepseek-v4-pro", 500);
         return text;
     } catch (error) {
         console.error("NVIDIA DeepSeek recommendation error:", error);

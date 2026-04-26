@@ -83,7 +83,6 @@ async function main() {
     console.error('Please add at least one of these GitHub Secrets:');
     console.error('  • GEMINI_API_KEY');
     console.error('  • GROQ_API_KEY');
-    console.error('  • OPENROUTER_API_KEY');
     console.error('  • NVIDIA_API_KEY');
     console.error('\nSkipping pipeline run to preserve existing data.');
     process.exit(0); // Exit cleanly so the workflow doesn't fail

@@ -6,7 +6,6 @@ const envSchema = z.object({
     GEMINI_API_KEY_PAID: z.string().optional().default(""),
     ANTHROPIC_API_KEY: z.string().optional().default(""), // Made optional since we are not using it actively in new plan
     GROQ_API_KEY: z.string().optional().default(""),
-    OPENROUTER_API_KEY: z.string().optional().default(""),
     NVIDIA_API_KEY: z.string().optional().default(""),
     NODE_ENV: z.enum(["development", "production", "test"]).default("development"),
     RATE_LIMIT_REQUESTS: z.coerce.number().default(10),
@@ -42,7 +41,6 @@ export function getEnv(): Env {
                 GEMINI_API_KEY_PAID: process.env.GEMINI_API_KEY_PAID || "",
                 ANTHROPIC_API_KEY: process.env.ANTHROPIC_API_KEY || "",
                 GROQ_API_KEY: process.env.GROQ_API_KEY || "",
-                OPENROUTER_API_KEY: process.env.OPENROUTER_API_KEY || "",
                 NVIDIA_API_KEY: process.env.NVIDIA_API_KEY || "",
                 NODE_ENV: "development",
                 RATE_LIMIT_REQUESTS: 10,
@@ -62,13 +60,12 @@ export function getEnv(): Env {
 /**
  * Check if API keys are configured
  */
-export function hasApiKeys(): { gemini: boolean; anthropic: boolean; groq: boolean; openrouter: boolean; nvidia: boolean } {
+export function hasApiKeys(): { gemini: boolean; anthropic: boolean; groq: boolean; nvidia: boolean } {
     const env = getEnv();
     return {
         gemini: env.GEMINI_API_KEY.length > 0 || env.GEMINI_API_KEY_PAID.length > 0,
         anthropic: env.ANTHROPIC_API_KEY.length > 0,
         groq: env.GROQ_API_KEY.length > 0,
-        openrouter: env.OPENROUTER_API_KEY.length > 0,
         nvidia: env.NVIDIA_API_KEY.length > 0,
     };
 }

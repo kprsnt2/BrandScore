@@ -19,7 +19,7 @@ export const metadata: Metadata = {
         template: "%s | Brand Score",
     },
     description:
-        "Discover how AI models like Gemini, Groq (Llama), and OpenRouter models perceive your brand. Get your LLMO Score and optimize for AI-powered recommendations.",
+        "Discover how AI models like Gemini, Groq (Llama), and DeepSeek perceive your brand. Get your LLMO Score and optimize for AI-powered recommendations.",
     keywords: [
         "AI brand visibility",
         "LLMO score",
@@ -147,10 +147,10 @@ export default function RootLayout({
                                                 About
                                             </a>
                                             <a
-                                                href="/pipeline"
+                                                href="/check"
                                                 className="px-4 py-1.5 bg-gradient-to-r from-primary-500 to-purple-600 text-white rounded-lg font-medium hover:shadow-lg hover:shadow-primary-500/25 transition-all text-sm"
                                             >
-                                                📊 India AI Index
+                                                🔍 Check Brand
                                             </a>
                                         </nav>
                                     </div>

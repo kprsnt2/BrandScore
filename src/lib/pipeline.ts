@@ -1,7 +1,6 @@
 import { Industry, getIndustryById, getAllIndustries } from './industry-data';
 import { queryGemini } from './gemini';
 import { queryGroq } from './groq';
-import { queryOpenRouter } from './openrouter';
 import { queryNvidia } from './nvidia';
 import { calculateLLMOScore, analyzeSentiment, countBrandMentions } from './scoring';
 import { getEnv, hasApiKeys } from './env';
@@ -251,22 +250,11 @@ export class BrandAnalysisPipeline {
       );
     }
 
-    if (this.apiKeys.openrouter) {
-      queries.push(
-        queryOpenRouter(brand, category).catch(e => ({
-          text: "Unable to fetch response from OpenRouter",
-          model: "LFM 40B (OpenRouter)",
-          modelType: "free" as const,
-          error: e
-        }))
-      );
-    }
-
     if (this.apiKeys.nvidia) {
       queries.push(
-        queryNvidia(brand, category, "deepseek-ai/deepseek-v3.2").catch(e => ({
+        queryNvidia(brand, category, "deepseek-ai/deepseek-v4-pro").catch(e => ({
           text: "Unable to fetch response from NVIDIA DeepSeek",
-          model: "DeepSeek V3.2 (NVIDIA)",
+          model: "DeepSeek V4 Pro (NVIDIA)",
           modelType: "free" as const,
           error: e
         }))
