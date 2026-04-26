@@ -6,6 +6,7 @@
 
 import { BrandAnalysisPipeline } from '../src/lib/pipeline';
 import { getAllIndustries } from '../src/lib/industry-data';
+import { hasApiKeys } from '../src/lib/env';
 import Database from 'better-sqlite3';
 import * as fs from 'fs';
 import * as path from 'path';
@@ -73,6 +74,23 @@ async function main() {
   console.log('🇮🇳 India Brand Intelligence Pipeline');
   console.log('=====================================');
 
+  // === Pre-flight: check that at least one API key is configured ===
+  const keys = hasApiKeys();
+  const activeProviders = Object.entries(keys).filter(([, v]) => v).map(([k]) => k);
+
+  if (activeProviders.length === 0) {
+    console.error('\n❌ No API keys configured!');
+    console.error('Please add at least one of these GitHub Secrets:');
+    console.error('  • GEMINI_API_KEY');
+    console.error('  • GROQ_API_KEY');
+    console.error('  • OPENROUTER_API_KEY');
+    console.error('  • NVIDIA_API_KEY');
+    console.error('\nSkipping pipeline run to preserve existing data.');
+    process.exit(0); // Exit cleanly so the workflow doesn't fail
+  }
+
+  console.log(`✅ Active providers: ${activeProviders.join(', ')}`);
+
   const industries = getAllIndustries();
   const totalBrandCount = industries.reduce((s, i) => s + i.topBrands.length, 0);
   console.log(`📊 ${industries.length} industries, ${totalBrandCount} brands total`);
@@ -106,6 +124,13 @@ async function main() {
     lowestScore: successfulBrands.length > 0 ? Math.min(...successfulBrands.map(b => b.score)) : 0,
     totalTimeMs: totalTime,
   };
+
+  // === Guard: don't overwrite good data with empty results ===
+  if (successfulBrands.length === 0) {
+    console.error('\n⚠️ All brands failed analysis. Keeping existing data.');
+    console.error('Check your API keys and rate limits.');
+    process.exit(0);
+  }
 
   const output = { results, summary, timestamp: new Date().toISOString(), version: '1.0.0' };
 
