@@ -136,11 +136,23 @@ export class BrandAnalysisPipeline {
   }
 
   private async queryAllModels(prompt: string): Promise<{ model: string; scores: BatchBrandScore[] }[]> {
+    const perModelTimeout = this.config.timeoutMs; // timeout per model, not global
+
+    // Helper: wrap a query with its own timeout
+    const withTimeout = <T>(promise: Promise<T>, model: string): Promise<T> => {
+      return Promise.race([
+        promise,
+        new Promise<T>((_, reject) =>
+          setTimeout(() => reject(new Error(`${model} timed out after ${perModelTimeout / 1000}s`)), perModelTimeout)
+        ),
+      ]);
+    };
+
     const queries: Promise<{ model: string; text: string; error?: unknown }>[] = [];
 
     if (this.apiKeys.gemini) {
       queries.push(
-        this.queryGeminiRaw(prompt).catch(e => ({
+        withTimeout(this.queryGeminiRaw(prompt), 'Gemini').catch(e => ({
           text: '', model: 'Gemini 2.5 Flash', error: e
         }))
       );
@@ -148,7 +160,7 @@ export class BrandAnalysisPipeline {
 
     if (this.apiKeys.groq) {
       queries.push(
-        this.queryGroqRaw(prompt).catch(e => ({
+        withTimeout(this.queryGroqRaw(prompt), 'Groq').catch(e => ({
           text: '', model: 'Llama 3.3 70B (Groq)', error: e
         }))
       );
@@ -156,24 +168,23 @@ export class BrandAnalysisPipeline {
 
     if (this.apiKeys.nvidia) {
       queries.push(
-        this.queryNvidiaRaw(prompt).catch(e => ({
+        withTimeout(this.queryNvidiaRaw(prompt), 'NVIDIA').catch(e => ({
           text: '', model: 'DeepSeek V4 Pro (NVIDIA)', error: e
         }))
       );
     }
 
-    const results = await Promise.race([
-      Promise.all(queries),
-      new Promise<never>((_, reject) =>
-        setTimeout(() => reject(new Error("Industry analysis timeout")), this.config.timeoutMs)
-      ),
-    ]);
+    // allSettled: each model resolves independently, no global timeout
+    const settled = await Promise.allSettled(queries);
+    const results = settled
+      .filter((s): s is PromiseFulfilledResult<{ model: string; text: string; error?: unknown }> => s.status === 'fulfilled')
+      .map(s => s.value);
 
     // Parse each model's batch response
     const parsed: { model: string; scores: BatchBrandScore[] }[] = [];
     for (const result of results) {
       if (result.error || !result.text) {
-        console.warn(`    ⚠ ${result.model} failed`);
+        console.warn(`    ⚠ ${result.model} failed: ${result.error instanceof Error ? result.error.message : 'unknown'}`);
         continue;
       }
       const scores = parseBatchIndustryResponse(result.text);
@@ -269,7 +280,7 @@ export class BrandAnalysisPipeline {
     const genAI = new GoogleGenerativeAI(apiKey);
     const model = genAI.getGenerativeModel({
       model: env.GEMINI_API_KEY_PAID ? "gemini-pro-latest" : "gemini-2.5-flash",
-      generationConfig: { maxOutputTokens: 4000, temperature: 0.3 },
+      generationConfig: { maxOutputTokens: 8000, temperature: 0.3 },
     });
 
     const result = await model.generateContent(prompt);
@@ -289,7 +300,7 @@ export class BrandAnalysisPipeline {
       body: JSON.stringify({
         model: "llama-3.3-70b-versatile",
         messages: [{ role: "user", content: prompt }],
-        max_tokens: 4000,
+        max_tokens: 8000,
         temperature: 0.3,
       }),
     });
@@ -312,7 +323,7 @@ export class BrandAnalysisPipeline {
       body: JSON.stringify({
         model: "deepseek-ai/deepseek-v4-pro",
         messages: [{ role: "user", content: prompt }],
-        max_tokens: 4000,
+        max_tokens: 8000,
         temperature: 0.3,
       }),
     });

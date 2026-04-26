@@ -96,7 +96,7 @@ async function main() {
 
   const pipeline = new BrandAnalysisPipeline({
     delayBetweenIndustries: 5000,   // 5s between industries to respect rate limits
-    timeoutMs: 120000,              // 2 min timeout per industry
+    timeoutMs: 180000,              // 3 min per-model timeout (Gemini thinks long)
   });
 
   console.log('\n🚀 Starting analysis...\n');
