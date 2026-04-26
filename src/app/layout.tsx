@@ -134,7 +134,7 @@ export default function RootLayout({
                                             </div>
                                             <span className="font-bold text-xl gradient-text">Brand Score</span>
                                         </a>
-                                        <nav className="flex gap-6 text-sm text-gray-400" aria-label="Main navigation">
+                                        <nav className="flex gap-6 text-sm text-gray-400 items-center" aria-label="Main navigation">
                                             <a href="#features" className="hover:text-white transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 focus:ring-offset-gray-900 rounded">
                                                 How it Works
                                             </a>
@@ -145,6 +145,12 @@ export default function RootLayout({
                                                 className="hover:text-white transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 focus:ring-offset-gray-900 rounded"
                                             >
                                                 About
+                                            </a>
+                                            <a
+                                                href="/pipeline"
+                                                className="px-4 py-1.5 bg-gradient-to-r from-primary-500 to-purple-600 text-white rounded-lg font-medium hover:shadow-lg hover:shadow-primary-500/25 transition-all text-sm"
+                                            >
+                                                📊 India AI Index
                                             </a>
                                         </nav>
                                     </div>
