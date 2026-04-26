@@ -25,6 +25,7 @@ export default function CompetitorComparison({
         }
     };
 
+    // Calculate advantage using ORIGINAL brand score vs competitor score
     const advantage = competitorResult
         ? brandResult.score - competitorResult.score
         : null;
@@ -52,12 +53,12 @@ export default function CompetitorComparison({
                         className="px-6 py-2 bg-gray-700 hover:bg-gray-600 rounded-lg font-medium
                        transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                        {loading ? "Checking..." : "Compare"}
+                        {loading ? "Analyzing..." : "Compare"}
                     </button>
                 </div>
             </form>
 
-            {/* Comparison Results */}
+            {/* Comparison Results - Uses ORIGINAL brand score, not re-scored */}
             {competitorResult && (
                 <div className="space-y-4">
                     {/* Score Comparison */}
@@ -70,7 +71,7 @@ export default function CompetitorComparison({
 
                         <div className="p-4 flex items-center justify-center">
                             <div className={`text-2xl font-bold ${advantage && advantage > 0 ? "text-green-400" :
-                                    advantage && advantage < 0 ? "text-red-400" : "text-gray-400"
+                                advantage && advantage < 0 ? "text-red-400" : "text-gray-400"
                                 }`}>
                                 {advantage !== null && (
                                     <>
