@@ -141,6 +141,48 @@ async function main() {
   fs.writeFileSync(path.join(historyDir, `${dateStr}.json`), JSON.stringify(output, null, 2));
   console.log(`\n✅ JSON results saved`);
 
+  // === Build timeline.json from history ===
+  try {
+    const historyFiles = fs.readdirSync(historyDir)
+      .filter(f => f.endsWith('.json'))
+      .sort(); // chronological order
+
+    interface TimelineBrand { date: string; score: number; rank: number }
+    interface TimelineIndustry { [brand: string]: TimelineBrand[] }
+    const timeline: { dates: string[]; industries: { [industryId: string]: TimelineIndustry } } = {
+      dates: [],
+      industries: {},
+    };
+
+    for (const file of historyFiles) {
+      const d = file.replace('.json', '');
+      timeline.dates.push(d);
+
+      const snap = JSON.parse(fs.readFileSync(path.join(historyDir, file), 'utf-8'));
+      if (!snap.results) continue;
+
+      for (const ir of snap.results) {
+        const iid = ir.industry?.id;
+        if (!iid) continue;
+        if (!timeline.industries[iid]) timeline.industries[iid] = {};
+
+        const ranked = (ir.brandResults || [])
+          .filter((b: any) => !b.error && b.score > 0)
+          .sort((a: any, b: any) => b.score - a.score);
+
+        ranked.forEach((b: any, idx: number) => {
+          if (!timeline.industries[iid][b.brand]) timeline.industries[iid][b.brand] = [];
+          timeline.industries[iid][b.brand].push({ date: d, score: b.score, rank: idx + 1 });
+        });
+      }
+    }
+
+    fs.writeFileSync(path.join(dataDir, 'timeline.json'), JSON.stringify(timeline));
+    console.log(`📈 Timeline built from ${historyFiles.length} snapshots`);
+  } catch (e) {
+    console.warn('⚠️ Timeline generation failed:', e);
+  }
+
   // === Save to SQLite ===
   const dbDir = path.join(process.cwd(), 'data');
   fs.mkdirSync(dbDir, { recursive: true });
