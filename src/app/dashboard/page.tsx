@@ -40,6 +40,23 @@ const CHART_COLORS = [
   '#fb923c', '#60a5fa', '#e879f9', '#4ade80', '#f87171',
 ];
 
+// Score color: red → amber → green based on value
+function scoreColor(score: number): string {
+  if (score >= 85) return '#34d399'; // emerald
+  if (score >= 70) return '#a3e635'; // lime
+  if (score >= 55) return '#facc15'; // yellow
+  if (score >= 40) return '#fb923c'; // orange
+  return '#f87171'; // red
+}
+
+function scoreGradient(score: number): string {
+  if (score >= 85) return 'from-emerald-400 to-cyan-400';
+  if (score >= 70) return 'from-lime-400 to-emerald-400';
+  if (score >= 55) return 'from-yellow-400 to-lime-400';
+  if (score >= 40) return 'from-orange-400 to-yellow-400';
+  return 'from-red-400 to-orange-400';
+}
+
 // ========== SVG Line Chart Component ==========
 function TimelineChart({ data, brands, dates }: { data: { [brand: string]: TimelineEntry[] }; brands: string[]; dates: string[] }) {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -309,8 +326,7 @@ export default function DashboardPage() {
                           <span className="text-[10px] text-gray-500 font-medium uppercase tracking-[0.15em]">Visibility Score</span>
                         </div>
                         <div className="flex items-baseline gap-2 mb-7">
-                          <span className="text-4xl font-bold text-white tracking-tight">{brand.score}</span>
-                          <span className="text-gray-600 text-base">/100</span>
+                          <span className={`text-4xl font-bold tracking-tight bg-gradient-to-r ${scoreGradient(brand.score)} bg-clip-text text-transparent`}>{brand.score}</span>
                           {scoreChange !== null && scoreChange !== 0 && (
                             <span className={`text-xs font-semibold ${scoreChange > 0 ? 'text-emerald-400' : 'text-red-400'}`}>
                               {scoreChange > 0 ? '+' : ''}{scoreChange}
@@ -376,8 +392,7 @@ export default function DashboardPage() {
                       </span>
                     </div>
                     <div className="col-span-2 text-right">
-                      <span className="text-sm font-semibold text-white tabular-nums">{brand.score}</span>
-                      <span className="text-gray-600 text-xs">/100</span>
+                      <span className="text-sm font-semibold tabular-nums" style={{ color: scoreColor(brand.score) }}>{brand.score}</span>
                     </div>
                     <div className="col-span-2 text-right">
                       {scoreChange !== null && scoreChange !== 0 ? (
@@ -407,7 +422,7 @@ export default function DashboardPage() {
 
             {/* Footer */}
             <div className="mt-5 flex items-center justify-between px-1 text-xs text-gray-600">
-              <span>Industry Avg: <span className="text-gray-400 font-medium">{currentIndustry.industryAverage.score}/100</span></span>
+              <span>Industry Avg: <span className="text-gray-400 font-medium">{currentIndustry.industryAverage.score}</span></span>
               <span>{selectedModel === 'all' ? 'All Models' : selectedModel} · Powered by Gemini, Llama, DeepSeek</span>
             </div>
           </>
