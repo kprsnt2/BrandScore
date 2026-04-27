@@ -31,6 +31,7 @@ export interface BrandAnalysisResult {
 export interface IndustryAnalysisResult {
   industry: Industry;
   brandResults: BrandAnalysisResult[];
+  modelData: { model: string; brandScores: BatchBrandScore[] }[];
   industryAverage: {
     score: number;
     recommendation: number;
@@ -90,6 +91,7 @@ export class BrandAnalysisPipeline {
       return {
         industry,
         brandResults,
+        modelData: modelResults.map(m => ({ model: m.model, brandScores: m.scores })),
         industryAverage,
         topPerformers,
         bottomPerformers,
@@ -101,6 +103,7 @@ export class BrandAnalysisPipeline {
       return {
         industry,
         brandResults: [],
+        modelData: [],
         industryAverage: { score: 0, recommendation: 0, sentiment: 0, prominence: 0, accuracy: 0 },
         topPerformers: [],
         bottomPerformers: [],
