@@ -439,7 +439,7 @@ export default function DashboardPage() {
             {/* Footer */}
             <div className="mt-6 flex flex-col sm:flex-row sm:items-center justify-between px-1 gap-4 text-xs text-gray-600">
               <div className="flex items-center gap-3">
-                <span>Industry Avg: <span className="text-gray-400 font-medium">{industryData.industryAverage.score}</span></span>
+                <span>Industry Avg: <span className="text-gray-400 font-medium">{industryData.industryAverage.score.toFixed(1)}</span></span>
                 <span className="text-gray-800">|</span>
                 <span>All scores /100</span>
               </div>
