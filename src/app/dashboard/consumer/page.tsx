@@ -80,8 +80,15 @@ function TimelineChart({ data, brands, dates }: { data: { [brand: string]: Timel
   for (let v = Math.ceil(minScore / step) * step; v <= maxScore; v += step) yTicks.push(v);
 
   return (
-    <div ref={containerRef} className="relative">
-      <svg viewBox={`0 0 ${W} ${H}`} className="w-full h-auto" style={{ minHeight: 200 }}>
+    <div ref={containerRef} className="relative" role="region" aria-label="Score Trend Timeline Chart">
+      {/* Invisible semantic data for LLMs */}
+      <div className="sr-only">
+        {dates.map(d => `Date: ${d}. ` + brands.slice(0, 5).map(b => {
+          const entry = data[b]?.find(e => e.date === d);
+          return entry ? `${b}: ${entry.score}` : '';
+        }).filter(Boolean).join(', ')).join(' | ')}
+      </div>
+      <svg viewBox={`0 0 ${W} ${H}`} className="w-full h-auto" style={{ minHeight: 200 }} aria-hidden="true">
         {/* Grid lines */}
         {yTicks.map(v => (
           <g key={v}>
@@ -158,7 +165,11 @@ function ScoreBreakdownChart({ brands }: { brands: BrandData[] }) {
   if (top3.length === 0) return null;
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4" role="region" aria-label="Score Breakdown Top 3 Brands">
+      {/* Hidden semantic text for LLMs and Screen Readers */}
+      <div className="sr-only">
+        {top3.map(b => `Brand: ${b.brand}. Total Score: ${b.score}. Breakdown: Recommendation ${Math.round(b.breakdown.recommendation)} out of 40, Sentiment ${Math.round(b.breakdown.sentiment)} out of 30, Prominence ${Math.round(b.breakdown.prominence)} out of 20, Accuracy ${Math.round(b.breakdown.accuracy)} out of 10. `).join(' | ')}
+      </div>
       {top3.map((brand, index) => {
         const barColors = ['#22d3ee', '#a78bfa', '#f472b6'];
         const c = barColors[index];
@@ -310,7 +321,7 @@ export default function ConsumerDashboardPage() {
       </section>
 
       {/* Content */}
-      <div className="max-w-7xl mx-auto px-4 py-8">
+      <main id="main-content" className="max-w-7xl mx-auto px-4 py-8">
         {!industryData || rankedBrands.length === 0 ? (
           <div className="text-center py-24">
             <div className="w-16 h-16 rounded-2xl bg-white/[0.03] border border-white/[0.06] flex items-center justify-center mx-auto mb-5">
@@ -453,7 +464,7 @@ export default function ConsumerDashboardPage() {
             </div>
           </>
         )}
-      </div>
+      </main>
     </div>
   );
 }

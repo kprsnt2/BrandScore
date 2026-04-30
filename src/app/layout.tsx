@@ -127,28 +127,28 @@ export default function RootLayout({
                             {/* Header */}
                             <header className="border-b border-gray-800 backdrop-blur-sm bg-gray-900/50 sticky top-0 z-50">
                                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                                    <div className="flex justify-between items-center py-4">
-                                        <a href="/" className="flex items-center gap-2" aria-label="Brand Score Home">
-                                            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary-500 to-purple-600 flex items-center justify-center">
-                                                <span className="text-white font-bold text-sm">BS</span>
+                                    <div className="flex justify-between items-center py-3 sm:py-4">
+                                        <a href="/" className="flex items-center gap-2 shrink-0" aria-label="Brand Score Home">
+                                            <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-gradient-to-br from-primary-500 to-purple-600 flex items-center justify-center">
+                                                <span className="text-white font-bold text-xs sm:text-sm">BS</span>
                                             </div>
-                                            <span className="font-bold text-xl gradient-text">Brand Score</span>
+                                            <span className="font-bold text-base sm:text-xl gradient-text hidden sm:block">Brand Score</span>
                                         </a>
-                                        <nav className="flex gap-6 text-sm text-gray-400 items-center" aria-label="Main navigation">
-                                            <a href="#features" className="hover:text-white transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 focus:ring-offset-gray-900 rounded">
+                                        <nav className="flex gap-3 sm:gap-6 text-xs sm:text-sm text-gray-400 items-center overflow-x-auto whitespace-nowrap" aria-label="Main navigation">
+                                            <a href="#features" className="hover:text-white transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 focus:ring-offset-gray-900 rounded hidden sm:inline">
                                                 How it Works
                                             </a>
                                             <a
                                                 href="https://kprsnt.in"
                                                 target="_blank"
                                                 rel="noopener noreferrer"
-                                                className="hover:text-white transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 focus:ring-offset-gray-900 rounded"
+                                                className="hover:text-white transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 focus:ring-offset-gray-900 rounded hidden xs:inline"
                                             >
                                                 About
                                             </a>
                                             <a
                                                 href="/dashboard"
-                                                className="px-4 py-1.5 bg-gradient-to-r from-primary-500 to-purple-600 text-white rounded-lg font-medium hover:shadow-lg hover:shadow-primary-500/25 transition-all text-sm"
+                                                className="px-3 py-1.5 sm:px-4 bg-gradient-to-r from-primary-500 to-purple-600 text-white rounded-lg font-medium hover:shadow-lg hover:shadow-primary-500/25 transition-all text-xs sm:text-sm"
                                             >
                                                 🇮🇳 India AI Index
                                             </a>
