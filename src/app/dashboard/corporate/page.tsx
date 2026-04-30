@@ -152,39 +152,35 @@ function TimelineChart({ data, brands, dates }: { data: { [brand: string]: Timel
   );
 }
 
-// ========== Score Breakdown Chart Component ==========
+// ========== Score Breakdown Stacked Chart ==========
 function ScoreBreakdownChart({ brands }: { brands: BrandData[] }) {
-  const top5 = brands.slice(0, 5);
-  if (top5.length === 0) return null;
+  const top3 = brands.slice(0, 3);
+  if (top3.length === 0) return null;
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-5 gap-6">
-      {top5.map((brand) => (
-        <div key={brand.brand} className="flex flex-col">
-          <div className="text-xs font-semibold text-white mb-3 truncate flex items-center gap-1.5">
-            <span className="w-1.5 h-1.5 rounded-full bg-primary-400"></span>
-            {brand.brand}
+    <div className="space-y-4">
+      {top3.map((brand, index) => {
+        const barColors = ['#eab308', '#9ca3af', '#f97316'];
+        const c = barColors[index];
+        return (
+          <div key={brand.brand} className="flex items-center gap-3">
+            <span className="text-xs text-gray-300 w-36 truncate font-medium">{brand.brand}</span>
+            <div className="flex-1 flex gap-[2px] h-3 rounded-full overflow-hidden bg-white/[0.03]">
+              <div className="rounded-l-full transition-all duration-500" style={{ width: `${(brand.breakdown.recommendation / 40) * 100}%`, backgroundColor: c, opacity: 1 }} />
+              <div className="transition-all duration-500" style={{ width: `${(brand.breakdown.sentiment / 30) * 100}%`, backgroundColor: c, opacity: 0.65 }} />
+              <div className="transition-all duration-500" style={{ width: `${(brand.breakdown.prominence / 20) * 100}%`, backgroundColor: c, opacity: 0.4 }} />
+              <div className="rounded-r-full transition-all duration-500" style={{ width: `${(brand.breakdown.accuracy / 10) * 100}%`, backgroundColor: c, opacity: 0.2 }} />
+            </div>
+            <span className="text-sm font-bold text-white w-14 text-right tabular-nums">{brand.score}/100</span>
           </div>
-          <div className="space-y-2.5">
-            {[
-              { label: 'Prominence', value: brand.breakdown?.prominence || 0, color: 'bg-blue-400' },
-              { label: 'Recommendation', value: brand.breakdown?.recommendation || 0, color: 'bg-emerald-400' },
-              { label: 'Sentiment', value: brand.breakdown?.sentiment || 0, color: 'bg-purple-400' },
-              { label: 'Accuracy', value: brand.breakdown?.accuracy || 0, color: 'bg-orange-400' }
-            ].map(m => (
-              <div key={m.label} className="flex flex-col gap-1">
-                <div className="flex justify-between text-[9px] text-gray-500 uppercase tracking-wider">
-                  <span>{m.label}</span>
-                  <span className="text-gray-300 font-medium">{Math.round(m.value)}</span>
-                </div>
-                <div className="w-full bg-white/[0.05] h-1.5 rounded-full overflow-hidden">
-                  <div className={`h-full ${m.color} rounded-full`} style={{ width: `${Math.max(0, Math.min(100, m.value))}%` }} />
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      ))}
+        );
+      })}
+      <div className="flex gap-5 mt-4 text-[10px] text-gray-500 tracking-wide pt-2">
+        <span className="flex items-center gap-1.5"><span className="w-1.5 h-1.5 rounded-full bg-gray-400" style={{opacity:1}}></span> Recommendation</span>
+        <span className="flex items-center gap-1.5"><span className="w-1.5 h-1.5 rounded-full bg-gray-400" style={{opacity:0.65}}></span> Sentiment</span>
+        <span className="flex items-center gap-1.5"><span className="w-1.5 h-1.5 rounded-full bg-gray-400" style={{opacity:0.4}}></span> Prominence</span>
+        <span className="flex items-center gap-1.5"><span className="w-1.5 h-1.5 rounded-full bg-gray-400" style={{opacity:0.2}}></span> Accuracy</span>
+      </div>
     </div>
   );
 }
@@ -360,6 +356,16 @@ export default function DashboardPage() {
               </div>
             )}
 
+            {/* Score Breakdown Chart */}
+            {rankedBrands.length >= 3 && (
+              <div className="rounded-xl border border-white/[0.04] bg-white/[0.015] p-5 mb-8">
+                <h3 className="text-[10px] font-medium text-gray-500 mb-5 uppercase tracking-[0.2em]">
+                  Score Breakdown — Top 3
+                </h3>
+                <ScoreBreakdownChart brands={rankedBrands} />
+              </div>
+            )}
+
             {/* Timeline Chart */}
             {Object.keys(timelineBrands).length > 0 && (
               <div className="rounded-xl border border-white/[0.04] bg-white/[0.015] p-5 mb-8">
@@ -371,16 +377,6 @@ export default function DashboardPage() {
                   brands={rankedBrands.slice(0, 5).map(b => b.brand)}
                   dates={timelineDates}
                 />
-              </div>
-            )}
-
-            {/* Score Breakdown Chart */}
-            {rankedBrands.length > 0 && (
-              <div className="rounded-xl border border-white/[0.04] bg-white/[0.015] p-5 mb-8">
-                <h3 className="text-[10px] font-medium text-gray-500 mb-4 uppercase tracking-[0.2em]">
-                  Score Breakdown — Top 5
-                </h3>
-                <ScoreBreakdownChart brands={rankedBrands} />
               </div>
             )}
 
