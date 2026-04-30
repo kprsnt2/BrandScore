@@ -211,6 +211,12 @@ async function main() {
   });
 
   saveAll();
+
+  // Checkpoint WAL into main DB and switch to DELETE mode
+  // so the .db file is fully self-contained (no .db-wal/.db-shm needed)
+  db.pragma('wal_checkpoint(TRUNCATE)');
+  db.pragma('journal_mode = DELETE');
+
   db.close();
   console.log(`\n💾 SQLite database saved to ${dbPath}`);
 

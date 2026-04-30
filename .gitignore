@@ -21,3 +21,7 @@ npm-debug.log*
 .vscode/
 *.swp
 *.swo
+
+# SQLite WAL files (only the main .db is needed)
+*.db-shm
+*.db-wal
