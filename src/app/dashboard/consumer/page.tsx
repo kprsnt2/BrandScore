@@ -175,11 +175,11 @@ function ScoreBreakdownChart({ brands }: { brands: BrandData[] }) {
           </div>
         );
       })}
-      <div className="flex gap-5 mt-4 text-[10px] text-gray-500 tracking-wide pt-2">
-        <span className="flex items-center gap-1.5"><span className="w-1.5 h-1.5 rounded-full bg-gray-400" style={{opacity:1}}></span> Recommendation</span>
-        <span className="flex items-center gap-1.5"><span className="w-1.5 h-1.5 rounded-full bg-gray-400" style={{opacity:0.65}}></span> Sentiment</span>
-        <span className="flex items-center gap-1.5"><span className="w-1.5 h-1.5 rounded-full bg-gray-400" style={{opacity:0.4}}></span> Prominence</span>
-        <span className="flex items-center gap-1.5"><span className="w-1.5 h-1.5 rounded-full bg-gray-400" style={{opacity:0.2}}></span> Accuracy</span>
+      <div className="flex gap-5 mt-4 text-[10px] text-gray-400 tracking-wide pt-2">
+        <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-sm bg-white" style={{opacity:1}}></span> Recommendation</span>
+        <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-sm bg-white" style={{opacity:0.65}}></span> Sentiment</span>
+        <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-sm bg-white" style={{opacity:0.4}}></span> Prominence</span>
+        <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-sm bg-white" style={{opacity:0.25}}></span> Accuracy</span>
       </div>
     </div>
   );
