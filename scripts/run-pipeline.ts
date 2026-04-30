@@ -1,7 +1,7 @@
 /**
  * Standalone pipeline runner for GitHub Actions
  * Analyzes top 15 brands across 15 Indian industries
- * Saves results to SQLite database + JSON file
+ * Saves results to SQLite database (single source of truth)
  */
 
 import { BrandAnalysisPipeline } from '../src/lib/pipeline';
@@ -59,13 +59,23 @@ function initDatabase(dbPath: string) {
       accuracy INTEGER,
       response_time_ms INTEGER,
       error TEXT,
+      model TEXT,
       FOREIGN KEY (run_id) REFERENCES pipeline_runs(id)
     );
 
     CREATE INDEX IF NOT EXISTS idx_brand_results_run ON brand_results(run_id);
     CREATE INDEX IF NOT EXISTS idx_brand_results_industry ON brand_results(industry_id);
+    CREATE INDEX IF NOT EXISTS idx_brand_results_model ON brand_results(model);
     CREATE INDEX IF NOT EXISTS idx_industry_results_run ON industry_results(run_id);
   `);
+
+  // Add model column if it doesn't exist (migration for existing DBs)
+  try {
+    db.exec(`ALTER TABLE brand_results ADD COLUMN model TEXT`);
+    console.log('✅ Added model column to brand_results');
+  } catch {
+    // Column already exists — this is expected
+  }
 
   return db;
 }
@@ -129,61 +139,9 @@ async function main() {
     process.exit(0);
   }
 
-  const output = { results, summary, timestamp: new Date().toISOString(), version: '1.0.0' };
-
-  // === Save to JSON ===
-  const dataDir = path.join(process.cwd(), 'public', 'data');
-  const historyDir = path.join(dataDir, 'history');
-  fs.mkdirSync(historyDir, { recursive: true });
-
-  fs.writeFileSync(path.join(dataDir, 'latest-results.json'), JSON.stringify(output, null, 2));
   const dateStr = new Date().toISOString().split('T')[0];
-  fs.writeFileSync(path.join(historyDir, `${dateStr}.json`), JSON.stringify(output, null, 2));
-  console.log(`\n✅ JSON results saved`);
 
-  // === Build timeline.json from history ===
-  try {
-    const historyFiles = fs.readdirSync(historyDir)
-      .filter(f => f.endsWith('.json'))
-      .sort(); // chronological order
-
-    interface TimelineBrand { date: string; score: number; rank: number }
-    interface TimelineIndustry { [brand: string]: TimelineBrand[] }
-    const timeline: { dates: string[]; industries: { [industryId: string]: TimelineIndustry } } = {
-      dates: [],
-      industries: {},
-    };
-
-    for (const file of historyFiles) {
-      const d = file.replace('.json', '');
-      timeline.dates.push(d);
-
-      const snap = JSON.parse(fs.readFileSync(path.join(historyDir, file), 'utf-8'));
-      if (!snap.results) continue;
-
-      for (const ir of snap.results) {
-        const iid = ir.industry?.id;
-        if (!iid) continue;
-        if (!timeline.industries[iid]) timeline.industries[iid] = {};
-
-        const ranked = (ir.brandResults || [])
-          .filter((b: any) => !b.error && b.score > 0)
-          .sort((a: any, b: any) => b.score - a.score);
-
-        ranked.forEach((b: any, idx: number) => {
-          if (!timeline.industries[iid][b.brand]) timeline.industries[iid][b.brand] = [];
-          timeline.industries[iid][b.brand].push({ date: d, score: b.score, rank: idx + 1 });
-        });
-      }
-    }
-
-    fs.writeFileSync(path.join(dataDir, 'timeline.json'), JSON.stringify(timeline));
-    console.log(`📈 Timeline built from ${historyFiles.length} snapshots`);
-  } catch (e) {
-    console.warn('⚠️ Timeline generation failed:', e);
-  }
-
-  // === Save to SQLite ===
+  // === Save to SQLite (single source of truth) ===
   const dbDir = path.join(process.cwd(), 'data');
   fs.mkdirSync(dbDir, { recursive: true });
   const dbPath = path.join(dbDir, 'brand-intelligence.db');
@@ -200,8 +158,8 @@ async function main() {
   `);
 
   const insertBrand = db.prepare(`
-    INSERT INTO brand_results (run_id, industry_id, brand, category, score, recommendation, sentiment, prominence, accuracy, response_time_ms, error)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    INSERT INTO brand_results (run_id, industry_id, brand, category, score, recommendation, sentiment, prominence, accuracy, response_time_ms, error, model)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
   `);
 
   const runResult = insertRun.run(
@@ -222,20 +180,39 @@ async function main() {
         result.totalResponseTime, result.error || null
       );
 
+      // Insert aggregated scores (model = NULL) — these are the "All Models" average
       for (const brand of result.brandResults) {
         insertBrand.run(
           runId, result.industry.id, brand.brand, brand.category,
           brand.score, brand.breakdown.recommendation, brand.breakdown.sentiment,
           brand.breakdown.prominence, brand.breakdown.accuracy,
-          brand.responseTime, brand.error || null
+          brand.responseTime, brand.error || null, null  // model = NULL for aggregated
         );
+      }
+
+      // Insert per-model scores
+      if (result.modelData) {
+        for (const md of result.modelData) {
+          for (const bs of md.brandScores) {
+            const totalScore = Math.min(100,
+              bs.breakdown.recommendation + bs.breakdown.sentiment +
+              bs.breakdown.prominence + bs.breakdown.accuracy
+            );
+            insertBrand.run(
+              runId, result.industry.id, bs.brand, result.industry.category,
+              totalScore, bs.breakdown.recommendation, bs.breakdown.sentiment,
+              bs.breakdown.prominence, bs.breakdown.accuracy,
+              0, null, md.model  // model = model name for per-model rows
+            );
+          }
+        }
       }
     }
   });
 
   saveAll();
   db.close();
-  console.log(`💾 SQLite database saved to ${dbPath}`);
+  console.log(`\n💾 SQLite database saved to ${dbPath}`);
 
   // Print summary
   console.log('\n📊 Pipeline Summary');

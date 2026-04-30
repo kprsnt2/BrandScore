@@ -3,35 +3,30 @@
 import { useState, useEffect, useMemo, useRef } from 'react';
 import { INDUSTRIES } from '@/lib/industry-data';
 
-interface BrandScore {
+interface BrandData {
   brand: string;
   score: number;
   breakdown: { recommendation: number; sentiment: number; prominence: number; accuracy: number };
-  error?: string;
+  rank: number;
+  scoreChange: number | null;
+  rankChange: number | null;
 }
 
-interface ModelData {
-  model: string;
-  brandScores: BrandScore[];
-}
-
-interface IndustryResult {
+interface IndustryResponse {
   industry: { id: string; name: string; category: string };
-  brandResults: BrandScore[];
-  modelData?: ModelData[];
-  industryAverage: { score: number };
-}
-
-interface PipelineData {
-  results: IndustryResult[];
-  summary: { totalBrands: number; successfulBrands: number };
+  brands: BrandData[];
+  industryAverage: { score: number; recommendation: number; sentiment: number; prominence: number; accuracy: number };
+  availableModels: string[];
+  selectedModel: string;
+  totalBrands: number;
+  runDate: string;
   timestamp: string;
 }
 
 interface TimelineEntry { date: string; score: number; rank: number }
-interface TimelineData {
+interface TimelineResponse {
   dates: string[];
-  industries: { [industryId: string]: { [brand: string]: TimelineEntry[] } };
+  brands: { [brand: string]: TimelineEntry[] };
 }
 
 // Brand colors for chart lines
@@ -158,74 +153,47 @@ function TimelineChart({ data, brands, dates }: { data: { [brand: string]: Timel
 
 // ========== Main Dashboard ==========
 export default function DashboardPage() {
-  const [data, setData] = useState<PipelineData | null>(null);
-  const [timeline, setTimeline] = useState<TimelineData | null>(null);
+  const [industryData, setIndustryData] = useState<IndustryResponse | null>(null);
+  const [timeline, setTimeline] = useState<TimelineResponse | null>(null);
   const [selectedIndustry, setSelectedIndustry] = useState<string>('technology');
   const [selectedModel, setSelectedModel] = useState<string>('all');
   const [loading, setLoading] = useState(true);
 
+  // Fetch brand data when industry or model changes
   useEffect(() => {
-    async function load() {
+    let cancelled = false;
+    async function fetchData() {
+      setLoading(true);
       try {
-        const [resData, resTimeline] = await Promise.all([
-          fetch('/data/latest-results.json'),
-          fetch('/data/timeline.json'),
+        const [brandsRes, timelineRes] = await Promise.all([
+          fetch(`/api/brands?industry=${selectedIndustry}&model=${encodeURIComponent(selectedModel)}`),
+          fetch(`/api/brands/timeline?industry=${selectedIndustry}`),
         ]);
-        if (resData.ok) {
-          const json = await resData.json();
-          if (json.results?.length > 0) {
-            setData(json);
-            setSelectedIndustry(json.results[0]?.industry?.id || 'technology');
-          }
+
+        if (!cancelled && brandsRes.ok) {
+          setIndustryData(await brandsRes.json());
         }
-        if (resTimeline.ok) {
-          setTimeline(await resTimeline.json());
+        if (!cancelled && timelineRes.ok) {
+          setTimeline(await timelineRes.json());
         }
-      } catch { /* ignore */ }
-      finally { setLoading(false); }
+      } catch (err) {
+        console.error('Failed to fetch dashboard data:', err);
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
     }
-    load();
-  }, []);
+    fetchData();
+    return () => { cancelled = true; };
+  }, [selectedIndustry, selectedModel]);
 
-  const currentIndustry = useMemo(() => {
-    if (!data) return null;
-    return data.results.find(r => r.industry?.id === selectedIndustry);
-  }, [data, selectedIndustry]);
-
-  const availableModels = useMemo(() => {
-    if (!currentIndustry?.modelData) return [];
-    return currentIndustry.modelData.map(m => m.model);
-  }, [currentIndustry]);
-
-  const rankedBrands = useMemo(() => {
-    if (!currentIndustry) return [];
-    if (selectedModel === 'all' || !currentIndustry.modelData) {
-      return currentIndustry.brandResults.filter(b => !b.error && b.score > 0).sort((a, b) => b.score - a.score);
-    }
-    const md = currentIndustry.modelData.find(m => m.model === selectedModel);
-    if (!md) return [];
-    return md.brandScores.filter(b => b.score > 0).sort((a, b) => b.score - a.score);
-  }, [currentIndustry, selectedModel]);
-
-  // Previous day data for rank/score changes
-  const prevDayScores = useMemo(() => {
-    if (!timeline?.industries[selectedIndustry] || timeline.dates.length < 2) return null;
-    const prevDate = timeline.dates[timeline.dates.length - 2];
-    const industryData = timeline.industries[selectedIndustry];
-    const map: { [brand: string]: { score: number; rank: number } } = {};
-    for (const [brand, entries] of Object.entries(industryData)) {
-      const prev = entries.find(e => e.date === prevDate);
-      if (prev) map[brand] = { score: prev.score, rank: prev.rank };
-    }
-    return Object.keys(map).length > 0 ? map : null;
-  }, [timeline, selectedIndustry]);
-
+  const rankedBrands = industryData?.brands || [];
   const top3 = rankedBrands.slice(0, 3);
   const industryMeta = INDUSTRIES.find(i => i.id === selectedIndustry);
-  const lastUpdated = data?.timestamp ? new Date(data.timestamp) : null;
-  const timelineBrands = timeline?.industries[selectedIndustry] || {};
+  const lastUpdated = industryData?.timestamp ? new Date(industryData.timestamp) : null;
+  const timelineBrands = timeline?.brands || {};
+  const timelineDates = timeline?.dates || [];
 
-  if (loading) {
+  if (loading && !industryData) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
@@ -276,15 +244,15 @@ export default function DashboardPage() {
             <div className="relative">
               <select value={selectedModel} onChange={e => setSelectedModel(e.target.value)}
                 className="appearance-none bg-white/[0.04] border border-white/[0.08] rounded-lg px-3 py-2 pr-8 text-sm text-gray-300 cursor-pointer hover:bg-white/[0.07] transition-all focus:outline-none focus:ring-1 focus:ring-primary-500/50">
-                <option value="all">All Models</option>
-                {availableModels.map(m => <option key={m} value={m}>{m}</option>)}
+                <option value="all" className="bg-[#1a1a2e] text-gray-200">All Models</option>
+                {(industryData?.availableModels || []).map(m => <option key={m} value={m} className="bg-[#1a1a2e] text-gray-200">{m}</option>)}
               </select>
               <svg className="absolute right-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-500 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
             </div>
             <div className="relative">
               <select value={selectedIndustry} onChange={e => { setSelectedIndustry(e.target.value); setSelectedModel('all'); }}
                 className="appearance-none bg-white/[0.04] border border-white/[0.08] rounded-lg px-3 py-2 pr-8 text-sm text-gray-300 cursor-pointer hover:bg-white/[0.07] transition-all focus:outline-none focus:ring-1 focus:ring-primary-500/50">
-                {INDUSTRIES.map(i => <option key={i.id} value={i.id}>{i.name}</option>)}
+                {INDUSTRIES.map(i => <option key={i.id} value={i.id} className="bg-[#1a1a2e] text-gray-200">{i.name}</option>)}
               </select>
               <svg className="absolute right-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-500 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
             </div>
@@ -294,13 +262,13 @@ export default function DashboardPage() {
 
       {/* Content */}
       <div className="max-w-7xl mx-auto px-4 py-8">
-        {!data || !currentIndustry || rankedBrands.length === 0 ? (
+        {!industryData || rankedBrands.length === 0 ? (
           <div className="text-center py-24">
             <div className="w-16 h-16 rounded-2xl bg-white/[0.03] border border-white/[0.06] flex items-center justify-center mx-auto mb-5">
               <span className="text-3xl">📊</span>
             </div>
             <h2 className="text-xl font-semibold text-white mb-2">No data available</h2>
-            <p className="text-gray-500 text-sm max-w-sm mx-auto">Pipeline hasn&apos;t run yet.</p>
+            <p className="text-gray-500 text-sm max-w-sm mx-auto">Pipeline hasn&apos;t run yet for this industry.</p>
           </div>
         ) : (
           <>
@@ -314,8 +282,6 @@ export default function DashboardPage() {
                     { border: 'border-orange-500/15', glow: 'shadow-orange-500/5', badge: 'bg-orange-500/15 text-orange-400', num: 'text-orange-500/[0.07]' },
                   ];
                   const a = accents[index];
-                  const prev = prevDayScores?.[brand.brand];
-                  const scoreChange = prev ? brand.score - prev.score : null;
 
                   return (
                     <div key={brand.brand} className={`relative overflow-hidden rounded-xl border ${a.border} bg-white/[0.02] p-5 hover:bg-white/[0.04] transition-all duration-300 shadow-lg ${a.glow}`}>
@@ -327,9 +293,9 @@ export default function DashboardPage() {
                         </div>
                         <div className="flex items-baseline gap-2 mb-7">
                           <span className={`text-4xl font-bold tracking-tight bg-gradient-to-r ${scoreGradient(brand.score)} bg-clip-text text-transparent`}>{brand.score}</span>
-                          {scoreChange !== null && scoreChange !== 0 && (
-                            <span className={`text-xs font-semibold ${scoreChange > 0 ? 'text-emerald-400' : 'text-red-400'}`}>
-                              {scoreChange > 0 ? '+' : ''}{scoreChange}
+                          {brand.scoreChange !== null && brand.scoreChange !== 0 && (
+                            <span className={`text-xs font-semibold ${brand.scoreChange > 0 ? 'text-emerald-400' : 'text-red-400'}`}>
+                              {brand.scoreChange > 0 ? '+' : ''}{brand.scoreChange}
                             </span>
                           )}
                         </div>
@@ -353,7 +319,7 @@ export default function DashboardPage() {
                 <TimelineChart
                   data={timelineBrands}
                   brands={rankedBrands.slice(0, 5).map(b => b.brand)}
-                  dates={timeline?.dates || []}
+                  dates={timelineDates}
                 />
               </div>
             )}
@@ -368,61 +334,55 @@ export default function DashboardPage() {
                 <div className="col-span-2 text-right hidden sm:block">Rank Δ</div>
               </div>
 
-              {rankedBrands.map((brand, index) => {
-                const prev = prevDayScores?.[brand.brand];
-                const scoreChange = prev ? brand.score - prev.score : null;
-                const rankChange = prev ? prev.rank - (index + 1) : null; // positive = moved up
-
-                return (
-                  <div key={brand.brand}
-                    className={`grid grid-cols-12 px-5 py-3.5 items-center border-b border-white/[0.02] transition-colors duration-150 ${index < 3 ? 'bg-white/[0.01]' : 'hover:bg-white/[0.02]'}`}>
-                    <div className="col-span-1">
-                      <span className={`text-xs font-medium tabular-nums ${index < 3 ? 'text-primary-400' : 'text-gray-600'}`}>{index + 1}</span>
-                    </div>
-                    <div className="col-span-5 flex items-center gap-2.5">
-                      <div className={`w-6 h-6 rounded-md flex items-center justify-center text-[10px] font-bold
-                        ${index === 0 ? 'bg-yellow-500/10 text-yellow-500' :
-                          index === 1 ? 'bg-gray-400/10 text-gray-400' :
-                          index === 2 ? 'bg-orange-500/10 text-orange-400' :
-                          'bg-white/[0.04] text-gray-600'}`}>
-                        {brand.brand.charAt(0).toUpperCase()}
-                      </div>
-                      <span className={`text-sm truncate ${index < 3 ? 'font-semibold text-white' : 'font-medium text-gray-300'}`}>
-                        {brand.brand}
-                      </span>
-                    </div>
-                    <div className="col-span-2 text-right">
-                      <span className="text-sm font-semibold tabular-nums" style={{ color: scoreColor(brand.score) }}>{brand.score}</span>
-                    </div>
-                    <div className="col-span-2 text-right">
-                      {scoreChange !== null && scoreChange !== 0 ? (
-                        <span className={`text-xs font-semibold tabular-nums ${scoreChange > 0 ? 'text-emerald-400' : 'text-red-400'}`}>
-                          {scoreChange > 0 ? '+' : ''}{scoreChange}
-                        </span>
-                      ) : (
-                        <span className="text-xs text-gray-700">—</span>
-                      )}
-                    </div>
-                    <div className="col-span-2 text-right hidden sm:block">
-                      {rankChange !== null && rankChange !== 0 ? (
-                        <span className={`inline-flex items-center gap-0.5 text-xs font-semibold tabular-nums ${rankChange > 0 ? 'text-emerald-400' : 'text-red-400'}`}>
-                          <svg className={`w-3 h-3 ${rankChange < 0 ? 'rotate-180' : ''}`} fill="currentColor" viewBox="0 0 20 20">
-                            <path fillRule="evenodd" d="M10 17a.75.75 0 01-.75-.75V5.612L5.29 9.77a.75.75 0 01-1.08-1.04l5.25-5.5a.75.75 0 011.08 0l5.25 5.5a.75.75 0 11-1.08 1.04l-3.96-4.158V16.25A.75.75 0 0110 17z" clipRule="evenodd" />
-                          </svg>
-                          {Math.abs(rankChange)}
-                        </span>
-                      ) : (
-                        <span className="text-xs text-gray-700">—</span>
-                      )}
-                    </div>
+              {rankedBrands.map((brand, index) => (
+                <div key={brand.brand}
+                  className={`grid grid-cols-12 px-5 py-3.5 items-center border-b border-white/[0.02] transition-colors duration-150 ${index < 3 ? 'bg-white/[0.01]' : 'hover:bg-white/[0.02]'}`}>
+                  <div className="col-span-1">
+                    <span className={`text-xs font-medium tabular-nums ${index < 3 ? 'text-primary-400' : 'text-gray-600'}`}>{index + 1}</span>
                   </div>
-                );
-              })}
+                  <div className="col-span-5 flex items-center gap-2.5">
+                    <div className={`w-6 h-6 rounded-md flex items-center justify-center text-[10px] font-bold
+                      ${index === 0 ? 'bg-yellow-500/10 text-yellow-500' :
+                        index === 1 ? 'bg-gray-400/10 text-gray-400' :
+                        index === 2 ? 'bg-orange-500/10 text-orange-400' :
+                        'bg-white/[0.04] text-gray-600'}`}>
+                      {brand.brand.charAt(0).toUpperCase()}
+                    </div>
+                    <span className={`text-sm truncate ${index < 3 ? 'font-semibold text-white' : 'font-medium text-gray-300'}`}>
+                      {brand.brand}
+                    </span>
+                  </div>
+                  <div className="col-span-2 text-right">
+                    <span className="text-sm font-semibold tabular-nums" style={{ color: scoreColor(brand.score) }}>{brand.score}</span>
+                  </div>
+                  <div className="col-span-2 text-right">
+                    {brand.scoreChange !== null && brand.scoreChange !== 0 ? (
+                      <span className={`text-xs font-semibold tabular-nums ${brand.scoreChange > 0 ? 'text-emerald-400' : 'text-red-400'}`}>
+                        {brand.scoreChange > 0 ? '+' : ''}{brand.scoreChange}
+                      </span>
+                    ) : (
+                      <span className="text-xs text-gray-700">—</span>
+                    )}
+                  </div>
+                  <div className="col-span-2 text-right hidden sm:block">
+                    {brand.rankChange !== null && brand.rankChange !== 0 ? (
+                      <span className={`inline-flex items-center gap-0.5 text-xs font-semibold tabular-nums ${brand.rankChange > 0 ? 'text-emerald-400' : 'text-red-400'}`}>
+                        <svg className={`w-3 h-3 ${brand.rankChange < 0 ? 'rotate-180' : ''}`} fill="currentColor" viewBox="0 0 20 20">
+                          <path fillRule="evenodd" d="M10 17a.75.75 0 01-.75-.75V5.612L5.29 9.77a.75.75 0 01-1.08-1.04l5.25-5.5a.75.75 0 011.08 0l5.25 5.5a.75.75 0 11-1.08 1.04l-3.96-4.158V16.25A.75.75 0 0110 17z" clipRule="evenodd" />
+                        </svg>
+                        {Math.abs(brand.rankChange)}
+                      </span>
+                    ) : (
+                      <span className="text-xs text-gray-700">—</span>
+                    )}
+                  </div>
+                </div>
+              ))}
             </div>
 
             {/* Footer */}
             <div className="mt-5 flex items-center justify-between px-1 text-xs text-gray-600">
-              <span>Industry Avg: <span className="text-gray-400 font-medium">{currentIndustry.industryAverage.score}</span></span>
+              <span>Industry Avg: <span className="text-gray-400 font-medium">{industryData.industryAverage.score}</span></span>
               <span>{selectedModel === 'all' ? 'All Models' : selectedModel} · Powered by Gemini, Llama, DeepSeek</span>
             </div>
           </>
