@@ -163,19 +163,22 @@ function ScoreBreakdownChart({ brands }: { brands: BrandData[] }) {
         const barColors = ['#22d3ee', '#a78bfa', '#f472b6'];
         const c = barColors[index];
         return (
-          <div key={brand.brand} className="flex items-center gap-3">
-            <span className="text-xs text-gray-300 w-52 shrink-0 truncate font-medium">{brand.brand}</span>
-            <div className="flex-1 flex gap-[2px] h-3 rounded-full overflow-hidden bg-white/[0.03]">
+          <div key={brand.brand} className="flex flex-col sm:flex-row sm:items-center gap-1.5 sm:gap-3">
+            <div className="flex justify-between items-center sm:w-52 shrink-0">
+              <span className="text-xs text-gray-300 pr-2 truncate font-medium">{brand.brand}</span>
+              <span className="text-sm font-bold sm:hidden tabular-nums" style={{ color: scoreColor(brand.score) }}>{brand.score}</span>
+            </div>
+            <div className="flex-1 flex gap-[2px] h-3 rounded-full overflow-hidden bg-white/[0.03] w-full">
               <div className="rounded-l-full transition-all duration-500 hover:brightness-125 cursor-help" style={{ width: `${(brand.breakdown.recommendation / 40) * 100}%`, backgroundColor: c, opacity: 1 }} title={`Recommendation: ${Math.round(brand.breakdown.recommendation)}/40`} />
               <div className="transition-all duration-500 hover:brightness-125 cursor-help" style={{ width: `${(brand.breakdown.sentiment / 30) * 100}%`, backgroundColor: c, opacity: 0.65 }} title={`Sentiment: ${Math.round(brand.breakdown.sentiment)}/30`} />
               <div className="transition-all duration-500 hover:brightness-125 cursor-help" style={{ width: `${(brand.breakdown.prominence / 20) * 100}%`, backgroundColor: c, opacity: 0.4 }} title={`Prominence: ${Math.round(brand.breakdown.prominence)}/20`} />
               <div className="rounded-r-full transition-all duration-500 hover:brightness-125 cursor-help" style={{ width: `${(brand.breakdown.accuracy / 10) * 100}%`, backgroundColor: c, opacity: 0.2 }} title={`Accuracy: ${Math.round(brand.breakdown.accuracy)}/10`} />
             </div>
-            <span className="text-sm font-bold w-12 text-right tabular-nums" style={{ color: scoreColor(brand.score) }}>{brand.score}</span>
+            <span className="text-sm font-bold w-12 text-right tabular-nums hidden sm:block" style={{ color: scoreColor(brand.score) }}>{brand.score}</span>
           </div>
         );
       })}
-      <div className="flex gap-5 mt-4 text-[10px] text-gray-400 tracking-wide pt-2">
+      <div className="flex flex-wrap gap-x-5 gap-y-2 mt-4 text-[10px] text-gray-400 tracking-wide pt-2">
         <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-sm" style={{backgroundColor: '#22d3ee', opacity:1}}></span> Recommendation</span>
         <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-sm" style={{backgroundColor: '#22d3ee', opacity:0.65}}></span> Sentiment</span>
         <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-sm" style={{backgroundColor: '#22d3ee', opacity:0.4}}></span> Prominence</span>
@@ -279,25 +282,25 @@ export default function DashboardPage() {
 
       {/* Filters */}
       <section className="sticky top-[65px] z-40 bg-[#0a0a0f]/90 backdrop-blur-2xl border-b border-white/[0.04]">
-        <div className="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between gap-4">
+        <div className="max-w-7xl mx-auto px-4 py-3 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4">
           <div className="flex items-center gap-2 min-w-0">
             <h2 className="text-sm font-medium text-white whitespace-nowrap">
               Top <span className="text-primary-400">{industryMeta?.name}</span> brands
             </h2>
             <span className="text-gray-600 text-xs hidden sm:inline">· {rankedBrands.length} ranked</span>
           </div>
-          <div className="flex items-center gap-3 flex-shrink-0">
-            <div className="relative">
+          <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0 w-full sm:w-auto">
+            <div className="relative flex-1 sm:flex-none">
               <select value={selectedModel} onChange={e => setSelectedModel(e.target.value)}
-                className="appearance-none bg-white/[0.04] border border-white/[0.08] rounded-lg px-3 py-2 pr-8 text-sm text-gray-300 cursor-pointer hover:bg-white/[0.07] transition-all focus:outline-none focus:ring-1 focus:ring-primary-500/50">
+                className="appearance-none bg-white/[0.04] border border-white/[0.08] rounded-lg px-3 py-2 pr-8 text-sm text-gray-300 w-full cursor-pointer hover:bg-white/[0.07] transition-all focus:outline-none focus:ring-1 focus:ring-primary-500/50">
                 <option value="all" className="bg-[#1a1a2e] text-gray-200">All Models</option>
                 {(industryData?.availableModels || []).map(m => <option key={m} value={m} className="bg-[#1a1a2e] text-gray-200">{m}</option>)}
               </select>
               <svg className="absolute right-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-500 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
             </div>
-            <div className="relative">
+            <div className="relative flex-1 sm:flex-none">
               <select value={selectedIndustry} onChange={e => { setSelectedIndustry(e.target.value); setSelectedModel('all'); }}
-                className="appearance-none bg-white/[0.04] border border-white/[0.08] rounded-lg px-3 py-2 pr-8 text-sm text-gray-300 cursor-pointer hover:bg-white/[0.07] transition-all focus:outline-none focus:ring-1 focus:ring-primary-500/50">
+                className="appearance-none bg-white/[0.04] border border-white/[0.08] rounded-lg px-3 py-2 pr-8 text-sm text-gray-300 w-full cursor-pointer hover:bg-white/[0.07] transition-all focus:outline-none focus:ring-1 focus:ring-primary-500/50">
                 {INDUSTRIES.map(i => <option key={i.id} value={i.id} className="bg-[#1a1a2e] text-gray-200">{i.name}</option>)}
               </select>
               <svg className="absolute right-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-500 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
@@ -382,36 +385,36 @@ export default function DashboardPage() {
 
             {/* Rankings Table */}
             <div className="rounded-xl border border-white/[0.04] bg-white/[0.015] overflow-hidden">
-              <div className="grid grid-cols-12 px-5 py-3 border-b border-white/[0.04] text-[10px] font-medium text-gray-600 uppercase tracking-[0.15em]">
+              <div className="grid grid-cols-12 px-4 sm:px-5 py-3 border-b border-white/[0.04] text-[10px] font-medium text-gray-600 uppercase tracking-[0.15em]">
                 <div className="col-span-1">#</div>
-                <div className="col-span-5">Company</div>
-                <div className="col-span-2 text-right">Brand score</div>
-                <div className="col-span-2 text-right">Score Δ</div>
+                <div className="col-span-7 sm:col-span-5">Company</div>
+                <div className="col-span-4 sm:col-span-2 text-right">Score</div>
+                <div className="col-span-2 text-right hidden sm:block">Score Δ</div>
                 <div className="col-span-2 text-right hidden sm:block">Rank Δ</div>
               </div>
 
               {rankedBrands.slice(0, 10).map((brand, index) => (
                 <div key={brand.brand}
-                  className={`grid grid-cols-12 px-5 py-3.5 items-center border-b border-white/[0.02] transition-colors duration-150 ${index < 3 ? 'bg-white/[0.01]' : 'hover:bg-white/[0.02]'}`}>
+                  className={`grid grid-cols-12 px-4 sm:px-5 py-3.5 items-center border-b border-white/[0.02] transition-colors duration-150 ${index < 3 ? 'bg-white/[0.01]' : 'hover:bg-white/[0.02]'}`}>
                   <div className="col-span-1">
                     <span className={`text-xs font-medium tabular-nums ${index < 3 ? 'text-primary-400' : 'text-gray-600'}`}>{index + 1}</span>
                   </div>
-                  <div className="col-span-5 flex items-center gap-2.5">
-                    <div className={`w-6 h-6 rounded-md flex items-center justify-center text-[10px] font-bold
+                  <div className="col-span-7 sm:col-span-5 flex items-center gap-2.5 overflow-hidden pr-2">
+                    <div className={`w-6 h-6 rounded-md flex-shrink-0 flex items-center justify-center text-[10px] font-bold
                       ${index === 0 ? 'bg-yellow-500/10 text-yellow-500' :
                         index === 1 ? 'bg-gray-400/10 text-gray-400' :
                         index === 2 ? 'bg-orange-500/10 text-orange-400' :
                         'bg-white/[0.04] text-gray-600'}`}>
                       {brand.brand.charAt(0).toUpperCase()}
                     </div>
-                    <span className={`text-sm truncate ${index < 3 ? 'font-semibold text-white' : 'font-medium text-gray-300'}`}>
+                    <span className={`text-xs sm:text-sm truncate ${index < 3 ? 'font-semibold text-white' : 'font-medium text-gray-300'}`}>
                       {brand.brand}
                     </span>
                   </div>
-                  <div className="col-span-2 text-right">
+                  <div className="col-span-4 sm:col-span-2 text-right">
                     <span className="text-sm font-semibold tabular-nums" style={{ color: scoreColor(brand.score) }}>{brand.score}</span>
                   </div>
-                  <div className="col-span-2 text-right">
+                  <div className="col-span-2 text-right hidden sm:block">
                     {brand.scoreChange !== null && brand.scoreChange !== 0 ? (
                       <span className={`text-xs font-semibold tabular-nums ${brand.scoreChange > 0 ? 'text-emerald-400' : 'text-red-400'}`}>
                         {brand.scoreChange > 0 ? '+' : ''}{brand.scoreChange}
