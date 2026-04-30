@@ -12,13 +12,13 @@ export const dynamic = 'force-dynamic';
 
 export async function GET() {
   try {
-    const latestRun = getRun();
+    const latestRun = await getRun();
     if (!latestRun) {
       return NextResponse.json({ error: 'No pipeline data available' }, { status: 404 });
     }
 
-    const allDates = getAllRunDates();
-    const industryResults = getAllIndustryResults(latestRun.id);
+    const allDates = await getAllRunDates();
+    const industryResults = await getAllIndustryResults(latestRun.id);
 
     // Industries with data in latest run
     const industriesWithData = industryResults

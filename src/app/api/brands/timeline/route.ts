@@ -20,7 +20,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Invalid industry' }, { status: 400 });
     }
 
-    const timeline = getTimeline(industryId);
+    const timeline = await getTimeline(industryId);
 
     return NextResponse.json(timeline);
   } catch (error) {

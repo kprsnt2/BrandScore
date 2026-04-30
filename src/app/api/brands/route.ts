@@ -23,24 +23,24 @@ export async function GET(request: NextRequest) {
     }
 
     // Get latest run
-    const latestRun = getRun();
+    const latestRun = await getRun();
     if (!latestRun) {
       return NextResponse.json({ error: 'No pipeline data available' }, { status: 404 });
     }
 
     // Get brand results
-    const brands = getBrandResults(latestRun.id, industryId, model);
-    const availableModels = getAvailableModels(latestRun.id, industryId);
-    const industryResult = getIndustryResult(latestRun.id, industryId);
+    const brands = await getBrandResults(latestRun.id, industryId, model);
+    const availableModels = await getAvailableModels(latestRun.id, industryId);
+    const industryResult = await getIndustryResult(latestRun.id, industryId);
 
     // Get previous run for change calculations
-    const allDates = getAllRunDates();
+    const allDates = await getAllRunDates();
     const latestIdx = allDates.indexOf(latestRun.run_date);
     let prevBrands: typeof brands = [];
     if (latestIdx > 0) {
-      const prevRun = getRun(allDates[latestIdx - 1]);
+      const prevRun = await getRun(allDates[latestIdx - 1]);
       if (prevRun) {
-        prevBrands = getBrandResults(prevRun.id, industryId, model);
+        prevBrands = await getBrandResults(prevRun.id, industryId, model);
       }
     }
 

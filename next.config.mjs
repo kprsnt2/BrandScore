@@ -1,13 +1,11 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // Include the SQLite database in the serverless function bundle
+  // Include the SQLite database and sql.js WASM binary in the serverless function bundle
   outputFileTracingIncludes: {
-    '/api/brands': ['./data/**/*'],
-    '/api/brands/timeline': ['./data/**/*'],
-    '/api/brands/metadata': ['./data/**/*'],
+    '/api/brands': ['./data/**/*', './node_modules/sql.js/dist/sql-wasm.wasm'],
+    '/api/brands/timeline': ['./data/**/*', './node_modules/sql.js/dist/sql-wasm.wasm'],
+    '/api/brands/metadata': ['./data/**/*', './node_modules/sql.js/dist/sql-wasm.wasm'],
   },
-  // Ensure better-sqlite3 is treated as an external package (native module)
-  serverExternalPackages: ['better-sqlite3'],
 };
 
 export default nextConfig;
