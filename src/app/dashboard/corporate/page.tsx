@@ -160,11 +160,11 @@ function ScoreBreakdownChart({ brands }: { brands: BrandData[] }) {
   return (
     <div className="space-y-4">
       {top3.map((brand, index) => {
-        const barColors = ['#eab308', '#9ca3af', '#f97316'];
+        const barColors = ['#22d3ee', '#a78bfa', '#f472b6'];
         const c = barColors[index];
         return (
           <div key={brand.brand} className="flex items-center gap-3">
-            <span className="text-xs text-gray-300 w-36 truncate font-medium">{brand.brand}</span>
+            <span className="text-xs text-gray-300 w-52 shrink-0 truncate font-medium">{brand.brand}</span>
             <div className="flex-1 flex gap-[2px] h-3 rounded-full overflow-hidden bg-white/[0.03]">
               <div className="rounded-l-full transition-all duration-500 hover:brightness-125 cursor-help" style={{ width: `${(brand.breakdown.recommendation / 40) * 100}%`, backgroundColor: c, opacity: 1 }} title={`Recommendation: ${Math.round(brand.breakdown.recommendation)}/40`} />
               <div className="transition-all duration-500 hover:brightness-125 cursor-help" style={{ width: `${(brand.breakdown.sentiment / 30) * 100}%`, backgroundColor: c, opacity: 0.65 }} title={`Sentiment: ${Math.round(brand.breakdown.sentiment)}/30`} />
@@ -176,10 +176,10 @@ function ScoreBreakdownChart({ brands }: { brands: BrandData[] }) {
         );
       })}
       <div className="flex gap-5 mt-4 text-[10px] text-gray-400 tracking-wide pt-2">
-        <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-sm bg-white" style={{opacity:1}}></span> Recommendation</span>
-        <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-sm bg-white" style={{opacity:0.65}}></span> Sentiment</span>
-        <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-sm bg-white" style={{opacity:0.4}}></span> Prominence</span>
-        <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-sm bg-white" style={{opacity:0.25}}></span> Accuracy</span>
+        <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-sm" style={{backgroundColor: '#22d3ee', opacity:1}}></span> Recommendation</span>
+        <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-sm" style={{backgroundColor: '#22d3ee', opacity:0.65}}></span> Sentiment</span>
+        <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-sm" style={{backgroundColor: '#22d3ee', opacity:0.4}}></span> Prominence</span>
+        <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-sm" style={{backgroundColor: '#22d3ee', opacity:0.25}}></span> Accuracy</span>
       </div>
     </div>
   );
