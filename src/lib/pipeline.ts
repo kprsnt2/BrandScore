@@ -64,10 +64,13 @@ export class BrandAnalysisPipeline {
     this.apiKeys = hasApiKeys();
   }
 
-  async analyzeIndustry(industryId: string): Promise<IndustryAnalysisResult> {
-    const industry = getIndustryById(industryId);
+  async analyzeIndustry(industryId: string, customIndustries?: Industry[]): Promise<IndustryAnalysisResult> {
+    let industry = customIndustries ? customIndustries.find(i => i.id === industryId) : getIndustryById(industryId);
     if (!industry) {
-      throw new Error(`Industry not found: ${industryId}`);
+      industry = getIndustryById(industryId); // fallback
+      if (!industry) {
+        throw new Error(`Industry not found: ${industryId}`);
+      }
     }
 
     console.log(`  📋 ${industry.name} (${industry.topBrands.length} brands)...`);
@@ -114,8 +117,10 @@ export class BrandAnalysisPipeline {
     }
   }
 
-  async analyzeAllIndustries(): Promise<IndustryAnalysisResult[]> {
-    const industries = getAllIndustries();
+  async analyzeAllIndustries(industries?: Industry[]): Promise<IndustryAnalysisResult[]> {
+    if (!industries) {
+      industries = getAllIndustries();
+    }
     console.log(`Starting pipeline: ${industries.length} industries (1 request per industry per model)\n`);
     
     const results: IndustryAnalysisResult[] = [];
@@ -123,7 +128,7 @@ export class BrandAnalysisPipeline {
     for (let i = 0; i < industries.length; i++) {
       const industry = industries[i];
       try {
-        const result = await this.analyzeIndustry(industry.id);
+        const result = await this.analyzeIndustry(industry.id, industries);
         results.push(result);
         
         // Delay between industries to respect rate limits
