@@ -46,6 +46,13 @@ export function generateRecommendationPrompt(brand: string, category: string): s
 Provide a helpful recommendation response. Discuss leading options and mention ${brand} if it is a relevant and competitive choice in this space. Be balanced, objective, and informative.`;
 }
 
+// Unified scoring guidelines to ensure consistent AI scoring across all endpoints
+const SCORING_GUIDELINES = `Scoring guidelines:
+- recommendation (0-40): 40=highly recommend, 30=would recommend, 20=neutral, 10=concerns, 0=would not recommend
+- sentiment (0-30): 30=excellent reputation, 20=positive, 15=neutral, 10=mixed, 0=negative
+- prominence (0-20): 20=household name, 15=well-known, 10=known in industry, 5=niche, 0=unknown
+- accuracy (0-10): 10=extensive data, 5=moderate data, 0=very limited info`;
+
 // NEW: Structured prompt that returns JSON with scores
 export function generateStructuredBrandPrompt(brand: string, category: string): string {
     const categoryContext = category && category !== "general"
@@ -73,11 +80,7 @@ You MUST respond ONLY with valid JSON matching this exact structure (no markdown
   "tips": ["improvement tip 1", "improvement tip 2", "improvement tip 3"]
 }
 
-Scoring guidelines:
-- recommendation (0-40): 40=highly recommend to anyone, 30=would recommend, 20=neutral, 10=some concerns, 0=would not recommend
-- sentiment (0-30): 30=excellent public reputation, 20=positive, 15=neutral, 10=mixed, 0=negative reputation
-- prominence (0-20): 20=household name globally, 15=well-known, 10=known in industry, 5=niche, 0=unknown
-- accuracy (0-10): 10=extensive reliable data available, 5=moderate data, 0=very limited information
+${SCORING_GUIDELINES}
 
 Be objective and fair in your scoring. Provide 2-4 actionable tips for improving brand visibility.`;
 }
@@ -118,11 +121,7 @@ Respond ONLY with valid JSON (no markdown, no explanation):
   ]
 }
 
-Scoring guidelines:
-- recommendation (0-40): 40=highly recommend, 30=would recommend, 20=neutral, 10=concerns, 0=would not recommend
-- sentiment (0-30): 30=excellent reputation, 20=positive, 15=neutral, 10=mixed, 0=negative
-- prominence (0-20): 20=household name, 15=well-known, 10=known in industry, 5=niche, 0=unknown
-- accuracy (0-10): 10=extensive data, 5=moderate data, 0=very limited info
+${SCORING_GUIDELINES}
 - score = sum of all breakdown values (max 100)
 
 Score ALL ${brands.length} brands. Be objective and fair.`;
@@ -282,11 +281,7 @@ Respond ONLY with valid JSON (no markdown, no explanation):
   "comparisonSummary": "One sentence comparing the two brands"
 }
 
-Scoring guidelines:
-- recommendation (0-40): 40=highly recommend, 20=neutral, 0=would not recommend
-- sentiment (0-30): 30=excellent reputation, 15=neutral, 0=negative reputation
-- prominence (0-20): 20=household name, 10=known in industry, 0=unknown
-- accuracy (0-10): 10=extensive data available, 5=moderate data, 0=very limited data`;
+${SCORING_GUIDELINES}`;
 }
 
 // Parse comparison response from AI
