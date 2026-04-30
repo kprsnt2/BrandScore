@@ -20,10 +20,10 @@ export async function getDb(): Promise<SqlJsDatabase> {
 
   // Locate the WASM binary for sql.js
   const wasmPath = path.join(process.cwd(), 'node_modules', 'sql.js', 'dist', 'sql-wasm.wasm');
-  const wasmBinary = fs.readFileSync(wasmPath);
+  const wasmBinary = new Uint8Array(fs.readFileSync(wasmPath));
   const SQL = await initSqlJs({ wasmBinary });
 
-  const buffer = fs.readFileSync(dbPath);
+  const buffer = new Uint8Array(fs.readFileSync(dbPath));
   _db = new SQL.Database(buffer);
   return _db;
 }
