@@ -52,16 +52,23 @@ export default function PipelineDashboard({
   const industries = [
     { id: 'technology', name: 'Technology' },
     { id: 'automotive', name: 'Automotive' },
-    { id: 'retail', name: 'Retail' },
+    { id: 'ecommerce', name: 'Retail & E-Commerce' },
     { id: 'fashion', name: 'Fashion & Apparel' },
-    { id: 'food', name: 'Food & Beverage' },
+    { id: 'food-beverage', name: 'Food & Beverage' },
     { id: 'healthcare', name: 'Healthcare' },
     { id: 'finance', name: 'Finance & Banking' },
     { id: 'telecom', name: 'Telecommunications' },
     { id: 'entertainment', name: 'Entertainment & Media' },
     { id: 'travel', name: 'Travel & Hospitality' },
     { id: 'energy', name: 'Energy' },
-    { id: 'consumer', name: 'Consumer Goods' }
+    { id: 'fmcg', name: 'Consumer Goods' },
+    { id: 'realestate', name: 'Real Estate' },
+    { id: 'edtech', name: 'EdTech' },
+    { id: 'logistics', name: 'Logistics' },
+    { id: 'consumer-electronics', name: 'Consumer Electronics' },
+    { id: 'mobile-phones', name: 'Mobile Phones' },
+    { id: 'home-appliances', name: 'Home Appliances' },
+    { id: 'two-wheelers', name: 'Two Wheelers' },
   ];
 
   const getScoreColor = (score: number) => {
@@ -101,7 +108,7 @@ export default function PipelineDashboard({
             Industry Brand Analysis Pipeline
           </h1>
           <p className="text-gray-600">
-            Automated analysis of top 10 brands across 12 industries
+            Automated analysis of top brands across 19 industries
           </p>
         </div>
 

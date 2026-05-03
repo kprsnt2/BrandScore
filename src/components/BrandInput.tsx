@@ -20,10 +20,10 @@ export default function BrandInput({ onSubmit, loading }: BrandInputProps) {
     };
 
     const popularBrands = [
-        { name: "Apple", category: "smartphones" },
+        { name: "Apple", category: "mobile-phones" },
         { name: "Nike", category: "fashion" },
         { name: "Tesla", category: "automotive" },
-        { name: "Samsung", category: "smartphones" },
+        { name: "Samsung", category: "consumer-electronics" },
         { name: "Google", category: "technology" },
         { name: "Amazon", category: "ecommerce" },
     ];

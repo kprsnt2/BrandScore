@@ -7,7 +7,6 @@
 import { NextResponse } from 'next/server';
 import { getRun, getAllRunDates, getAllIndustryResults } from '@/lib/db';
 import { INDUSTRIES } from '@/lib/industry-data';
-import { CONSUMER_INDUSTRIES } from '@/lib/consumer-industry-data';
 
 export const dynamic = 'force-dynamic';
 
@@ -44,7 +43,7 @@ export async function GET() {
       totalRuns: allDates.length,
       runDates: allDates,
       industries: industriesWithData,
-      totalIndustries: INDUSTRIES.length + CONSUMER_INDUSTRIES.length,
+      totalIndustries: INDUSTRIES.length,
     });
   } catch (error) {
     console.error('Error in /api/brands/metadata:', error);

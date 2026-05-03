@@ -351,6 +351,98 @@ export const INDUSTRIES: Industry[] = [
       "Safexpress",
       "LoadShare"
     ]
+  },
+  {
+    id: "consumer-electronics",
+    name: "Consumer Electronics",
+    category: "consumer-electronics",
+    description: "Televisions, laptops, audio devices, and smart electronics in India",
+    topBrands: [
+      "Samsung",
+      "LG",
+      "Sony",
+      "Xiaomi",
+      "OnePlus",
+      "Realme",
+      "Boat",
+      "Noise",
+      "Lenovo",
+      "Dell",
+      "HP",
+      "Acer",
+      "Zebronics",
+      "Portronics",
+      "TCL"
+    ]
+  },
+  {
+    id: "mobile-phones",
+    name: "Mobile Phones",
+    category: "mobile-phones",
+    description: "Smartphones and feature phones sold in India",
+    topBrands: [
+      "Xiaomi",
+      "Samsung",
+      "Realme",
+      "Vivo",
+      "Oppo",
+      "OnePlus",
+      "Poco",
+      "Motorola",
+      "iQOO",
+      "Apple",
+      "Google",
+      "Nothing Phone",
+      "Nokia",
+      "Lava",
+      "Infinix"
+    ]
+  },
+  {
+    id: "home-appliances",
+    name: "Home Appliances",
+    category: "home-appliances",
+    description: "Refrigerators, washing machines, ACs, and kitchen appliances in India",
+    topBrands: [
+      "LG",
+      "Samsung",
+      "Whirlpool",
+      "Godrej",
+      "IFB",
+      "Haier",
+      "Voltas",
+      "Blue Star",
+      "Bajaj",
+      "Crompton",
+      "Kent RO",
+      "Philips",
+      "Panasonic",
+      "Borosil",
+      "Morphy Richards"
+    ]
+  },
+  {
+    id: "two-wheelers",
+    name: "Two Wheelers",
+    category: "two-wheelers",
+    description: "Motorcycles, scooters, and electric two-wheelers in India",
+    topBrands: [
+      "Hero MotoCorp",
+      "Honda",
+      "TVS Motor",
+      "Bajaj Auto",
+      "Royal Enfield",
+      "Ola Electric",
+      "Ather Energy",
+      "Yamaha",
+      "Suzuki",
+      "KTM",
+      "Jawa",
+      "Revolt",
+      "Ultraviolette",
+      "Aprilia",
+      "Simple Energy"
+    ]
   }
 ];
 

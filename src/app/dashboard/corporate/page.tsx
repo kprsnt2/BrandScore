@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect, useMemo, useRef } from 'react';
-import Link from 'next/link';
 import { INDUSTRIES } from '@/lib/industry-data';
 
 interface BrandData {
@@ -262,14 +261,14 @@ export default function DashboardPage() {
         <div className="max-w-5xl mx-auto px-4 text-center relative z-10">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary-500/10 border border-primary-500/20 text-primary-400 text-xs font-medium tracking-widest uppercase mb-6">
             <span className="w-1.5 h-1.5 rounded-full bg-primary-400 animate-pulse"></span>
-            India Corporate AI Index
+            India AI Visibility Index
           </div>
           <h1 className="text-3xl sm:text-5xl lg:text-6xl font-bold text-white mb-4 leading-[1.1] tracking-tight">
             See who is winning<br />
             <span className="bg-gradient-to-r from-primary-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">AI Search in India</span>
           </h1>
           <p className="text-gray-500 text-base sm:text-lg max-w-xl mx-auto leading-relaxed">
-            AI visibility rankings for top corporate Indian brands across 15 industries.
+            AI visibility rankings for top Indian brands across 19 industries.
           </p>
           {lastUpdated && (
             <p className="text-gray-700 text-xs mt-5">
@@ -278,18 +277,6 @@ export default function DashboardPage() {
           )}
         </div>
       </section>
-
-      {/* Navigation Tabs */}
-      <div className="flex justify-center border-b border-white/[0.04] mb-2 bg-[#0a0a0f]/90 backdrop-blur-2xl relative z-40">
-        <div className="flex gap-8">
-          <Link href="/dashboard/corporate" className="px-1 py-4 text-sm font-medium text-primary-400 border-b-2 border-primary-400">
-            Corporate Index
-          </Link>
-          <Link href="/dashboard/consumer" className="px-1 py-4 text-sm font-medium text-gray-400 hover:text-gray-300 transition-colors border-b-2 border-transparent">
-            Consumer Index
-          </Link>
-        </div>
-      </div>
 
       {/* Filters */}
       <section className="sticky top-[65px] z-40 bg-[#0a0a0f]/90 backdrop-blur-2xl border-b border-white/[0.04]">

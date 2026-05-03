@@ -1,20 +1,20 @@
 import { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'India Corporate AI Index | Market Leaders & Brand Ranks | Brand Score',
-  description: 'Explore the market leaders and AI brand ranks for top corporate companies in India. Check unified brand scores and AI visibility metrics across multiple foundational models.',
+  title: 'India AI Visibility Index | Brand Scores & Ranks | Brand Score',
+  description: 'View the AI visibility rankings and brand scores for top Indian brands across 19 industries. Analyze how models like Gemini, Groq, and DeepSeek recommend brands.',
   keywords: [
+    'brand scores',
+    'AI visibility index',
     'market leaders',
     'industry brand ranks',
-    'corporate brand scores',
-    'AI visibility index',
-    'B2B brand score',
     'top companies India',
     'AI perception',
+    'AI recommendations',
   ],
   openGraph: {
-    title: 'India Corporate AI Index | Market Leaders & Brand Ranks',
-    description: 'Explore the market leaders and AI brand ranks for top corporate companies in India.',
+    title: 'India AI Visibility Index | Brand Scores & Ranks',
+    description: 'View the AI visibility rankings and brand scores for top Indian brands across 19 industries.',
     url: 'https://brandscore.kprsnt.in/dashboard/corporate',
   },
   alternates: {
@@ -25,10 +25,10 @@ export const metadata: Metadata = {
 const jsonLd = {
   '@context': 'https://schema.org',
   '@type': 'Dataset',
-  name: 'India Corporate AI Index',
-  description: 'A comprehensive dataset ranking corporate market leaders in India based on their visibility and sentiment in top AI models.',
+  name: 'India AI Visibility Index',
+  description: 'A comprehensive dataset ranking Indian brands across 19 industries based on their visibility and sentiment in top AI models.',
   url: 'https://brandscore.kprsnt.in/dashboard/corporate',
-  keywords: ['market leaders', 'industry brand ranks', 'brand scores'],
+  keywords: ['brand scores', 'AI visibility index', 'market leaders', 'industry brand ranks'],
   creator: {
     '@type': 'Organization',
     name: 'Brand Score',

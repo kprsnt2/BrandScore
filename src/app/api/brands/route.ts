@@ -7,7 +7,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getRun, getBrandResults, getAvailableModels, getIndustryResult, getAllRunDates } from '@/lib/db';
 import { INDUSTRIES } from '@/lib/industry-data';
-import { CONSUMER_INDUSTRIES } from '@/lib/consumer-industry-data';
 
 export const dynamic = 'force-dynamic';
 
@@ -17,9 +16,8 @@ export async function GET(request: NextRequest) {
     const industryId = searchParams.get('industry') || 'technology';
     const model = searchParams.get('model') || 'all';
 
-    // Validate industry against both lists
-    const allIndustries = [...INDUSTRIES, ...CONSUMER_INDUSTRIES];
-    const industryMeta = allIndustries.find(i => i.id === industryId);
+    // Validate industry
+    const industryMeta = INDUSTRIES.find(i => i.id === industryId);
     if (!industryMeta) {
       return NextResponse.json({ error: 'Invalid industry' }, { status: 400 });
     }

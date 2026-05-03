@@ -3,17 +3,25 @@ import { z } from "zod";
 // Available categories for brand analysis
 export const BRAND_CATEGORIES = [
     { value: "general", label: "General / Auto-detect" },
-    { value: "smartphones", label: "Smartphones & Electronics" },
+    { value: "technology", label: "Technology & IT" },
     { value: "automotive", label: "Automotive" },
+    { value: "ecommerce", label: "Retail & E-Commerce" },
     { value: "fashion", label: "Fashion & Apparel" },
-    { value: "food", label: "Food & Beverage" },
-    { value: "technology", label: "Technology / Software" },
-    { value: "ecommerce", label: "E-commerce" },
-    { value: "beauty", label: "Beauty & Personal Care" },
-    { value: "finance", label: "Financial Services" },
-    { value: "healthcare", label: "Healthcare" },
+    { value: "food-beverage", label: "Food & Beverage" },
+    { value: "healthcare", label: "Healthcare & Pharma" },
+    { value: "finance", label: "Finance & Banking" },
+    { value: "telecom", label: "Telecommunications" },
     { value: "entertainment", label: "Entertainment & Media" },
     { value: "travel", label: "Travel & Hospitality" },
+    { value: "energy", label: "Energy & Oil" },
+    { value: "fmcg", label: "Consumer Goods (FMCG)" },
+    { value: "realestate", label: "Real Estate & Construction" },
+    { value: "edtech", label: "Education & EdTech" },
+    { value: "logistics", label: "Logistics & Supply Chain" },
+    { value: "consumer-electronics", label: "Consumer Electronics" },
+    { value: "mobile-phones", label: "Mobile Phones" },
+    { value: "home-appliances", label: "Home Appliances" },
+    { value: "two-wheelers", label: "Two Wheelers" },
 ] as const;
 
 // Brand name validation schema

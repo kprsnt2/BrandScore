@@ -35,6 +35,10 @@ const INDUSTRIES = [
   { id: 'realestate', name: 'Real Estate', icon: '🏗️' },
   { id: 'edtech', name: 'EdTech', icon: '📚' },
   { id: 'logistics', name: 'Logistics', icon: '🚚' },
+  { id: 'consumer-electronics', name: 'Consumer Electronics', icon: '📺' },
+  { id: 'mobile-phones', name: 'Mobile Phones', icon: '📱' },
+  { id: 'home-appliances', name: 'Home Appliances', icon: '🏠' },
+  { id: 'two-wheelers', name: 'Two Wheelers', icon: '🏍️' },
 ];
 
 export default function BrandDashboard({ results = [], isLoading = false, lastUpdated, onRunIndustry, onRunAllIndustries }: Props) {
@@ -130,7 +134,7 @@ export default function BrandDashboard({ results = [], isLoading = false, lastUp
           <div className="text-center py-24">
             <div className="text-6xl mb-6">🇮🇳</div>
             <h2 className="text-2xl font-bold text-white mb-3">India Brand Intelligence Index</h2>
-            <p className="text-gray-400 mb-2 max-w-md mx-auto">AI visibility rankings for 225 top Indian brands across 15 industries.</p>
+            <p className="text-gray-400 mb-2 max-w-md mx-auto">AI visibility rankings for 285 top Indian brands across 19 industries.</p>
             <p className="text-gray-600 text-sm mb-8">Powered by Gemini, Llama, DeepSeek</p>
             <button onClick={onRunAllIndustries}
               className="px-8 py-3 bg-white text-black rounded-xl font-semibold hover:bg-gray-200 transition-all">
