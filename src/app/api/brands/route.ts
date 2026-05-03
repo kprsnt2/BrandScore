@@ -8,7 +8,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getRun, getBrandResults, getAvailableModels, getIndustryResult, getAllRunDates } from '@/lib/db';
 import { INDUSTRIES } from '@/lib/industry-data';
 
-export const dynamic = 'force-dynamic';
+export const revalidate = 3600;
 
 export async function GET(request: NextRequest) {
   try {
@@ -98,6 +98,10 @@ export async function GET(request: NextRequest) {
       totalBrands: rankedBrands.length,
       runDate: latestRun.run_date,
       timestamp: latestRun.created_at,
+    }, {
+      headers: {
+        'Cache-Control': 'public, max-age=3600',
+      },
     });
   } catch (error) {
     console.error('Error in /api/brands:', error);

@@ -181,3 +181,34 @@ export async function getTimeline(industryId: string): Promise<{ dates: string[]
 
   return { dates, brands };
 }
+
+/**
+ * Get full history and latest breakdown for a specific brand across all runs.
+ */
+export async function getBrandHistory(brandName: string) {
+  const db = await getDb();
+
+  const runs = rowsToObjects<{ id: number; run_date: string }>(
+    db.exec('SELECT id, run_date FROM pipeline_runs ORDER BY run_date ASC')
+  );
+
+  const history: { date: string; score: number; industry_id: string }[] = [];
+  let latestBreakdown: BrandRow | undefined;
+  const industryIds = new Set<string>();
+
+  for (const run of runs) {
+    // Replace single quotes to prevent SQL injection/errors
+    const safeBrand = brandName.replace(/'/g, "''");
+    const results = rowsToObjects<BrandRow>(db.exec(
+      `SELECT * FROM brand_results WHERE run_id = ${run.id} AND brand COLLATE NOCASE = '${safeBrand}' AND model IS NULL AND score > 0 ORDER BY score DESC`
+    ));
+
+    for (const r of results) {
+      history.push({ date: run.run_date, score: r.score, industry_id: r.industry_id });
+      industryIds.add(r.industry_id);
+      latestBreakdown = r; // Will end up being the most recent one
+    }
+  }
+
+  return { history, latestBreakdown, industryIds: Array.from(industryIds) };
+}

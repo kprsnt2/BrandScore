@@ -8,7 +8,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getTimeline } from '@/lib/db';
 import { INDUSTRIES } from '@/lib/industry-data';
 
-export const dynamic = 'force-dynamic';
+export const revalidate = 3600;
 
 export async function GET(request: NextRequest) {
   try {
@@ -22,7 +22,11 @@ export async function GET(request: NextRequest) {
 
     const timeline = await getTimeline(industryId);
 
-    return NextResponse.json(timeline);
+    return NextResponse.json(timeline, {
+      headers: {
+        'Cache-Control': 'public, max-age=3600',
+      },
+    });
   } catch (error) {
     console.error('Error in /api/brands/timeline:', error);
     return NextResponse.json(

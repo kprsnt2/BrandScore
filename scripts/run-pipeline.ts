@@ -105,7 +105,7 @@ async function main() {
   console.log(`📊 ${industries.length} industries, ${totalBrandCount} brands total`);
 
   const pipeline = new BrandAnalysisPipeline({
-    delayBetweenIndustries: 5000,   // 5s between industries to respect rate limits
+    delayBetweenIndustries: 10000,  // 10s between industries to respect rate limits
     timeoutMs: 180000,              // 3 min per-model timeout (Gemini thinks long)
   });
 

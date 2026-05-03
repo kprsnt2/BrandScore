@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useMemo, useRef } from 'react';
 import { INDUSTRIES } from '@/lib/industry-data';
+import Link from 'next/link';
 
 interface BrandData {
   brand: string;
@@ -58,6 +59,15 @@ function TimelineChart({ data, brands, dates }: { data: { [brand: string]: Timel
   const [tooltip, setTooltip] = useState<{ x: number; y: number; brand: string; score: number; date: string } | null>(null);
 
   if (dates.length === 0 || brands.length === 0) return null;
+
+  if (dates.length <= 1) {
+    return (
+      <div className="flex flex-col items-center justify-center h-[260px] border border-dashed border-white/10 rounded-xl bg-white/[0.01]">
+        <span className="px-3 py-1 bg-purple-500/20 text-purple-300 text-xs font-semibold rounded-full mb-3 uppercase tracking-widest border border-purple-500/30">New Industry</span>
+        <p className="text-gray-400 text-sm">Historical trends will appear after the next pipeline run.</p>
+      </div>
+    );
+  }
 
   const W = 900, H = 260;
   const PAD = { top: 20, right: 20, bottom: 35, left: 40 };
@@ -205,6 +215,37 @@ export default function DashboardPage() {
   const [selectedIndustry, setSelectedIndustry] = useState<string>('technology');
   const [selectedModel, setSelectedModel] = useState<string>('all');
   const [loading, setLoading] = useState(true);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [searchResults, setSearchResults] = useState<any[]>([]);
+  const [compareMode, setCompareMode] = useState(false);
+  const [brand1, setBrand1] = useState<string>('');
+  const [brand2, setBrand2] = useState<string>('');
+
+  useEffect(() => {
+    if (searchQuery.length < 2) {
+      setSearchResults([]);
+      return;
+    }
+    const delay = setTimeout(async () => {
+      try {
+        const res = await fetch(`/api/brands/search?q=${encodeURIComponent(searchQuery)}`);
+        if (res.ok) {
+          const data = await res.json();
+          setSearchResults(data.results || []);
+        }
+      } catch (e) {}
+    }, 300);
+    return () => clearTimeout(delay);
+  }, [searchQuery]);
+
+  const handleShare = () => {
+    if (!industryData) return;
+    const industryMeta = INDUSTRIES.find(i => i.id === selectedIndustry);
+    const top3Text = industryData.brands.slice(0, 3).map((b, i) => `${i+1}. ${b.brand} (${b.score})`).join('\n');
+    const text = `🏆 Top 3 ${industryMeta?.name} Brands in India AI Search:\n\n${top3Text}\n\nSee full rankings at BrandScore.`;
+    navigator.clipboard.writeText(text);
+    alert('Ranking copied to clipboard!');
+  };
 
   // Fetch brand data when industry or model changes
   useEffect(() => {
@@ -280,15 +321,48 @@ export default function DashboardPage() {
 
       {/* Filters */}
       <section className="sticky top-[65px] z-40 bg-[#0a0a0f]/90 backdrop-blur-2xl border-b border-white/[0.04]">
-        <div className="max-w-7xl mx-auto px-4 py-3 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4">
-          <div className="flex items-center gap-2 min-w-0">
-            <h2 className="text-sm font-medium text-white whitespace-nowrap">
-              Top <span className="text-primary-400">{industryMeta?.name}</span> brands
-            </h2>
-            <span className="text-gray-600 text-xs hidden sm:inline">· {rankedBrands.length} ranked</span>
+        <div className="max-w-7xl mx-auto px-4 py-3 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+          <div className="flex items-center gap-4 min-w-0 w-full md:w-auto">
+            <div className="flex items-center gap-2">
+              <h2 className="text-sm font-medium text-white whitespace-nowrap">
+                Top <span className="text-primary-400">{industryMeta?.name}</span> brands
+              </h2>
+              <span className="text-gray-600 text-xs hidden sm:inline">· {rankedBrands.length} ranked</span>
+            </div>
+            
+            <button onClick={handleShare} className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 bg-white/[0.05] hover:bg-white/[0.1] border border-white/[0.05] rounded-lg text-xs font-medium text-gray-300 transition-colors">
+              <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-5.368m0 5.368l5.662 3.397m-5.662-3.397a3 3 0 110-5.368m0 5.368l5.662-3.397" /></svg>
+              Share
+            </button>
+            <button onClick={() => setCompareMode(!compareMode)} className={`hidden sm:flex items-center gap-1.5 px-3 py-1.5 border rounded-lg text-xs font-medium transition-colors ${compareMode ? 'bg-primary-500/20 text-primary-400 border-primary-500/30' : 'bg-white/[0.05] hover:bg-white/[0.1] text-gray-300 border-white/[0.05]'}`}>
+              ⚔️ Compare
+            </button>
           </div>
-          <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0 w-full sm:w-auto">
-            <div className="relative flex-1 sm:flex-none">
+          
+          <div className="flex items-center gap-2 sm:gap-3 w-full md:w-auto">
+            <div className="relative flex-1 md:w-48">
+              <input
+                type="text"
+                placeholder="Search brands..."
+                value={searchQuery}
+                onChange={e => setSearchQuery(e.target.value)}
+                className="w-full bg-white/[0.04] border border-white/[0.08] rounded-lg px-3 py-2 text-sm text-gray-300 focus:outline-none focus:ring-1 focus:ring-primary-500/50 placeholder-gray-600"
+              />
+              {searchResults.length > 0 && (
+                <div className="absolute top-full left-0 right-0 mt-1 bg-gray-900 border border-white/10 rounded-lg shadow-xl overflow-hidden z-50">
+                  {searchResults.map(res => (
+                    <Link key={res.brand + res.industry_id} href={`/brand/${encodeURIComponent(res.brand)}`} className="block px-4 py-2 hover:bg-white/5 text-sm text-gray-300">
+                      <div className="font-medium text-white">{res.brand}</div>
+                      <div className="text-xs text-gray-500 flex justify-between mt-0.5">
+                        <span>{INDUSTRIES.find(i => i.id === res.industry_id)?.name || res.industry_id}</span>
+                        <span className="text-primary-400">{res.score}/100</span>
+                      </div>
+                    </Link>
+                  ))}
+                </div>
+              )}
+            </div>
+            <div className="relative flex-none hidden sm:block">
               <select value={selectedModel} onChange={e => setSelectedModel(e.target.value)}
                 className="appearance-none bg-white/[0.04] border border-white/[0.08] rounded-lg px-3 py-2 pr-8 text-sm text-gray-300 w-full cursor-pointer hover:bg-white/[0.07] transition-all focus:outline-none focus:ring-1 focus:ring-primary-500/50">
                 <option value="all" className="bg-[#1a1a2e] text-gray-200">All Models</option>
@@ -296,7 +370,7 @@ export default function DashboardPage() {
               </select>
               <svg className="absolute right-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-500 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
             </div>
-            <div className="relative flex-1 sm:flex-none">
+            <div className="relative flex-none">
               <select value={selectedIndustry} onChange={e => { setSelectedIndustry(e.target.value); setSelectedModel('all'); }}
                 className="appearance-none bg-white/[0.04] border border-white/[0.08] rounded-lg px-3 py-2 pr-8 text-sm text-gray-300 w-full cursor-pointer hover:bg-white/[0.07] transition-all focus:outline-none focus:ring-1 focus:ring-primary-500/50">
                 {INDUSTRIES.map(i => <option key={i.id} value={i.id} className="bg-[#1a1a2e] text-gray-200">{i.name}</option>)}
@@ -319,6 +393,55 @@ export default function DashboardPage() {
           </div>
         ) : (
           <>
+            {compareMode && rankedBrands.length >= 2 && (
+              <div className="mb-8 p-5 bg-primary-500/[0.03] border border-primary-500/20 rounded-xl">
+                <div className="flex flex-col sm:flex-row items-center gap-4">
+                  <select className="flex-1 bg-gray-900 border border-white/10 rounded-lg px-4 py-2.5 text-sm text-white focus:outline-none focus:ring-1 focus:ring-primary-500"
+                    value={brand1} onChange={e => setBrand1(e.target.value)}>
+                    <option value="">Select Brand 1</option>
+                    {rankedBrands.map(b => <option key={b.brand} value={b.brand}>{b.brand} (Score: {b.score})</option>)}
+                  </select>
+                  <span className="text-gray-500 font-bold italic text-xl">VS</span>
+                  <select className="flex-1 bg-gray-900 border border-white/10 rounded-lg px-4 py-2.5 text-sm text-white focus:outline-none focus:ring-1 focus:ring-primary-500"
+                    value={brand2} onChange={e => setBrand2(e.target.value)}>
+                    <option value="">Select Brand 2</option>
+                    {rankedBrands.map(b => <option key={b.brand} value={b.brand}>{b.brand} (Score: {b.score})</option>)}
+                  </select>
+                </div>
+                {brand1 && brand2 && brand1 !== brand2 && (
+                  <div className="mt-6 pt-6 border-t border-white/5">
+                    {(() => {
+                      const b1 = rankedBrands.find(b => b.brand === brand1)!;
+                      const b2 = rankedBrands.find(b => b.brand === brand2)!;
+                      const diff = b1.score - b2.score;
+                      return (
+                        <div className="text-center">
+                          <div className="inline-block px-4 py-1.5 rounded-full bg-white/5 border border-white/10 text-sm font-medium mb-4">
+                            Advantage: <span className={diff > 0 ? 'text-primary-400' : diff < 0 ? 'text-purple-400' : 'text-gray-400'}>{Math.abs(diff)} points to {diff > 0 ? b1.brand : diff < 0 ? b2.brand : 'Tie'}</span>
+                          </div>
+                          <div className="grid grid-cols-2 gap-8 max-w-2xl mx-auto">
+                            <div className="space-y-3 text-right border-r border-white/5 pr-8">
+                              <h4 className="text-lg font-bold text-primary-400">{b1.brand}</h4>
+                              <div className="text-sm text-gray-400">Rec: <span className="text-white">{b1.breakdown.recommendation}</span></div>
+                              <div className="text-sm text-gray-400">Sent: <span className="text-white">{b1.breakdown.sentiment}</span></div>
+                              <div className="text-sm text-gray-400">Prom: <span className="text-white">{b1.breakdown.prominence}</span></div>
+                              <div className="text-sm text-gray-400">Acc: <span className="text-white">{b1.breakdown.accuracy}</span></div>
+                            </div>
+                            <div className="space-y-3 text-left pl-8">
+                              <h4 className="text-lg font-bold text-purple-400">{b2.brand}</h4>
+                              <div className="text-sm text-gray-400"><span className="text-white">{b2.breakdown.recommendation}</span> :Rec</div>
+                              <div className="text-sm text-gray-400"><span className="text-white">{b2.breakdown.sentiment}</span> :Sent</div>
+                              <div className="text-sm text-gray-400"><span className="text-white">{b2.breakdown.prominence}</span> :Prom</div>
+                              <div className="text-sm text-gray-400"><span className="text-white">{b2.breakdown.accuracy}</span> :Acc</div>
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })()}
+                  </div>
+                )}
+              </div>
+            )}
             {/* Top 3 Podium */}
             {top3.length >= 3 && (
               <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-8">
@@ -405,9 +528,9 @@ export default function DashboardPage() {
                         'bg-white/[0.04] text-gray-600'}`}>
                       {brand.brand.charAt(0).toUpperCase()}
                     </div>
-                    <span className={`text-xs sm:text-sm truncate ${index < 3 ? 'font-semibold text-white' : 'font-medium text-gray-300'}`}>
+                    <Link href={`/brand/${encodeURIComponent(brand.brand)}`} className={`text-xs sm:text-sm truncate hover:text-primary-400 transition-colors ${index < 3 ? 'font-semibold text-white' : 'font-medium text-gray-300'}`}>
                       {brand.brand}
-                    </span>
+                    </Link>
                   </div>
                   <div className="col-span-4 sm:col-span-2 text-right">
                     <span className="text-sm font-semibold tabular-nums" style={{ color: scoreColor(brand.score) }}>{brand.score}</span>
