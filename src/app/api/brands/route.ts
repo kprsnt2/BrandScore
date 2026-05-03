@@ -29,19 +29,30 @@ export async function GET(request: NextRequest) {
     }
 
     // Get brand results
-    const brands = await getBrandResults(latestRun.id, industryId, model);
-    const availableModels = await getAvailableModels(latestRun.id, industryId);
-    const industryResult = await getIndustryResult(latestRun.id, industryId);
+    const db = await import('@/lib/db').then(m => m.getDb());
+    
+    // Find all runs that have data for this industry, ordered by newest first
+    const industryRunsQuery = db.exec(`
+      SELECT DISTINCT run_id 
+      FROM brand_results 
+      WHERE industry_id = '${industryId}' 
+      ORDER BY run_id DESC
+    `);
+
+    if (industryRunsQuery.length === 0 || industryRunsQuery[0].values.length === 0) {
+      return NextResponse.json({ error: 'No pipeline data available for this industry' }, { status: 404 });
+    }
+
+    const currentRunId = industryRunsQuery[0].values[0][0] as number;
+    const brands = await getBrandResults(currentRunId, industryId, model);
+    const availableModels = await getAvailableModels(currentRunId, industryId);
+    const industryResult = await getIndustryResult(currentRunId, industryId);
 
     // Get previous run for change calculations
-    const allDates = await getAllRunDates();
-    const latestIdx = allDates.indexOf(latestRun.run_date);
     let prevBrands: typeof brands = [];
-    if (latestIdx > 0) {
-      const prevRun = await getRun(allDates[latestIdx - 1]);
-      if (prevRun) {
-        prevBrands = await getBrandResults(prevRun.id, industryId, model);
-      }
+    if (industryRunsQuery[0].values.length > 1) {
+      const prevRunId = industryRunsQuery[0].values[1][0] as number;
+      prevBrands = await getBrandResults(prevRunId, industryId, model);
     }
 
     // Build prev lookup
