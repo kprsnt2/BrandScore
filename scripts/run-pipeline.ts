@@ -81,7 +81,7 @@ function initDatabase(dbPath: string) {
 }
 
 async function main() {
-  console.log('🇮🇳 India Brand Intelligence Pipeline');
+  console.log('🇮🇳 India rAsh Intelligence Pipeline');
   console.log('=====================================');
 
   // === Pre-flight: check that at least one API key is configured ===

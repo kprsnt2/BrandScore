@@ -1,4 +1,4 @@
-name: Daily Brand Intelligence Pipeline
+name: Daily rAsh Score Pipeline
 
 on:
   schedule:

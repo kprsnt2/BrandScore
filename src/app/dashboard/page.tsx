@@ -242,7 +242,7 @@ export default function DashboardPage() {
     if (!industryData) return;
     const industryMeta = INDUSTRIES.find(i => i.id === selectedIndustry);
     const top3Text = industryData.brands.slice(0, 3).map((b, i) => `${i+1}. ${b.brand} (${b.score})`).join('\n');
-    const text = `🏆 Top 3 ${industryMeta?.name} Brands in India AI Search:\n\n${top3Text}\n\nSee full rankings at BrandScore.`;
+    const text = `🏆 Top 3 ${industryMeta?.name} Brands in India AI Search:\n\n${top3Text}\n\nSee full rankings at rAsh Score.`;
     navigator.clipboard.writeText(text);
     alert('Ranking copied to clipboard!');
   };
@@ -286,7 +286,7 @@ export default function DashboardPage() {
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
           <div className="w-14 h-14 border-[3px] border-primary-500/30 border-t-primary-500 rounded-full animate-spin mx-auto mb-6"></div>
-          <p className="text-gray-500 text-sm">Loading India AI Index...</p>
+          <p className="text-gray-500 text-sm">Loading India rAsh Index...</p>
         </div>
       </div>
     );
@@ -302,7 +302,7 @@ export default function DashboardPage() {
         <div className="max-w-5xl mx-auto px-4 text-center relative z-10">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary-500/10 border border-primary-500/20 text-primary-400 text-xs font-medium tracking-widest uppercase mb-6">
             <span className="w-1.5 h-1.5 rounded-full bg-primary-400 animate-pulse"></span>
-            India AI Visibility Index
+            India rAsh Index
           </div>
           <h1 className="text-3xl sm:text-5xl lg:text-6xl font-bold text-white mb-4 leading-[1.1] tracking-tight">
             See who is winning<br />
@@ -459,7 +459,7 @@ export default function DashboardPage() {
                       <div className="relative z-10">
                         <div className="flex items-center gap-1.5 mb-5">
                           <div className="w-1.5 h-1.5 rounded-full bg-primary-400"></div>
-                          <span className="text-[10px] text-gray-500 font-medium uppercase tracking-[0.15em]">Brand Score</span>
+                          <span className="text-[10px] text-gray-500 font-medium uppercase tracking-[0.15em]">rAsh Score</span>
                         </div>
                         <div className="flex items-baseline gap-2 mb-7">
                           <span className={`text-4xl font-bold tracking-tight bg-gradient-to-r ${scoreGradient(brand.score)} bg-clip-text text-transparent`}>{brand.score}</span>

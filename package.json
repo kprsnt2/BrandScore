@@ -1,7 +1,7 @@
 {
-    "name": "brand-score",
+    "name": "rash-score",
     "version": "1.0.0",
-    "description": "Check your brand's AI visibility. See what AI models say about you and get your LLMO Score.",
+    "description": "Check your brand's AI visibility. See what AI models say about you and get your rAsh Score.",
     "private": true,
     "author": {
         "name": "Prashanth Kumar Kadasi",

@@ -15,18 +15,18 @@ export const viewport: Viewport = {
 export const metadata: Metadata = {
     metadataBase: new URL("https://brandscore.kprsnt.in"),
     title: {
-        default: "Brand Score - Check Your Brand's AI Visibility | LLMO Score",
-        template: "%s | Brand Score",
+        default: "rAsh Score - Check Your Brand's AI Visibility",
+        template: "%s | rAsh Score",
     },
     description:
-        "Discover how AI models like Gemini, Groq (Llama), and DeepSeek perceive your brand. Get your LLMO Score and optimize for AI-powered recommendations.",
+        "Discover how AI models like Gemini, Groq (Llama), and DeepSeek perceive your brand. Get your rAsh Score and optimize for AI-powered recommendations.",
     keywords: [
         "AI brand visibility",
         "LLMO score",
         "LLM optimization",
         "AI recommendations",
         "brand monitoring",
-        "brand score",
+        "rAsh score",
         "AI SEO",
         "brand analysis",
         "AI perception",
@@ -34,7 +34,7 @@ export const metadata: Metadata = {
     ],
     authors: [{ name: "Prashanth Kumar Kadasi", url: "https://kprsnt.in" }],
     creator: "Prashanth Kumar Kadasi",
-    publisher: "Brand Score",
+    publisher: "rAsh Score",
     robots: {
         index: true,
         follow: true,
@@ -50,24 +50,24 @@ export const metadata: Metadata = {
         type: "website",
         locale: "en_US",
         url: "https://brandscore.kprsnt.in",
-        siteName: "Brand Score",
-        title: "Brand Score - Check Your Brand's AI Visibility",
+        siteName: "rAsh Score",
+        title: "rAsh Score - Check Your Brand's AI Visibility",
         description:
-            "See what AI models say about your brand. Get your unified Brand Score and optimize for AI recommendations.",
+            "See what AI models say about your brand. Get your unified rAsh Score and optimize for AI recommendations.",
         images: [
             {
                 url: "/og-image.png",
                 width: 1200,
                 height: 630,
-                alt: "Brand Score - AI Visibility Checker",
+                alt: "rAsh Score - AI Visibility Checker",
             },
         ],
     },
     twitter: {
         card: "summary_large_image",
-        title: "Brand Score - Check Your Brand's AI Visibility",
+        title: "rAsh Score - Check Your Brand's AI Visibility",
         description:
-            "Discover how AI models perceive your brand. Get your Brand Score and optimize for AI recommendations.",
+            "Discover how AI models perceive your brand. Get your rAsh Score and optimize for AI recommendations.",
         images: ["/og-image.png"],
         creator: "@kprsnt2",
     },
@@ -81,9 +81,9 @@ export const metadata: Metadata = {
 const jsonLd = {
     "@context": "https://schema.org",
     "@type": "WebApplication",
-    name: "Brand Score",
+    name: "rAsh Score",
     description:
-        "Check your brand's visibility in AI models like Gemini, Llama, and Mistral. Get your Brand Score.",
+        "Check your brand's visibility in AI models like Gemini, Llama, and Mistral. Get your rAsh Score.",
     url: "https://brandscore.kprsnt.in",
     applicationCategory: "BusinessApplication",
     operatingSystem: "Any",
@@ -128,11 +128,11 @@ export default function RootLayout({
                             <header className="border-b border-gray-800 backdrop-blur-sm bg-gray-900/50 sticky top-0 z-50">
                                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                                     <div className="flex justify-between items-center py-3 sm:py-4">
-                                        <a href="/" className="flex items-center gap-2 shrink-0" aria-label="Brand Score Home">
+                                        <a href="/" className="flex items-center gap-2 shrink-0" aria-label="rAsh Score Home">
                                             <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-gradient-to-br from-primary-500 to-purple-600 flex items-center justify-center">
-                                                <span className="text-white font-bold text-xs sm:text-sm">BS</span>
+                                                <span className="text-white font-bold text-xs sm:text-sm">rS</span>
                                             </div>
-                                            <span className="font-bold text-base sm:text-xl gradient-text hidden sm:block">Brand Score</span>
+                                            <span className="font-bold text-base sm:text-xl gradient-text hidden sm:block">rAsh Score</span>
                                         </a>
                                         <nav className="flex gap-3 sm:gap-6 text-xs sm:text-sm text-gray-400 items-center overflow-x-auto whitespace-nowrap" aria-label="Main navigation">
                                             <a href="#features" className="hover:text-white transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 focus:ring-offset-gray-900 rounded hidden sm:inline">
@@ -150,7 +150,7 @@ export default function RootLayout({
                                                 href="/dashboard"
                                                 className="px-3 py-1.5 sm:px-4 bg-gradient-to-r from-primary-500 to-purple-600 text-white rounded-lg font-medium hover:shadow-lg hover:shadow-primary-500/25 transition-all text-xs sm:text-sm"
                                             >
-                                                🇮🇳 India AI Index
+                                                🇮🇳 India rAsh Index
                                             </a>
                                         </nav>
                                     </div>
@@ -188,7 +188,7 @@ export default function RootLayout({
                                         </a>
                                     </p>
                                     <p className="mt-4 text-gray-600">
-                                        © {new Date().getFullYear()} Brand Score. All rights reserved.
+                                        © {new Date().getFullYear()} rAsh Score. All rights reserved.
                                     </p>
                                 </div>
                             </footer>

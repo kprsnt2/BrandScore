@@ -15,7 +15,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const formattedBrand = decodedBrand.charAt(0).toUpperCase() + decodedBrand.slice(1);
 
   return {
-    title: `${formattedBrand} AI Visibility Score | India Brand Intelligence Index`,
+    title: `${formattedBrand} AI Visibility Score | India rAsh Score Index`,
     description: `Deep dive into the AI search visibility score, sentiment, and recommendation trends for ${formattedBrand}.`,
   };
 }

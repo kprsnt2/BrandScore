@@ -38,7 +38,7 @@ export default function LLMOScore({ score, breakdown }: LLMOScoreProps) {
     return (
         <div className="card p-6">
             <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
-                📊 LLMO Score
+                📊 rAsh Score
             </h3>
 
             {/* Circular Score */}

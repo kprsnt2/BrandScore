@@ -1,6 +1,6 @@
-# BrandPulse AI
+# rAsh Score
 
-**Check your brand's AI visibility. See what AI models say about you and get your LLMO Score.**
+**Check your brand's AI visibility. See what AI models say about you and get your rAsh Score.**
 
 [![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/kprsnt2/BrandPulseAI)
 
