@@ -220,7 +220,8 @@ export default function DashboardPage() {
   const [searchResults, setSearchResults] = useState<any[]>([]);
   const [compareMode, setCompareMode] = useState(false);
   const [brand1, setBrand1] = useState<string>('');
-  const [brand2, setBrand2] = useState<string>('');
+
+  const [copied, setCopied] = useState(false);
 
   useEffect(() => {
     if (searchQuery.length < 2) {
@@ -245,7 +246,8 @@ export default function DashboardPage() {
     const top3Text = industryData.brands.slice(0, 3).map((b, i) => `${i+1}. ${b.brand} (${b.score})`).join('\n');
     const text = `🏆 Top 3 ${industryMeta?.name} Brands in India AI Search:\n\n${top3Text}\n\nSee full rankings at rAsh Score.`;
     navigator.clipboard.writeText(text);
-    alert('Ranking copied to clipboard!');
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2500);
   };
 
   // Fetch brand data when industry or model changes
@@ -328,13 +330,16 @@ export default function DashboardPage() {
               <h2 className="text-sm font-medium text-white whitespace-nowrap">
                 Top <span className="text-primary-400">{industryMeta?.name}</span> brands
               </h2>
-              <span className="text-gray-600 text-xs hidden sm:inline">· {rankedBrands.length} ranked</span>
+              <span className="text-gray-600 text-xs hidden sm:inline">· Top 10</span>
             </div>
             
             <button onClick={handleShare} className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 bg-white/[0.05] hover:bg-white/[0.1] border border-white/[0.05] rounded-lg text-xs font-medium text-gray-300 transition-colors">
               <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-5.368m0 5.368l5.662 3.397m-5.662-3.397a3 3 0 110-5.368m0 5.368l5.662-3.397" /></svg>
-              Share
+              {copied ? "? Copied!" : "Share"}
             </button>
+            {copied && (
+              <span className="text-[11px] text-emerald-400 font-medium animate-pulse">Copied to clipboard!</span>
+            )}
             <button onClick={() => setCompareMode(!compareMode)} className={`hidden sm:flex items-center gap-1.5 px-3 py-1.5 border rounded-lg text-xs font-medium transition-colors ${compareMode ? 'bg-primary-500/20 text-primary-400 border-primary-500/30' : 'bg-white/[0.05] hover:bg-white/[0.1] text-gray-300 border-white/[0.05]'}`}>
               ⚔️ Compare
             </button>
