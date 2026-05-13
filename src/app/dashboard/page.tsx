@@ -225,7 +225,7 @@ function DashboardInner() {
   const [searchResults, setSearchResults] = useState<any[]>([]);
   const [compareMode, setCompareMode] = useState(false);
   const [brand1, setBrand1] = useState<string>('');
-
+  const [brand2, setBrand2] = useState<string>('');
   const [copied, setCopied] = useState(false);
 
   useEffect(() => {
@@ -386,7 +386,7 @@ function DashboardInner() {
               <svg className="absolute right-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-500 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
             </div>
             <div className="relative flex-none">
-                setSelectedIndustry(e.target.value); setSelectedModel('all'); router.replace('/dashboard?industry=' + e.target.value, { scroll: false });
+              <select value={selectedIndustry} onChange={e => { setSelectedIndustry(e.target.value); setSelectedModel('all'); router.replace('/dashboard?industry=' + e.target.value, { scroll: false }); }}
                 className="appearance-none bg-white/[0.04] border border-white/[0.08] rounded-lg px-3 py-2 pr-8 text-sm text-gray-300 w-full cursor-pointer hover:bg-white/[0.07] transition-all focus:outline-none focus:ring-1 focus:ring-primary-500/50">
                 {INDUSTRIES.map(i => <option key={i.id} value={i.id} className="bg-[#1a1a2e] text-gray-200">{i.name}</option>)}
               </select>
