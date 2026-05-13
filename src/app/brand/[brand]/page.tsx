@@ -1,6 +1,7 @@
 import { Metadata } from 'next';
 import { getBrandHistory } from '@/lib/db';
 import { INDUSTRIES } from '@/lib/industry-data';
+import BrandLogo from '@/components/BrandLogo';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 
@@ -99,9 +100,12 @@ export default async function BrandPage({ params }: Props) {
                   </span>
                 ))}
               </div>
-              <h1 className="text-4xl sm:text-6xl font-bold text-white mb-2 tracking-tight">
-                {latestBreakdown.brand}
-              </h1>
+              <div className="flex items-center gap-4 mb-2">
+                <BrandLogo brand={latestBreakdown.brand} size={48} />
+                <h1 className="text-4xl sm:text-6xl font-bold text-white tracking-tight">
+                  {latestBreakdown.brand}
+                </h1>
+              </div>
               <p className="text-gray-400">AI Visibility Deep Dive</p>
             </div>
             

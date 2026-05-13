@@ -6,6 +6,15 @@ const nextConfig = {
     '/api/brands/timeline': ['./data/**/*', './node_modules/sql.js/dist/sql-wasm.wasm'],
     '/api/brands/metadata': ['./data/**/*', './node_modules/sql.js/dist/sql-wasm.wasm'],
   },
+  // Allow logo.dev images to be served via next/image
+  images: {
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'img.logo.dev',
+      },
+    ],
+  },
 };
 
 export default nextConfig;

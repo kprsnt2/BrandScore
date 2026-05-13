@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useMemo, useRef } from 'react';
 import { INDUSTRIES } from '@/lib/industry-data';
+import BrandLogo from '@/components/BrandLogo';
 import Link from 'next/link';
 
 interface BrandData {
@@ -351,11 +352,14 @@ export default function DashboardPage() {
               {searchResults.length > 0 && (
                 <div className="absolute top-full left-0 right-0 mt-1 bg-gray-900 border border-white/10 rounded-lg shadow-xl overflow-hidden z-50">
                   {searchResults.map(res => (
-                    <Link key={res.brand + res.industry_id} href={`/brand/${encodeURIComponent(res.brand)}`} className="block px-4 py-2 hover:bg-white/5 text-sm text-gray-300">
-                      <div className="font-medium text-white">{res.brand}</div>
-                      <div className="text-xs text-gray-500 flex justify-between mt-0.5">
-                        <span>{INDUSTRIES.find(i => i.id === res.industry_id)?.name || res.industry_id}</span>
-                        <span className="text-primary-400">{res.score}/100</span>
+                    <Link key={res.brand + res.industry_id} href={`/brand/${encodeURIComponent(res.brand)}`} className="flex items-center gap-3 px-4 py-2.5 hover:bg-white/5 text-sm text-gray-300 transition-colors">
+                      <BrandLogo brand={res.brand} size={20} />
+                      <div className="flex-1 min-w-0">
+                        <div className="font-medium text-white truncate">{res.brand}</div>
+                        <div className="text-xs text-gray-500 flex justify-between mt-0.5">
+                          <span>{INDUSTRIES.find(i => i.id === res.industry_id)?.name || res.industry_id}</span>
+                          <span className="text-primary-400">{res.score}/100</span>
+                        </div>
                       </div>
                     </Link>
                   ))}
@@ -470,7 +474,7 @@ export default function DashboardPage() {
                           )}
                         </div>
                         <div className="flex items-center gap-2.5">
-                          <div className={`w-7 h-7 rounded-md flex items-center justify-center text-xs font-bold ${a.badge}`}>{index + 1}</div>
+                          <BrandLogo brand={brand.brand} size={28} rank={index} />
                           <h3 className="text-sm font-semibold text-white truncate">{brand.brand}</h3>
                         </div>
                       </div>
@@ -521,13 +525,7 @@ export default function DashboardPage() {
                     <span className={`text-xs font-medium tabular-nums ${index < 3 ? 'text-primary-400' : 'text-gray-600'}`}>{index + 1}</span>
                   </div>
                   <div className="col-span-7 sm:col-span-5 flex items-center gap-2.5 overflow-hidden pr-2">
-                    <div className={`w-6 h-6 rounded-md flex-shrink-0 flex items-center justify-center text-[10px] font-bold
-                      ${index === 0 ? 'bg-yellow-500/10 text-yellow-500' :
-                        index === 1 ? 'bg-gray-400/10 text-gray-400' :
-                        index === 2 ? 'bg-orange-500/10 text-orange-400' :
-                        'bg-white/[0.04] text-gray-600'}`}>
-                      {brand.brand.charAt(0).toUpperCase()}
-                    </div>
+                    <BrandLogo brand={brand.brand} size={24} rank={index} />
                     <Link href={`/brand/${encodeURIComponent(brand.brand)}`} className={`text-xs sm:text-sm truncate hover:text-primary-400 transition-colors ${index < 3 ? 'font-semibold text-white' : 'font-medium text-gray-300'}`}>
                       {brand.brand}
                     </Link>
