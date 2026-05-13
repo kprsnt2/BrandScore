@@ -186,7 +186,7 @@ function ScoreBreakdownChart({ brands }: { brands: BrandData[] }) {
         return (
           <div key={brand.brand} className="flex flex-col sm:flex-row sm:items-center gap-1.5 sm:gap-3">
             <div className="flex justify-between items-center sm:w-52 shrink-0">
-              <span className="text-xs text-gray-300 pr-2 truncate font-medium">{brand.brand}</span>
+              <div className="flex items-center gap-2 min-w-0"><BrandLogo brand={brand.brand} size={20} rank={index} /><span className="text-xs text-gray-300 pr-2 truncate font-medium">{brand.brand}</span></div>
               <span className="text-sm font-bold sm:hidden tabular-nums" style={{ color: scoreColor(brand.score) }}>{brand.score}</span>
             </div>
             <div className="flex-1 flex gap-[2px] h-3 rounded-full overflow-hidden bg-white/[0.03] w-full">

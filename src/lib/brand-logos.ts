@@ -65,7 +65,7 @@ const BRAND_DOMAINS: Record<string, string> = {
   "W (BIBA Group)": "biba.in",
   "Raymond": "raymond.in",
   "Van Heusen": "vanheusenindia.com",
-  "Woodland": "woodland.co.in",
+  "Woodland": "woodlandworldwide.com",
   "Bata India": "bata.in",
   "Titan (Tanishq)": "tanishq.co.in",
   "Kalyan Jewellers": "kalyanjewellers.net",
