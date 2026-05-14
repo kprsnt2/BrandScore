@@ -25,7 +25,7 @@ const AVATAR_COLORS = [
 ];
 
 /**
- * Renders a brand logo fetched via Google's Favicon API (sz=128),
+ * Renders a brand logo fetched via logo.dev API,
  * with a graceful fallback to a styled initial-letter avatar.
  */
 export default function BrandLogo({ brand, size = 24, className = "", rank }: BrandLogoProps) {

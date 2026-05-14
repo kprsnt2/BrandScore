@@ -114,9 +114,9 @@ Rules:
 
 // ─── AI Callers ──────────────────────────────────────────────────────────────
 
-const GEMINI_RETRY_DELAY_MS = 60_000; // 1 minute — matches free-tier retry window
+const BOTH_FAILED_RETRY_DELAY_MS = 60_000; // 1 minute — wait only when both providers fail
 
-async function callGemini(prompt: string, attempt = 1): Promise<string> {
+async function callGemini(prompt: string): Promise<string> {
   const env = getEnv();
   const apiKey = env.GEMINI_API_KEY || env.GEMINI_API_KEY_PAID;
   if (!apiKey) throw new Error('No Gemini API key configured');
@@ -127,28 +127,16 @@ async function callGemini(prompt: string, attempt = 1): Promise<string> {
     generationConfig: { maxOutputTokens: 1024, temperature: 0.5 },
   });
 
-  try {
-    const result = await model.generateContent(prompt);
-    const text = result.response.text().trim();
-    if (!text) throw new Error('Gemini returned empty response');
-    return text;
-  } catch (err) {
-    const msg = (err as Error).message || '';
-    // Retry once on 429 rate-limit after a 60s wait
-    if (attempt === 1 && (msg.includes('429') || msg.includes('quota'))) {
-      console.warn(`  ⏳ Gemini 429 — waiting ${GEMINI_RETRY_DELAY_MS / 1000}s before retry...`);
-      await new Promise(resolve => setTimeout(resolve, GEMINI_RETRY_DELAY_MS));
-      return callGemini(prompt, 2);
-    }
-    throw err;
-  }
+  const result = await model.generateContent(prompt);
+  const text = result.response.text().trim();
+  if (!text) throw new Error('Gemini returned empty response');
+  return text;
 }
 
-async function callNvidiaDeepSeek(prompt: string): Promise<string> {
+async function callNvidiaDeepSeek(prompt: string, model = 'deepseek-ai/deepseek-v4-pro'): Promise<string> {
   const env = getEnv();
   if (!env.NVIDIA_API_KEY) throw new Error('No NVIDIA API key configured');
 
-  // Use the same model as the brand scoring pipeline
   const response = await fetch('https://integrate.api.nvidia.com/v1/chat/completions', {
     method: 'POST',
     headers: {
@@ -156,7 +144,7 @@ async function callNvidiaDeepSeek(prompt: string): Promise<string> {
       Authorization: `Bearer ${env.NVIDIA_API_KEY}`,
     },
     body: JSON.stringify({
-      model: 'deepseek-ai/deepseek-v4-pro',
+      model,
       messages: [{ role: 'user', content: prompt }],
       temperature: 0.5,
       max_tokens: 1024,
@@ -174,32 +162,63 @@ async function callNvidiaDeepSeek(prompt: string): Promise<string> {
   return text;
 }
 
+async function callNvidiaWithFallback(prompt: string): Promise<string> {
+  try {
+    return await callNvidiaDeepSeek(prompt, 'deepseek-ai/deepseek-v4-pro');
+  } catch (err) {
+    console.warn(`  ⚠ DeepSeek v4-pro failed, trying r1: ${(err as Error).message.split('\n')[0]}`);
+    return callNvidiaDeepSeek(prompt, 'deepseek-ai/deepseek-r1');
+  }
+}
+
 // ─── Public API ──────────────────────────────────────────────────────────────
 
 /**
- * Generate an insight for an industry, trying Gemini first, DeepSeek as fallback.
- * Returns { text, generatedBy }
+ * Generate an insight for an industry.
+ * Strategy:
+ *   1. Try Gemini
+ *   2. If Gemini fails (any reason, including 429/quota), immediately try NVIDIA DeepSeek
+ *   3. If both fail, wait 60s and attempt one more full cycle (Gemini → DeepSeek)
+ *   4. If still both fail, throw
  */
 export async function generateInsight(
   prompt: string
 ): Promise<{ text: string; generatedBy: 'gemini' | 'nvidia-deepseek' }> {
-  // Try Gemini
-  try {
-    const text = await callGemini(prompt);
-    return { text, generatedBy: 'gemini' };
-  } catch (geminiErr) {
-    console.warn(`  ⚠ Gemini insight failed: ${(geminiErr as Error).message}`);
+  async function tryCycle(): Promise<{ text: string; generatedBy: 'gemini' | 'nvidia-deepseek' } | null> {
+    // 1. Try Gemini
+    try {
+      const text = await callGemini(prompt);
+      return { text, generatedBy: 'gemini' };
+    } catch (geminiErr) {
+      const msg = (geminiErr as Error).message || '';
+      const isQuota = msg.includes('429') || msg.includes('quota');
+      console.warn(`  ⚠ Gemini failed${isQuota ? ' (quota/rate-limit)' : ''}: ${msg.split('\n')[0]}`);
+    }
+
+    // 2. Immediately try NVIDIA DeepSeek (v4-pro → r1 fallback)
+    try {
+      console.log('  ⏩ Trying NVIDIA DeepSeek fallback...');
+      const text = await callNvidiaWithFallback(prompt);
+      return { text, generatedBy: 'nvidia-deepseek' };
+    } catch (deepseekErr) {
+      console.warn(`  ⚠ DeepSeek failed: ${(deepseekErr as Error).message.split('\n')[0]}`);
+    }
+
+    return null; // Both failed this cycle
   }
 
-  // Fallback: NVIDIA DeepSeek
-  try {
-    const text = await callNvidiaDeepSeek(prompt);
-    return { text, generatedBy: 'nvidia-deepseek' };
-  } catch (deepseekErr) {
-    throw new Error(
-      `Both Gemini and NVIDIA DeepSeek failed for insight generation: ${(deepseekErr as Error).message}`
-    );
-  }
+  // First attempt
+  const first = await tryCycle();
+  if (first) return first;
+
+  // Both failed — wait 60s then try one more time
+  console.warn(`  ⏳ Both providers failed — waiting ${BOTH_FAILED_RETRY_DELAY_MS / 1000}s before retry...`);
+  await new Promise(resolve => setTimeout(resolve, BOTH_FAILED_RETRY_DELAY_MS));
+
+  const second = await tryCycle();
+  if (second) return second;
+
+  throw new Error('Both Gemini and NVIDIA DeepSeek failed after retry');
 }
 
 /**
