@@ -26,6 +26,16 @@ interface IndustryResponse {
   timestamp: string;
 }
 
+interface InsightResponse {
+  industryId: string;
+  insight: string | null;
+  generatedBy?: string;
+  date?: string;
+  isToday?: boolean;
+  staleWarning?: string | null;
+  message?: string;
+}
+
 interface TimelineEntry { date: string; score: number; rank: number }
 interface TimelineResponse {
   dates: string[];
@@ -210,6 +220,121 @@ function ScoreBreakdownChart({ brands }: { brands: BrandData[] }) {
   );
 }
 
+// ========== AI Insight Card ==========
+interface AIInsightCardProps {
+  insight: {
+    industryId: string;
+    insight: string | null;
+    generatedBy?: string;
+    date?: string;
+    isToday?: boolean;
+    staleWarning?: string | null;
+    message?: string;
+  } | null;
+  loading: boolean;
+  industryName: string;
+}
+
+function AIInsightCard({ insight, loading, industryName }: AIInsightCardProps) {
+  if (loading) {
+    return (
+      <div className="rounded-xl border border-primary-500/10 bg-white/[0.015] p-5 mb-8 animate-pulse">
+        <div className="flex items-center gap-2 mb-4">
+          <div className="w-4 h-4 rounded-full bg-primary-500/20" />
+          <div className="h-3 w-32 bg-white/[0.06] rounded" />
+          <div className="ml-auto h-3 w-16 bg-white/[0.04] rounded" />
+        </div>
+        <div className="space-y-2.5">
+          <div className="h-3 bg-white/[0.04] rounded w-full" />
+          <div className="h-3 bg-white/[0.04] rounded w-[90%]" />
+          <div className="h-3 bg-white/[0.04] rounded w-[95%]" />
+          <div className="h-3 bg-white/[0.04] rounded w-[80%]" />
+        </div>
+      </div>
+    );
+  }
+
+  // No insight at all
+  if (!insight || !insight.insight) {
+    return (
+      <div className="rounded-xl border border-dashed border-white/[0.06] bg-white/[0.01] px-5 py-4 mb-8 flex items-center gap-3">
+        <span className="text-lg">🤖</span>
+        <p className="text-xs text-gray-600">
+          {insight?.message || 'AI insights generate daily after the pipeline run.'}
+        </p>
+      </div>
+    );
+  }
+
+  // Parse bullet points from the insight text
+  const bullets = insight.insight
+    .split('\n')
+    .map(line => line.trim())
+    .filter(line => line.length > 0);
+
+  const modelLabel = insight.generatedBy === 'gemini'
+    ? 'Gemini'
+    : insight.generatedBy === 'nvidia-deepseek'
+    ? 'DeepSeek'
+    : insight.generatedBy || 'AI';
+
+  const dateLabel = insight.date
+    ? new Date(insight.date + 'T00:00:00').toLocaleDateString('en-IN', {
+        day: 'numeric', month: 'short', year: 'numeric',
+      })
+    : null;
+
+  return (
+    <div className="rounded-xl border border-primary-500/15 bg-gradient-to-br from-primary-500/[0.04] to-purple-500/[0.03] p-5 mb-8 relative overflow-hidden">
+      {/* Subtle glow */}
+      <div className="absolute -top-10 -right-10 w-40 h-40 bg-primary-500/[0.06] rounded-full blur-3xl pointer-events-none" />
+
+      {/* Header */}
+      <div className="relative flex items-center gap-2.5 mb-4 flex-wrap">
+        <span className="text-base">🤖</span>
+        <h3 className="text-[10px] font-semibold text-gray-400 uppercase tracking-[0.15em]">
+          AI Insight · {industryName}
+        </h3>
+        <div className="ml-auto flex items-center gap-2">
+          {/* Stale warning badge */}
+          {insight.staleWarning && (
+            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-500/10 border border-amber-500/20 text-[9px] text-amber-400 font-medium">
+              ⚠️ Not today
+            </span>
+          )}
+          {/* Model badge */}
+          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-white/[0.05] border border-white/[0.07] text-[9px] text-gray-500 font-medium">
+            ✨ {modelLabel}
+          </span>
+        </div>
+      </div>
+
+      {/* Stale warning message */}
+      {insight.staleWarning && (
+        <p className="text-[10px] text-amber-500/70 mb-3 leading-relaxed">
+          {insight.staleWarning}
+        </p>
+      )}
+
+      {/* Bullet Points */}
+      <ul className="relative space-y-2.5">
+        {bullets.map((bullet, i) => (
+          <li key={i} className="text-sm text-gray-300 leading-relaxed">
+            {bullet}
+          </li>
+        ))}
+      </ul>
+
+      {/* Footer */}
+      {dateLabel && (
+        <p className="relative text-[10px] text-gray-600 mt-4 pt-3 border-t border-white/[0.04]">
+          Generated {insight.isToday ? 'today' : 'on'} · {dateLabel}
+        </p>
+      )}
+    </div>
+  );
+}
+
 // ========== Main Dashboard ==========
 function DashboardInner() {
   const [industryData, setIndustryData] = useState<IndustryResponse | null>(null);
@@ -227,6 +352,8 @@ function DashboardInner() {
   const [brand1, setBrand1] = useState<string>('');
   const [brand2, setBrand2] = useState<string>('');
   const [copied, setCopied] = useState(false);
+  const [insight, setInsight] = useState<InsightResponse | null>(null);
+  const [insightLoading, setInsightLoading] = useState(false);
 
   useEffect(() => {
     if (searchQuery.length < 2) {
@@ -282,6 +409,27 @@ function DashboardInner() {
     fetchData();
     return () => { cancelled = true; };
   }, [selectedIndustry, selectedModel]);
+
+  // Fetch AI insight when industry changes
+  useEffect(() => {
+    let cancelled = false;
+    async function fetchInsight() {
+      setInsightLoading(true);
+      setInsight(null);
+      try {
+        const res = await fetch(`/api/brands/insights?industry=${selectedIndustry}`);
+        if (!cancelled && res.ok) {
+          setInsight(await res.json());
+        }
+      } catch (err) {
+        console.error('Failed to fetch insight:', err);
+      } finally {
+        if (!cancelled) setInsightLoading(false);
+      }
+    }
+    fetchInsight();
+    return () => { cancelled = true; };
+  }, [selectedIndustry]);
 
   const rankedBrands = industryData?.brands || [];
   const top3 = rankedBrands.slice(0, 3);
@@ -494,6 +642,13 @@ function DashboardInner() {
                 })}
               </div>
             )}
+
+            {/* AI Insight Card */}
+            <AIInsightCard
+              insight={insight}
+              loading={insightLoading}
+              industryName={industryMeta?.name || selectedIndustry}
+            />
 
             {/* Score Breakdown Chart */}
             {rankedBrands.length >= 3 && (

@@ -3,6 +3,9 @@
  * Uses sql.js (pure WASM) for Vercel serverless compatibility.
  * Opens the brand-intelligence.db in read-only mode for serving data.
  */
+// NOTE: InsightRow is also defined in src/lib/insights.ts for the pipeline script.
+// This duplicate is intentional: the pipeline uses better-sqlite3 (Node),
+// the API routes use sql.js (WASM). Keeping them separate avoids cross-importing.
 import initSqlJs, { Database as SqlJsDatabase } from 'sql.js';
 import * as path from 'path';
 import * as fs from 'fs';
@@ -211,4 +214,35 @@ export async function getBrandHistory(brandName: string) {
   }
 
   return { history, latestBreakdown, industryIds: Array.from(industryIds) };
+}
+
+export interface InsightRow {
+  id: number;
+  industry_id: string;
+  insight_date: string;
+  insight_text: string;
+  generated_by: string;
+  previous_insight_id: number | null;
+  created_at: string;
+}
+
+/**
+ * Get the most recent insight for an industry.
+ * Returns today's insight if available, otherwise the latest stored insight.
+ */
+export async function getLatestInsight(industryId: string): Promise<InsightRow | undefined> {
+  const db = await getDb();
+  const safeId = industryId.replace(/'/g, "''");
+
+  // Try today first
+  const today = new Date().toISOString().split('T')[0];
+  const todayResult = rowToObject<InsightRow>(
+    db.exec(`SELECT * FROM industry_insights WHERE industry_id = '${safeId}' AND insight_date = '${today}' LIMIT 1`)
+  );
+  if (todayResult) return todayResult;
+
+  // Fallback: most recent any date
+  return rowToObject<InsightRow>(
+    db.exec(`SELECT * FROM industry_insights WHERE industry_id = '${safeId}' ORDER BY insight_date DESC LIMIT 1`)
+  );
 }
