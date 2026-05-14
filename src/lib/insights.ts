@@ -133,7 +133,7 @@ async function callGemini(prompt: string): Promise<string> {
   return text;
 }
 
-async function callNvidiaDeepSeek(prompt: string, model = 'deepseek-ai/deepseek-v4-pro'): Promise<string> {
+async function callNvidiaDeepSeek(prompt: string, model = 'minimaxai/minimax-m2.7'): Promise<string> {
   const env = getEnv();
   if (!env.NVIDIA_API_KEY) throw new Error('No NVIDIA API key configured');
 
@@ -164,10 +164,10 @@ async function callNvidiaDeepSeek(prompt: string, model = 'deepseek-ai/deepseek-
 
 async function callNvidiaWithFallback(prompt: string): Promise<string> {
   try {
-    return await callNvidiaDeepSeek(prompt, 'deepseek-ai/deepseek-v4-pro');
+    return await callNvidiaDeepSeek(prompt, 'minimaxai/minimax-m2.7');
   } catch (err) {
-    console.warn(`  ⚠ DeepSeek v4-pro failed, trying r1: ${(err as Error).message.split('\n')[0]}`);
-    return callNvidiaDeepSeek(prompt, 'deepseek-ai/deepseek-r1');
+    console.warn(`  ⚠ MiniMax M2.7 failed, trying Mistral Large 3: ${(err as Error).message.split('\n')[0]}`);
+    return callNvidiaDeepSeek(prompt, 'mistralai/mistral-large-3-675b-instruct-2512');
   }
 }
 

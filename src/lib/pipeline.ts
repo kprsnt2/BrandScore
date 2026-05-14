@@ -177,7 +177,7 @@ export class BrandAnalysisPipeline {
     if (this.apiKeys.nvidia) {
       queries.push(
         withTimeout(this.queryNvidiaRaw(prompt), 'NVIDIA').catch(e => ({
-          text: '', model: 'DeepSeek V4 Pro (NVIDIA)', error: e
+          text: '', model: 'MiniMax M2.7 (NVIDIA)', error: e
         }))
       );
     }
@@ -322,23 +322,33 @@ export class BrandAnalysisPipeline {
     const env = (await import('./env')).getEnv();
     if (!env.NVIDIA_API_KEY) throw new Error("No NVIDIA API key");
 
-    const response = await fetch("https://integrate.api.nvidia.com/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${env.NVIDIA_API_KEY}`,
-      },
-      body: JSON.stringify({
-        model: "deepseek-ai/deepseek-v4-pro",
-        messages: [{ role: "user", content: prompt }],
-        max_tokens: 8000,
-        temperature: 0.3,
-      }),
-    });
+    const tryModel = async (model: string) => {
+      const response = await fetch("https://integrate.api.nvidia.com/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${env.NVIDIA_API_KEY}`,
+        },
+        body: JSON.stringify({
+          model,
+          messages: [{ role: "user", content: prompt }],
+          max_tokens: 8000,
+          temperature: 0.3,
+        }),
+      });
+      if (!response.ok) throw new Error(`NVIDIA API error: ${response.status}`);
+      const data = await response.json();
+      return data.choices[0]?.message?.content || '';
+    };
 
-    if (!response.ok) throw new Error(`NVIDIA API error: ${response.status}`);
-    const data = await response.json();
-    return { text: data.choices[0]?.message?.content || '', model: "DeepSeek V4 Pro (NVIDIA)" };
+    try {
+      const text = await tryModel("minimaxai/minimax-m2.7");
+      return { text, model: "MiniMax M2.7 (NVIDIA)" };
+    } catch (err) {
+      console.warn(`  ⚠ NVIDIA MiniMax M2.7 failed, trying Mistral Large 3: ${(err as Error).message}`);
+      const text = await tryModel("mistralai/mistral-large-3-675b-instruct-2512");
+      return { text, model: "Mistral Large 3 (NVIDIA)" };
+    }
   }
 
   private calculateIndustryAverage(results: BrandAnalysisResult[]) {

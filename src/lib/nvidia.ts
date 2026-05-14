@@ -55,7 +55,7 @@ async function callNvidiaAPI(messages: NvidiaMessage[], model: string, maxTokens
     return data.choices[0]?.message?.content || "";
 }
 
-export async function queryNvidia(brand: string, category: string, model: string = "deepseek-ai/deepseek-v4-pro") {
+export async function queryNvidia(brand: string, category: string, model: string = "minimaxai/minimax-m2.7") {
     const prompt = generateBrandAnalysisPrompt(brand, category);
 
     try {
@@ -71,6 +71,11 @@ export async function queryNvidia(brand: string, category: string, model: string
         };
     } catch (error) {
         console.error(`NVIDIA ${model} API error:`, error);
+        // Fallback to Mistral if primary fails
+        if (model !== "mistralai/mistral-large-3-675b-instruct-2512") {
+            console.warn(`NVIDIA: falling back to Mistral Large 3...`);
+            return queryNvidia(brand, category, "mistralai/mistral-large-3-675b-instruct-2512");
+        }
         throw error;
     }
 }
@@ -79,11 +84,16 @@ export async function queryNvidiaRecommendation(brand: string, category: string)
     const prompt = generateRecommendationPrompt(brand, category);
 
     try {
-        // Use DeepSeek V3.2 for recommendations as fallback
-        const text = await callNvidiaAPI([{ role: "user", content: prompt }], "deepseek-ai/deepseek-v4-pro", 500);
+        const text = await callNvidiaAPI([{ role: "user", content: prompt }], "minimaxai/minimax-m2.7", 500);
         return text;
     } catch (error) {
-        console.error("NVIDIA DeepSeek recommendation error:", error);
-        throw error;
+        console.error("NVIDIA MiniMax recommendation error:", error);
+        // Fallback to Mistral
+        try {
+            return await callNvidiaAPI([{ role: "user", content: prompt }], "mistralai/mistral-large-3-675b-instruct-2512", 500);
+        } catch (fallbackError) {
+            console.error("NVIDIA Mistral recommendation fallback error:", fallbackError);
+            throw error;
+        }
     }
 }

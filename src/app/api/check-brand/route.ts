@@ -150,9 +150,9 @@ export async function POST(request: NextRequest) {
         } else if (apiKeys.nvidia) {
             // If Gemini not available but NVIDIA is, use NVIDIA DeepSeek directly as primary
             modelQueries.push(
-                queryNvidia(brand, category, "deepseek-ai/deepseek-v4-pro").catch(e => ({
-                    text: "Unable to fetch response from NVIDIA DeepSeek",
-                    model: "DeepSeek V4 Pro (NVIDIA)",
+                queryNvidia(brand, category, "minimaxai/minimax-m2.7").catch(e => ({
+                    text: "Unable to fetch response from NVIDIA MiniMax",
+                    model: "MiniMax M2.7 (NVIDIA)",
                     modelType: "free" as const,
                     error: e
                 }))
