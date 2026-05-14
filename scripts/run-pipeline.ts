@@ -7,8 +7,6 @@
 import { BrandAnalysisPipeline } from '../src/lib/pipeline';
 import { getAllIndustries } from '../src/lib/industry-data';
 import { hasApiKeys } from '../src/lib/env';
-import { buildInsightPrompt, generateInsight, type IndustryDataSnapshot } from '../src/lib/insights';
-import type { IndustryAnalysisResult } from '../src/lib/pipeline';
 import Database from 'better-sqlite3';
 import * as fs from 'fs';
 import * as path from 'path';
@@ -96,162 +94,6 @@ function initDatabase(dbPath: string) {
   return db;
 }
 
-// ─── Insight Generation ───────────────────────────────────────────────────────
-
-/**
- * Build a snapshot of brand data from pipeline results for a given industry.
- */
-function buildSnapshot(
-  industryId: string,
-  industryName: string,
-  runDate: string,
-  results: IndustryAnalysisResult,
-  prevResults: { brand: string; score: number }[] = []
-): IndustryDataSnapshot {
-  const prevMap: Record<string, { score: number; rank: number }> = {};
-  prevResults.forEach((b, i) => {
-    prevMap[b.brand] = { score: b.score, rank: i + 1 };
-  });
-
-  const sortedBrands = [...results.brandResults]
-    .filter(b => !b.error && b.score > 0)
-    .sort((a, b) => b.score - a.score);
-
-  return {
-    industryId,
-    industryName,
-    runDate,
-    avgScore: results.industryAverage.score,
-    brands: sortedBrands.map((b, i) => {
-      const prev = prevMap[b.brand];
-      return {
-        brand: b.brand,
-        score: b.score,
-        rank: i + 1,
-        scoreChange: prev ? b.score - prev.score : null,
-        rankChange: prev ? prev.rank - (i + 1) : null,
-      };
-    }),
-  };
-}
-
-/**
- * After all brand/industry data is saved, generate and store one insight
- * per industry. Skips any industry that already has today's insight.
- */
-async function generateAndSaveInsights(
-  db: Database.Database,
-  runId: bigint | number,
-  results: IndustryAnalysisResult[],
-  dateStr: string
-): Promise<void> {
-  console.log('\n🤖 Generating AI insights for each industry...');
-
-  const insertInsight = db.prepare(`
-    INSERT OR IGNORE INTO industry_insights
-      (industry_id, insight_date, insight_text, generated_by, previous_insight_id)
-    VALUES (?, ?, ?, ?, ?)
-  `);
-
-  for (const industryResult of results) {
-    const { industry } = industryResult;
-    if (industryResult.brandResults.filter(b => !b.error).length === 0) {
-      console.log(`  ⏭  ${industry.name}: no brand data, skipping insight`);
-      continue;
-    }
-
-    // Check if today's insight already exists
-    const existing = db.prepare(
-      `SELECT id FROM industry_insights WHERE industry_id = ? AND insight_date = ?`
-    ).get(industry.id, dateStr) as { id: number } | undefined;
-
-    if (existing) {
-      console.log(`  ✅ ${industry.name}: insight already exists for today, skipping`);
-      continue;
-    }
-
-    try {
-      // Get previous run data for this industry (from DB)
-      const prevBrandRows = db.prepare(`
-        SELECT br.brand, br.score
-        FROM brand_results br
-        INNER JOIN pipeline_runs pr ON br.run_id = pr.id
-        WHERE br.industry_id = ? AND br.model IS NULL AND br.score > 0
-          AND pr.run_date < ?
-        ORDER BY pr.run_date DESC, br.score DESC
-        LIMIT 30
-      `).all(industry.id, dateStr) as { brand: string; score: number }[];
-
-      // Get previous insight if any
-      const prevInsightRow = db.prepare(`
-        SELECT id, insight_text, insight_date
-        FROM industry_insights
-        WHERE industry_id = ?
-        ORDER BY insight_date DESC
-        LIMIT 1
-      `).get(industry.id) as { id: number; insight_text: string; insight_date: string } | undefined;
-
-      // Build today's snapshot
-      const todaySnapshot = buildSnapshot(
-        industry.id, industry.name, dateStr, industryResult, prevBrandRows
-      );
-
-      // Build previous snapshot from DB rows (if available)
-      let prevSnapshot: IndustryDataSnapshot | null = null;
-      if (prevBrandRows.length > 0) {
-        // Get the date of the last run for this industry
-        const prevRunDate = (db.prepare(`
-          SELECT pr.run_date
-          FROM brand_results br
-          INNER JOIN pipeline_runs pr ON br.run_id = pr.id
-          WHERE br.industry_id = ? AND br.model IS NULL AND pr.run_date < ?
-          ORDER BY pr.run_date DESC
-          LIMIT 1
-        `).get(industry.id, dateStr) as { run_date: string } | undefined)?.run_date || '';
-
-        const prevIndustryRow = db.prepare(`
-          SELECT avg_score FROM industry_results
-          INNER JOIN pipeline_runs ON industry_results.run_id = pipeline_runs.id
-          WHERE industry_results.industry_id = ? AND pipeline_runs.run_date = ?
-        `).get(industry.id, prevRunDate) as { avg_score: number } | undefined;
-
-        prevSnapshot = {
-          industryId: industry.id,
-          industryName: industry.name,
-          runDate: prevRunDate,
-          avgScore: prevIndustryRow?.avg_score || 0,
-          brands: prevBrandRows.map((b, i) => ({
-            brand: b.brand, score: b.score, rank: i + 1,
-            scoreChange: null, rankChange: null,
-          })),
-        };
-      }
-
-      const prevInsight = prevInsightRow
-        ? { text: prevInsightRow.insight_text, date: prevInsightRow.insight_date }
-        : null;
-
-      const prompt = buildInsightPrompt(
-        industry.name, todaySnapshot, prevSnapshot, prevInsight
-      );
-
-      console.log(`  🧠 Generating insight for ${industry.name}...`);
-      const { text, generatedBy } = await generateInsight(prompt);
-
-      insertInsight.run(
-        industry.id, dateStr, text, generatedBy, prevInsightRow?.id || null
-      );
-      console.log(`  ✅ ${industry.name}: insight saved (${generatedBy})`);
-
-      // Small delay between industries to respect API rate limits
-      await new Promise(resolve => setTimeout(resolve, 2000));
-    } catch (err) {
-      console.error(`  ❌ ${industry.name}: insight generation failed:`, (err as Error).message);
-    }
-  }
-
-  console.log('✅ All insights processed.\n');
-}
 
 async function main() {
   console.log('🇮🇳 India rAsh Intelligence Pipeline');
@@ -384,9 +226,6 @@ async function main() {
   });
 
   saveAll();
-
-  // Generate and save AI insights for each industry
-  await generateAndSaveInsights(db, runId, results, dateStr);
 
   // Checkpoint WAL into main DB and switch to DELETE mode
   // so the .db file is fully self-contained (no .db-wal/.db-shm needed)
