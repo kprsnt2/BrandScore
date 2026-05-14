@@ -37,6 +37,7 @@ jobs:
         run: npx tsx scripts/run-insights.ts
 
       - name: Commit insights to DB
+        if: always()   # commit whatever was saved, even on partial failure
         run: |
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
           git config --local user.name "github-actions[bot]"

@@ -114,7 +114,9 @@ Rules:
 
 // ─── AI Callers ──────────────────────────────────────────────────────────────
 
-async function callGemini(prompt: string): Promise<string> {
+const GEMINI_RETRY_DELAY_MS = 60_000; // 1 minute — matches free-tier retry window
+
+async function callGemini(prompt: string, attempt = 1): Promise<string> {
   const env = getEnv();
   const apiKey = env.GEMINI_API_KEY || env.GEMINI_API_KEY_PAID;
   if (!apiKey) throw new Error('No Gemini API key configured');
@@ -125,16 +127,28 @@ async function callGemini(prompt: string): Promise<string> {
     generationConfig: { maxOutputTokens: 1024, temperature: 0.5 },
   });
 
-  const result = await model.generateContent(prompt);
-  const text = result.response.text().trim();
-  if (!text) throw new Error('Gemini returned empty response');
-  return text;
+  try {
+    const result = await model.generateContent(prompt);
+    const text = result.response.text().trim();
+    if (!text) throw new Error('Gemini returned empty response');
+    return text;
+  } catch (err) {
+    const msg = (err as Error).message || '';
+    // Retry once on 429 rate-limit after a 60s wait
+    if (attempt === 1 && (msg.includes('429') || msg.includes('quota'))) {
+      console.warn(`  ⏳ Gemini 429 — waiting ${GEMINI_RETRY_DELAY_MS / 1000}s before retry...`);
+      await new Promise(resolve => setTimeout(resolve, GEMINI_RETRY_DELAY_MS));
+      return callGemini(prompt, 2);
+    }
+    throw err;
+  }
 }
 
 async function callNvidiaDeepSeek(prompt: string): Promise<string> {
   const env = getEnv();
   if (!env.NVIDIA_API_KEY) throw new Error('No NVIDIA API key configured');
 
+  // Use the same model as the brand scoring pipeline
   const response = await fetch('https://integrate.api.nvidia.com/v1/chat/completions', {
     method: 'POST',
     headers: {
@@ -142,7 +156,7 @@ async function callNvidiaDeepSeek(prompt: string): Promise<string> {
       Authorization: `Bearer ${env.NVIDIA_API_KEY}`,
     },
     body: JSON.stringify({
-      model: 'deepseek-ai/deepseek-r1',
+      model: 'deepseek-ai/deepseek-v4-pro',
       messages: [{ role: 'user', content: prompt }],
       temperature: 0.5,
       max_tokens: 1024,
@@ -157,9 +171,7 @@ async function callNvidiaDeepSeek(prompt: string): Promise<string> {
   const data = await response.json();
   const text = data.choices?.[0]?.message?.content?.trim() || '';
   if (!text) throw new Error('NVIDIA DeepSeek returned empty response');
-
-  // Strip <think>...</think> blocks that DeepSeek R1 sometimes emits
-  return text.replace(/<think>[\s\S]*?<\/think>/gi, '').trim();
+  return text;
 }
 
 // ─── Public API ──────────────────────────────────────────────────────────────
