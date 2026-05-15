@@ -119,7 +119,7 @@ Rules:
 
 const MODEL_RETRY_DELAY_MS = 60_000; // 60s wait between each failed model attempt
 
-type GeminiModel = 'gemini-2.5-flash' | 'gemini-2.0-flash' | 'gemini-2.0-flash-lite';
+type GeminiModel = 'gemini-2.5-flash' | 'gemini-3.0-flash' | 'gemini-2.5-flash-lite';
 
 async function callGeminiModel(prompt: string, geminiModel: GeminiModel): Promise<string> {
   const env = getEnv();
@@ -153,8 +153,8 @@ export async function generateInsight(
 ): Promise<{ text: string; generatedBy: string }> {
   const models: { id: GeminiModel; label: string }[] = [
     { id: 'gemini-2.5-flash',      label: 'Gemini 2.5 Flash' },
-    { id: 'gemini-2.0-flash',      label: 'Gemini 2.0 Flash' },
-    { id: 'gemini-2.0-flash-lite', label: 'Gemini 2.0 Flash Lite' },
+    { id: 'gemini-3.0-flash',      label: 'Gemini 3.0 Flash' },
+    { id: 'gemini-2.5-flash-lite', label: 'Gemini 2.5 Flash Lite' },
   ];
 
   for (let i = 0; i < models.length; i++) {
@@ -176,7 +176,7 @@ export async function generateInsight(
     }
   }
 
-  throw new Error('All Gemini models (2.5-flash, 2.0-flash, 2.0-flash-lite) failed');
+  throw new Error('All Gemini models (2.5-flash, 3.0-flash, 2.5-flash-lite) failed');
 }
 
 /**
