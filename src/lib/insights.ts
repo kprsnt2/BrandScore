@@ -129,7 +129,7 @@ async function callGeminiModel(prompt: string, geminiModel: GeminiModel): Promis
   const genAI = new GoogleGenerativeAI(apiKey);
   const model = genAI.getGenerativeModel({
     model: geminiModel,
-    generationConfig: { maxOutputTokens: 1024, temperature: 0.5 },
+    generationConfig: { maxOutputTokens: 2048, temperature: 0.5 },
   });
 
   const result = await model.generateContent(prompt);
