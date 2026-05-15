@@ -197,8 +197,8 @@ async function main() {
       console.log(`  ✅ ${industry.name}: saved (${generatedBy})`);
       generated++;
 
-      // Delay between industries to respect rate limits
-      await new Promise(resolve => setTimeout(resolve, 3000));
+      // 60s between industries to respect Gemini rate limits
+      await new Promise(resolve => setTimeout(resolve, 60_000));
     } catch (err) {
       console.error(`  ❌ ${industry.name}: failed — ${(err as Error).message}`);
       failed++;

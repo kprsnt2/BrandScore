@@ -114,11 +114,12 @@ Rules:
 - Output ONLY the bullet list, nothing else`;
 }
 
+
 // ─── AI Callers ──────────────────────────────────────────────────────────────
 
-const RETRY_DELAY_MS = 60_000; // 1 minute — wait when flash + flash-lite both fail
+const MODEL_RETRY_DELAY_MS = 60_000; // 60s wait between each failed model attempt
 
-type GeminiModel = 'gemini-2.5-flash' | 'gemini-2.0-flash-lite';
+type GeminiModel = 'gemini-2.5-flash' | 'gemini-2.0-flash' | 'gemini-2.0-flash-lite';
 
 async function callGeminiModel(prompt: string, geminiModel: GeminiModel): Promise<string> {
   const env = getEnv();
@@ -141,52 +142,41 @@ async function callGeminiModel(prompt: string, geminiModel: GeminiModel): Promis
 
 /**
  * Generate an insight for an industry.
- * Strategy (one cycle):
- *   1. Try gemini-2.5-flash
- *   2. If flash fails, try gemini-2.0-flash-lite
- * If both fail in cycle 1, wait 60 s then run cycle 2 (flash → flash-lite).
- * If cycle 2 also fails entirely, throw.
+ * Fallback chain (60s wait between each failed attempt):
+ *   1. gemini-2.5-flash   (most capable flash)
+ *   2. gemini-2.0-flash   (previous flash)
+ *   3. gemini-2.0-flash-lite (lightest, highest quota)
+ * Throws if all three fail.
  */
 export async function generateInsight(
   prompt: string
 ): Promise<{ text: string; generatedBy: string }> {
-  async function tryCycle(): Promise<{ text: string; generatedBy: string } | null> {
-    // 1. Try Gemini Flash
-    try {
-      const text = await callGeminiModel(prompt, 'gemini-2.5-flash');
-      return { text, generatedBy: 'gemini-flash' };
-    } catch (flashErr) {
-      const msg = (flashErr as Error).message || '';
-      const isQuota = msg.includes('429') || msg.includes('quota');
-      console.warn(`  ⚠ Gemini Flash failed${isQuota ? ' (quota/rate-limit)' : ''}: ${msg.split('\n')[0]}`);
-    }
+  const models: { id: GeminiModel; label: string }[] = [
+    { id: 'gemini-2.5-flash',      label: 'Gemini 2.5 Flash' },
+    { id: 'gemini-2.0-flash',      label: 'Gemini 2.0 Flash' },
+    { id: 'gemini-2.0-flash-lite', label: 'Gemini 2.0 Flash Lite' },
+  ];
 
-    // 2. Try Gemini Flash Lite
+  for (let i = 0; i < models.length; i++) {
+    const { id, label } = models[i];
     try {
-      console.log('  ⏩ Trying Gemini Flash Lite fallback...');
-      const text = await callGeminiModel(prompt, 'gemini-2.0-flash-lite');
-      return { text, generatedBy: 'gemini-flash-lite' };
-    } catch (liteErr) {
-      const msg = (liteErr as Error).message || '';
+      if (i > 0) console.log(`  ⏩ Trying ${label} fallback...`);
+      const text = await callGeminiModel(prompt, id);
+      return { text, generatedBy: id };
+    } catch (err) {
+      const msg = (err as Error).message || '';
       const isQuota = msg.includes('429') || msg.includes('quota');
-      console.warn(`  ⚠ Gemini Flash Lite failed${isQuota ? ' (quota/rate-limit)' : ''}: ${msg.split('\n')[0]}`);
-    }
+      console.warn(`  ⚠ ${label} failed${isQuota ? ' (quota/rate-limit)' : ''}: ${msg.split('\n')[0]}`);
 
-    return null; // Both failed this cycle
+      // Wait 60s before trying the next model (skip wait after the last model)
+      if (i < models.length - 1) {
+        console.warn(`  ⏳ Waiting ${MODEL_RETRY_DELAY_MS / 1000}s before trying next model...`);
+        await new Promise(resolve => setTimeout(resolve, MODEL_RETRY_DELAY_MS));
+      }
+    }
   }
 
-  // First attempt
-  const first = await tryCycle();
-  if (first) return first;
-
-  // Both failed — wait 60s then try one more cycle
-  console.warn(`  ⏳ Both Gemini models failed — waiting ${RETRY_DELAY_MS / 1000}s before retry...`);
-  await new Promise(resolve => setTimeout(resolve, RETRY_DELAY_MS));
-
-  const second = await tryCycle();
-  if (second) return second;
-
-  throw new Error('Gemini Flash and Flash Lite both failed after retry');
+  throw new Error('All Gemini models (2.5-flash, 2.0-flash, 2.0-flash-lite) failed');
 }
 
 /**
