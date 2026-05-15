@@ -3,7 +3,7 @@
  * Runs separately after the main brand analysis pipeline completes.
  *
  * Reads brand data from the existing SQLite DB (committed by the main pipeline),
- * generates one AI insight per industry (Gemini → NVIDIA DeepSeek fallback),
+ * generates one AI insight per industry using Gemini Flash → Flash Lite fallback,
  * and saves them back to the DB.
  */
 
@@ -20,11 +20,11 @@ async function main() {
 
   // Check API keys
   const keys = hasApiKeys();
-  if (!keys.gemini && !keys.nvidia) {
-    console.error('❌ No Gemini or NVIDIA API key configured. Exiting.');
+  if (!keys.gemini) {
+    console.error('❌ No Gemini API key configured. Exiting.');
     process.exit(1);
   }
-  console.log(`✅ Available: ${[keys.gemini && 'Gemini', keys.nvidia && 'NVIDIA DeepSeek'].filter(Boolean).join(', ')}`);
+  console.log('✅ Gemini available (Flash → Flash Lite fallback)');
 
   const dbPath = path.join(process.cwd(), 'data', 'brand-intelligence.db');
   if (!fs.existsSync(dbPath)) {
