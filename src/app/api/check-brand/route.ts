@@ -251,10 +251,14 @@ async function saveBrandToDb(data: {
                 VALUES ('${safeBrand}', '${safeCategory}', ${data.score}, ${data.breakdown.recommendation}, ${data.breakdown.sentiment}, ${data.breakdown.prominence}, ${data.breakdown.accuracy}, '${safeSentiment}', '${safeTips}', '${safeResponses}', ${data.modelsQueried}, ${data.responseTime})`);
 
         // Export updated DB to file
+        // Vercel serverless has read-only filesystem — use /tmp/ there
         const fs = await import("fs");
         const path = await import("path");
         const dbData = db.export();
-        const dbPath = path.join(process.cwd(), "data", "brand-intelligence.db");
+        const isVercel = !!process.env.VERCEL;
+        const dbPath = isVercel
+            ? path.join("/tmp", "brand-intelligence.db")
+            : path.join(process.cwd(), "data", "brand-intelligence.db");
         fs.writeFileSync(dbPath, Buffer.from(dbData));
 
         console.log(`✅ Saved brand "${data.brand}" to live_search_results`);
