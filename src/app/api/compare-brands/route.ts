@@ -100,22 +100,22 @@ export async function POST(request: NextRequest) {
 
         const prompt = generateComparisonPrompt(brand1, brand2, category);
 
-        // Try NVIDIA first, fall back to Groq
+        // Try Groq first (faster), fall back to NVIDIA
         let responseText: string | null = null;
 
-        if (apiKeys.nvidia) {
-            try {
-                responseText = await queryNvidiaComparison(prompt);
-            } catch (error) {
-                console.warn("NVIDIA comparison failed, trying Groq:", error instanceof Error ? error.message : error);
-            }
-        }
-
-        if (!responseText && apiKeys.groq) {
+        if (apiKeys.groq) {
             try {
                 responseText = await queryGroqComparison(prompt);
             } catch (error) {
-                console.error("Groq comparison also failed:", error instanceof Error ? error.message : error);
+                console.warn("Groq comparison failed, trying NVIDIA:", error instanceof Error ? error.message : error);
+            }
+        }
+
+        if (!responseText && apiKeys.nvidia) {
+            try {
+                responseText = await queryNvidiaComparison(prompt);
+            } catch (error) {
+                console.error("NVIDIA comparison also failed:", error instanceof Error ? error.message : error);
             }
         }
 

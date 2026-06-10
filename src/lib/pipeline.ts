@@ -189,20 +189,20 @@ export class BrandAnalysisPipeline {
 
     const queries: Promise<{ model: string; text: string; error?: unknown }>[] = [];
 
-    // NVIDIA (primary) — with retry
-    if (this.apiKeys.nvidia) {
-      queries.push(
-        withRetry(() => queryNvidiaRaw(prompt), 'NVIDIA').catch(e => ({
-          text: '', model: 'NVIDIA', error: e
-        }))
-      );
-    }
-
-    // Groq (primary) — with retry
+    // Groq (primary — faster) — with retry
     if (this.apiKeys.groq) {
       queries.push(
         withRetry(() => queryGroqRaw(prompt), 'Groq').catch(e => ({
           text: '', model: 'Groq', error: e
+        }))
+      );
+    }
+
+    // NVIDIA (backup) — with retry
+    if (this.apiKeys.nvidia) {
+      queries.push(
+        withRetry(() => queryNvidiaRaw(prompt), 'NVIDIA').catch(e => ({
+          text: '', model: 'NVIDIA', error: e
         }))
       );
     }

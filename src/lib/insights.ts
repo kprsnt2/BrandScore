@@ -122,7 +122,7 @@ const RETRY_DELAYS_MS = [30_000, 60_000, 90_000];
 const NVIDIA_BASE_URL = "https://integrate.api.nvidia.com/v1";
 const GROQ_BASE_URL = "https://api.groq.com/openai/v1";
 
-// All models to try in order (NVIDIA primary → NVIDIA fallbacks → Groq primary → Groq fallbacks)
+// All models to try in order (Groq primary → Groq fallbacks → NVIDIA primary → NVIDIA fallbacks)
 interface ModelConfig {
   provider: 'nvidia' | 'groq';
   model: string;
@@ -132,12 +132,12 @@ interface ModelConfig {
 }
 
 const MODEL_CHAIN: ModelConfig[] = [
-  { provider: 'nvidia', model: 'nvidia/nemotron-3-ultra-550b-a55b', label: 'Nemotron Ultra (NVIDIA)', baseUrl: NVIDIA_BASE_URL, apiKeyField: 'NVIDIA_API_KEY' },
-  { provider: 'nvidia', model: 'stepfun-ai/step-3.7-flash', label: 'Step 3.7 Flash (NVIDIA)', baseUrl: NVIDIA_BASE_URL, apiKeyField: 'NVIDIA_API_KEY' },
-  { provider: 'nvidia', model: 'z-ai/glm-5.1', label: 'GLM 5.1 (NVIDIA)', baseUrl: NVIDIA_BASE_URL, apiKeyField: 'NVIDIA_API_KEY' },
   { provider: 'groq', model: 'openai/gpt-oss-120b', label: 'GPT-OSS 120B (Groq)', baseUrl: GROQ_BASE_URL, apiKeyField: 'GROQ_API_KEY' },
   { provider: 'groq', model: 'groq/compound', label: 'Compound (Groq)', baseUrl: GROQ_BASE_URL, apiKeyField: 'GROQ_API_KEY' },
   { provider: 'groq', model: 'llama-3.3-70b-versatile', label: 'Llama 3.3 70B (Groq)', baseUrl: GROQ_BASE_URL, apiKeyField: 'GROQ_API_KEY' },
+  { provider: 'nvidia', model: 'nvidia/nemotron-3-ultra-550b-a55b', label: 'Nemotron Ultra (NVIDIA)', baseUrl: NVIDIA_BASE_URL, apiKeyField: 'NVIDIA_API_KEY' },
+  { provider: 'nvidia', model: 'stepfun-ai/step-3.7-flash', label: 'Step 3.7 Flash (NVIDIA)', baseUrl: NVIDIA_BASE_URL, apiKeyField: 'NVIDIA_API_KEY' },
+  { provider: 'nvidia', model: 'z-ai/glm-5.1', label: 'GLM 5.1 (NVIDIA)', baseUrl: NVIDIA_BASE_URL, apiKeyField: 'NVIDIA_API_KEY' },
 ];
 
 async function callModel(config: ModelConfig, prompt: string): Promise<string> {

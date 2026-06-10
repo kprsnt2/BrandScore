@@ -322,7 +322,7 @@ export async function POST(request: NextRequest) {
             );
         }
 
-        // Query both NVIDIA and Groq in parallel (dual primary)
+        // Query both Groq and NVIDIA in parallel (Groq first — faster)
         const modelQueries: Promise<{
             text: string;
             model: string;
@@ -331,22 +331,22 @@ export async function POST(request: NextRequest) {
             error?: unknown;
         }>[] = [];
 
-        if (apiKeys.nvidia) {
+        if (apiKeys.groq) {
             modelQueries.push(
-                queryNvidia(brand, category).catch(e => ({
-                    text: "Unable to fetch response from NVIDIA",
-                    model: "NVIDIA",
+                queryGroq(brand, category).catch(e => ({
+                    text: "Unable to fetch response from Groq",
+                    model: "Groq",
                     modelType: "free" as const,
                     error: e
                 }))
             );
         }
 
-        if (apiKeys.groq) {
+        if (apiKeys.nvidia) {
             modelQueries.push(
-                queryGroq(brand, category).catch(e => ({
-                    text: "Unable to fetch response from Groq",
-                    model: "Groq",
+                queryNvidia(brand, category).catch(e => ({
+                    text: "Unable to fetch response from NVIDIA",
+                    model: "NVIDIA",
                     modelType: "free" as const,
                     error: e
                 }))
