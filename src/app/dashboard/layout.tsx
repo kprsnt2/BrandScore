@@ -2,7 +2,7 @@ import { Metadata } from 'next';
 
 export const metadata: Metadata = {
   title: 'India rAsh Index | AI Visibility Scores & Ranks | rAsh Score',
-  description: 'View the AI visibility rankings and rAsh Scores for top Indian brands across 19 industries. Analyze how models like Gemini, Groq, and DeepSeek recommend brands.',
+  description: 'View the AI visibility rankings and rAsh Scores for top Indian brands across 19 industries. Analyze how models like NVIDIA Nemotron and Groq recommend brands.',
   keywords: [
     'rAsh scores',
     'AI visibility index',

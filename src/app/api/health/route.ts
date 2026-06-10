@@ -14,8 +14,8 @@ export async function GET() {
             uptime: process.uptime(),
             environment: env.NODE_ENV,
             services: {
-                gemini: apiKeys.gemini ? "configured" : "not_configured",
-                anthropic: apiKeys.anthropic ? "configured" : "not_configured",
+                nvidia: apiKeys.nvidia ? "configured" : "not_configured",
+                groq: apiKeys.groq ? "configured" : "not_configured",
             },
             responseTime: 0,
         };
@@ -23,7 +23,7 @@ export async function GET() {
         status.responseTime = Date.now() - startTime;
 
         // Return degraded status if no providers configured
-        if (!apiKeys.gemini && !apiKeys.anthropic) {
+        if (!apiKeys.nvidia && !apiKeys.groq) {
             return NextResponse.json(
                 { ...status, status: "degraded", message: "No AI providers configured" },
                 { status: 503 }

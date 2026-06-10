@@ -3,7 +3,7 @@
  * Runs separately after the main brand analysis pipeline completes.
  *
  * Reads brand data from the existing SQLite DB (committed by the main pipeline),
- * generates one AI insight per industry using Gemini Flash → Flash Lite fallback,
+ * generates one AI insight per industry using NVIDIA (primary) with Groq fallback,
  * and saves them back to the DB.
  */
 

@@ -19,7 +19,7 @@ export const metadata: Metadata = {
         template: "%s | rAsh Score",
     },
     description:
-        "Discover how AI models like Gemini, Groq (Llama), and DeepSeek perceive your brand. Get your rAsh Score and optimize for AI-powered recommendations.",
+        "Discover how AI models like NVIDIA Nemotron and Groq perceive your brand. Get your rAsh Score and optimize for AI-powered recommendations.",
     keywords: [
         "AI brand visibility",
         "LLMO score",
@@ -83,7 +83,7 @@ const jsonLd = {
     "@type": "WebApplication",
     name: "rAsh Score",
     description:
-        "Check your brand's visibility in AI models like Gemini, Llama, and Mistral. Get your rAsh Score.",
+        "Check your brand's visibility in AI models like NVIDIA Nemotron and Groq. Get your rAsh Score.",
     url: "https://brandscore.kprsnt.in",
     applicationCategory: "BusinessApplication",
     operatingSystem: "Any",

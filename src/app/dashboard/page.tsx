@@ -272,10 +272,10 @@ function AIInsightCard({ insight, loading, industryName }: AIInsightCardProps) {
     .map(line => line.trim())
     .filter(line => line.length > 0);
 
-  const modelLabel = insight.generatedBy === 'gemini'
-    ? 'Gemini'
-    : insight.generatedBy === 'nvidia-deepseek'
-    ? 'DeepSeek'
+  const modelLabel = insight.generatedBy?.includes('nvidia') || insight.generatedBy?.includes('nemotron')
+    ? 'NVIDIA'
+    : insight.generatedBy?.includes('groq') || insight.generatedBy?.includes('llama') || insight.generatedBy?.includes('gpt-oss')
+    ? 'Groq'
     : insight.generatedBy || 'AI';
 
   const dateLabel = insight.date

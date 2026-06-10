@@ -26,8 +26,8 @@ export default function ModelComparison({ responses, brand }: ModelComparisonPro
                     <div key={idx} className="bg-gray-900/40 rounded-xl p-4 border border-gray-800 flex flex-col h-full hover:border-primary-500/30 transition-colors">
                         <div className="flex items-center gap-2 mb-3 pb-3 border-b border-gray-800">
                             <div className="w-8 h-8 rounded-lg bg-gray-800 flex items-center justify-center text-lg">
-                                {response.model.toLowerCase().includes("gemini") ? "✨" :
-                                    response.model.toLowerCase().includes("groq") || response.model.toLowerCase().includes("llama") ? "🦙" : "🔓"}
+                                {response.model.toLowerCase().includes("nvidia") || response.model.toLowerCase().includes("nemotron") || response.model.toLowerCase().includes("step") || response.model.toLowerCase().includes("glm") ? "⚡" :
+                                    response.model.toLowerCase().includes("groq") || response.model.toLowerCase().includes("llama") || response.model.toLowerCase().includes("gpt-oss") ? "🚀" : "🤖"}
                             </div>
                             <div>
                                 <h4 className="font-semibold text-sm text-gray-200">{response.model}</h4>

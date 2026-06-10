@@ -25,7 +25,7 @@ export function middleware(request: NextRequest) {
         "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
         "font-src 'self' https://fonts.gstatic.com",
         "img-src 'self' data: https:",
-        "connect-src 'self' https://generativelanguage.googleapis.com https://api.anthropic.com",
+        "connect-src 'self' https://integrate.api.nvidia.com https://api.groq.com",
     ].join("; ");
 
     response.headers.set("Content-Security-Policy", csp);
