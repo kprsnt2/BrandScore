@@ -2,11 +2,8 @@ import { z } from "zod";
 
 // Environment variable schema
 const envSchema = z.object({
-    GEMINI_API_KEY: z.string().optional().default(""),
-    GEMINI_API_KEY_PAID: z.string().optional().default(""),
-    ANTHROPIC_API_KEY: z.string().optional().default(""), // Made optional since we are not using it actively in new plan
-    GROQ_API_KEY: z.string().optional().default(""),
     NVIDIA_API_KEY: z.string().optional().default(""),
+    GROQ_API_KEY: z.string().optional().default(""),
     NODE_ENV: z.enum(["development", "production", "test"]).default("development"),
     RATE_LIMIT_REQUESTS: z.coerce.number().default(10),
     RATE_LIMIT_WINDOW_MS: z.coerce.number().default(60000),
@@ -37,11 +34,8 @@ export function getEnv(): Env {
             console.warn(`⚠️ Environment validation warnings: ${missingVars}`);
             // Return defaults for development
             cachedEnv = {
-                GEMINI_API_KEY: process.env.GEMINI_API_KEY || "",
-                GEMINI_API_KEY_PAID: process.env.GEMINI_API_KEY_PAID || "",
-                ANTHROPIC_API_KEY: process.env.ANTHROPIC_API_KEY || "",
-                GROQ_API_KEY: process.env.GROQ_API_KEY || "",
                 NVIDIA_API_KEY: process.env.NVIDIA_API_KEY || "",
+                GROQ_API_KEY: process.env.GROQ_API_KEY || "",
                 NODE_ENV: "development",
                 RATE_LIMIT_REQUESTS: 10,
                 RATE_LIMIT_WINDOW_MS: 60000,
@@ -60,13 +54,11 @@ export function getEnv(): Env {
 /**
  * Check if API keys are configured
  */
-export function hasApiKeys(): { gemini: boolean; anthropic: boolean; groq: boolean; nvidia: boolean } {
+export function hasApiKeys(): { nvidia: boolean; groq: boolean } {
     const env = getEnv();
     return {
-        gemini: env.GEMINI_API_KEY.length > 0 || env.GEMINI_API_KEY_PAID.length > 0,
-        anthropic: env.ANTHROPIC_API_KEY.length > 0,
-        groq: env.GROQ_API_KEY.length > 0,
         nvidia: env.NVIDIA_API_KEY.length > 0,
+        groq: env.GROQ_API_KEY.length > 0,
     };
 }
 
@@ -76,4 +68,3 @@ export function hasApiKeys(): { gemini: boolean; anthropic: boolean; groq: boole
 export function isProduction(): boolean {
     return getEnv().NODE_ENV === "production";
 }
-

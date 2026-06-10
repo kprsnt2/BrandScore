@@ -1,14 +1,23 @@
+/**
+ * NVIDIA AI Provider — Primary model with fallback chain.
+ * Uses OpenAI-compatible API at integrate.api.nvidia.com.
+ *
+ * Primary: nvidia/nemotron-3-ultra-550b-a55b
+ * Fallbacks: stepfun-ai/step-3.7-flash → z-ai/glm-5.1
+ */
 import { getEnv } from "./env";
-import { generateBrandAnalysisPrompt, generateRecommendationPrompt } from "./prompts";
+import { generateStructuredBrandPrompt, parseAIScoreResponse, AIScoreResponse } from "./prompts";
 
 const NVIDIA_BASE_URL = "https://integrate.api.nvidia.com/v1";
 
-interface NvidiaMessage {
-    role: "user" | "assistant" | "system";
-    content: string;
-}
+// Model configuration
+const NVIDIA_PRIMARY_MODEL = "nvidia/nemotron-3-ultra-550b-a55b";
+const NVIDIA_FALLBACK_MODELS = [
+    "stepfun-ai/step-3.7-flash",
+    "z-ai/glm-5.1",
+];
 
-interface NvidiaResponse {
+interface OpenAIResponse {
     id: string;
     choices: {
         index: number;
@@ -18,82 +27,134 @@ interface NvidiaResponse {
         };
         finish_reason: string;
     }[];
-    usage: {
+    usage?: {
         prompt_tokens: number;
         completion_tokens: number;
         total_tokens: number;
     };
 }
 
-async function callNvidiaAPI(messages: NvidiaMessage[], model: string, maxTokens: number = 2000): Promise<string> {
+/**
+ * Call NVIDIA API with OpenAI-compatible format.
+ * Tries primary model, then iterates through fallbacks on failure.
+ */
+async function callNvidiaAPI(
+    messages: { role: string; content: string }[],
+    maxTokens: number = 2000,
+    temperature: number = 0.7,
+    model?: string,
+): Promise<{ text: string; modelUsed: string }> {
     const env = getEnv();
     if (!env.NVIDIA_API_KEY) {
         throw new Error("NVIDIA_API_KEY is not configured");
     }
 
-    const response = await fetch(`${NVIDIA_BASE_URL}/chat/completions`, {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json",
-            "Authorization": `Bearer ${env.NVIDIA_API_KEY}`,
-        },
-        body: JSON.stringify({
-            model: model,
-            messages,
-            temperature: 0.7,
-            top_p: 0.95,
-            max_tokens: maxTokens,
-        }),
-    });
+    const modelsToTry = model
+        ? [model, ...NVIDIA_FALLBACK_MODELS.filter(m => m !== model)]
+        : [NVIDIA_PRIMARY_MODEL, ...NVIDIA_FALLBACK_MODELS];
 
-    if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(`NVIDIA API error: ${response.status} - ${errorText}`);
-    }
+    let lastError: Error | null = null;
 
-    const data: NvidiaResponse = await response.json();
-    return data.choices[0]?.message?.content || "";
-}
-
-export async function queryNvidia(brand: string, category: string, model: string = "minimaxai/minimax-m2.7") {
-    const prompt = generateBrandAnalysisPrompt(brand, category);
-
-    try {
-        const text = await callNvidiaAPI([{ role: "user", content: prompt }], model, 2000);
-
-        // Extract simple model name for display
-        const displayModel = model.split("/").pop() || model;
-
-        return {
-            text,
-            model: `${displayModel} (NVIDIA)`,
-            modelType: "free" as const,
-        };
-    } catch (error) {
-        console.error(`NVIDIA ${model} API error:`, error);
-        // Fallback to Mistral if primary fails
-        if (model !== "mistralai/mistral-large-3-675b-instruct-2512") {
-            console.warn(`NVIDIA: falling back to Mistral Large 3...`);
-            return queryNvidia(brand, category, "mistralai/mistral-large-3-675b-instruct-2512");
-        }
-        throw error;
-    }
-}
-
-export async function queryNvidiaRecommendation(brand: string, category: string) {
-    const prompt = generateRecommendationPrompt(brand, category);
-
-    try {
-        const text = await callNvidiaAPI([{ role: "user", content: prompt }], "minimaxai/minimax-m2.7", 500);
-        return text;
-    } catch (error) {
-        console.error("NVIDIA MiniMax recommendation error:", error);
-        // Fallback to Mistral
+    for (const currentModel of modelsToTry) {
         try {
-            return await callNvidiaAPI([{ role: "user", content: prompt }], "mistralai/mistral-large-3-675b-instruct-2512", 500);
-        } catch (fallbackError) {
-            console.error("NVIDIA Mistral recommendation fallback error:", fallbackError);
-            throw error;
+            const controller = new AbortController();
+            const timeout = setTimeout(() => controller.abort(), 30000); // 30s timeout
+
+            const response = await fetch(`${NVIDIA_BASE_URL}/chat/completions`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${env.NVIDIA_API_KEY}`,
+                },
+                body: JSON.stringify({
+                    model: currentModel,
+                    messages,
+                    temperature,
+                    top_p: 0.95,
+                    max_tokens: maxTokens,
+                }),
+                signal: controller.signal,
+            });
+
+            clearTimeout(timeout);
+
+            if (!response.ok) {
+                const errorText = await response.text();
+                throw new Error(`NVIDIA ${currentModel} API error: ${response.status} - ${errorText}`);
+            }
+
+            const data: OpenAIResponse = await response.json();
+            const text = data.choices[0]?.message?.content || "";
+
+            if (!text) {
+                throw new Error(`NVIDIA ${currentModel} returned empty response`);
+            }
+
+            return { text, modelUsed: currentModel };
+        } catch (error) {
+            console.warn(`[NVIDIA ${currentModel}] Failed:`, error instanceof Error ? error.message : error);
+            lastError = error instanceof Error ? error : new Error(String(error));
         }
     }
+
+    throw lastError || new Error("All NVIDIA models failed");
+}
+
+export interface StructuredModelResponse {
+    text: string;
+    model: string;
+    modelType: "free" | "pro";
+    structured?: AIScoreResponse;
+}
+
+/**
+ * Query NVIDIA for brand analysis with structured JSON scoring.
+ */
+export async function queryNvidia(brand: string, category: string): Promise<StructuredModelResponse> {
+    const prompt = generateStructuredBrandPrompt(brand, category);
+
+    const { text, modelUsed } = await callNvidiaAPI(
+        [{ role: "user", content: prompt }],
+        2000,
+        0.7,
+    );
+
+    // Extract display name from model path
+    const displayModel = modelUsed.split("/").pop() || modelUsed;
+
+    // Try to parse structured response
+    const structured = parseAIScoreResponse(text);
+
+    return {
+        text,
+        model: `${displayModel} (NVIDIA)`,
+        modelType: "free" as const,
+        structured: structured || undefined,
+    };
+}
+
+/**
+ * Query NVIDIA with a raw prompt (used by pipeline for batch scoring).
+ */
+export async function queryNvidiaRaw(prompt: string): Promise<{ text: string; model: string }> {
+    const { text, modelUsed } = await callNvidiaAPI(
+        [{ role: "user", content: prompt }],
+        8000,
+        0.3,
+    );
+
+    const displayModel = modelUsed.split("/").pop() || modelUsed;
+    return { text, model: `${displayModel} (NVIDIA)` };
+}
+
+/**
+ * Query NVIDIA for brand comparison.
+ */
+export async function queryNvidiaComparison(prompt: string): Promise<string> {
+    const { text } = await callNvidiaAPI(
+        [{ role: "user", content: prompt }],
+        2000,
+        0.7,
+    );
+    return text;
 }

@@ -1,5 +1,5 @@
 import { Metadata } from 'next';
-import { getBrandHistory } from '@/lib/db';
+import { getBrandHistory, getDb, BrandRow } from '@/lib/db';
 import { INDUSTRIES } from '@/lib/industry-data';
 import BrandLogo from '@/components/BrandLogo';
 import Link from 'next/link';
@@ -38,6 +38,14 @@ function scoreGradient(score: number): string {
   return 'from-red-400 to-orange-400';
 }
 
+function scoreLabel(score: number): string {
+  if (score >= 85) return 'Excellent';
+  if (score >= 70) return 'Good';
+  if (score >= 55) return 'Average';
+  if (score >= 40) return 'Below Average';
+  return 'Needs Work';
+}
+
 export const revalidate = 3600;
 
 export default async function BrandPage({ params }: Props) {
@@ -51,6 +59,70 @@ export default async function BrandPage({ params }: Props) {
   const { history, latestBreakdown, industryIds } = data;
   const industries = industryIds.map(id => INDUSTRIES.find(i => i.id === id)).filter(Boolean);
   
+  // ===== Per-model scores =====
+  let perModelScores: { model: string; score: number; recommendation: number; sentiment: number; prominence: number; accuracy: number }[] = [];
+  try {
+    const db = await getDb();
+    const safeBrand = decodedBrand.replace(/'/g, "''");
+    // Get per-model scores from the latest run
+    const modelResults = db.exec(
+      `SELECT model, score, recommendation, sentiment, prominence, accuracy
+       FROM brand_results
+       WHERE run_id = ${latestBreakdown.run_id} AND brand COLLATE NOCASE = '${safeBrand}' AND model IS NOT NULL AND score > 0
+       ORDER BY score DESC`
+    );
+    if (modelResults.length > 0) {
+      const cols = modelResults[0].columns;
+      perModelScores = modelResults[0].values.map(vals => {
+        const obj: Record<string, unknown> = {};
+        cols.forEach((c, i) => obj[c] = vals[i]);
+        return {
+          model: String(obj.model),
+          score: Number(obj.score),
+          recommendation: Number(obj.recommendation),
+          sentiment: Number(obj.sentiment),
+          prominence: Number(obj.prominence),
+          accuracy: Number(obj.accuracy),
+        };
+      });
+    }
+  } catch {
+    // Per-model data not available, that's fine
+  }
+
+  // ===== Industry ranking context =====
+  let rankingContext: { rank: number; total: number; above: { brand: string; score: number }[]; below: { brand: string; score: number }[] } | null = null;
+  try {
+    const db = await getDb();
+    const industryId = industryIds[0];
+    if (industryId) {
+      const allBrands = db.exec(
+        `SELECT brand, score FROM brand_results
+         WHERE run_id = ${latestBreakdown.run_id} AND industry_id = '${industryId}' AND model IS NULL AND score > 0
+         ORDER BY score DESC`
+      );
+      if (allBrands.length > 0) {
+        const cols = allBrands[0].columns;
+        const brands = allBrands[0].values.map(vals => {
+          const obj: Record<string, unknown> = {};
+          cols.forEach((c, i) => obj[c] = vals[i]);
+          return { brand: String(obj.brand), score: Number(obj.score) };
+        });
+        const myIndex = brands.findIndex(b => b.brand.toLowerCase() === decodedBrand.toLowerCase());
+        if (myIndex >= 0) {
+          rankingContext = {
+            rank: myIndex + 1,
+            total: brands.length,
+            above: brands.slice(Math.max(0, myIndex - 2), myIndex),
+            below: brands.slice(myIndex + 1, myIndex + 3),
+          };
+        }
+      }
+    }
+  } catch {
+    // Ranking context not available
+  }
+
   // Format history for chart
   const dates = Array.from(new Set(history.map(h => h.date))).sort();
   const W = 900, H = 260;
@@ -99,6 +171,11 @@ export default async function BrandPage({ params }: Props) {
                     {ind.name}
                   </span>
                 ))}
+                {rankingContext && (
+                  <span className="px-3 py-1 text-[10px] font-semibold tracking-widest uppercase bg-primary-500/10 text-primary-400 rounded-full border border-primary-500/20">
+                    Rank #{rankingContext.rank} of {rankingContext.total}
+                  </span>
+                )}
               </div>
               <div className="flex items-center gap-4 mb-2">
                 <BrandLogo brand={latestBreakdown.brand} size={48} />
@@ -117,6 +194,9 @@ export default async function BrandPage({ params }: Props) {
                 </span>
                 <span className="text-gray-500 text-xl font-light">/100</span>
               </div>
+              <span className={`text-xs font-medium mt-1`} style={{ color: scoreColor(latestBreakdown.score) }}>
+                {scoreLabel(latestBreakdown.score)}
+              </span>
             </div>
           </div>
         </div>
@@ -130,16 +210,17 @@ export default async function BrandPage({ params }: Props) {
             </h3>
             
             {[
-              { label: 'Recommendation', value: latestBreakdown.recommendation, max: 40, color: '#22d3ee' },
-              { label: 'Sentiment', value: latestBreakdown.sentiment, max: 30, color: '#a78bfa' },
-              { label: 'Prominence', value: latestBreakdown.prominence, max: 20, color: '#f472b6' },
-              { label: 'Accuracy', value: latestBreakdown.accuracy, max: 10, color: '#34d399' },
+              { label: 'Recommendation', value: latestBreakdown.recommendation, max: 40, color: '#22d3ee', desc: 'Would AI recommend this brand?' },
+              { label: 'Sentiment', value: latestBreakdown.sentiment, max: 30, color: '#a78bfa', desc: 'Overall reputation & tone' },
+              { label: 'Prominence', value: latestBreakdown.prominence, max: 20, color: '#f472b6', desc: 'Brand visibility & recognition' },
+              { label: 'Accuracy', value: latestBreakdown.accuracy, max: 10, color: '#34d399', desc: 'Data confidence level' },
             ].map((metric) => (
               <div key={metric.label} className="bg-white/[0.015] border border-white/[0.04] rounded-xl p-4">
-                <div className="flex justify-between items-end mb-3">
+                <div className="flex justify-between items-end mb-1">
                   <span className="text-xs text-gray-400 uppercase tracking-wider">{metric.label}</span>
                   <span className="text-lg font-bold text-white tabular-nums">{metric.value}<span className="text-gray-600 text-sm font-normal">/{metric.max}</span></span>
                 </div>
+                <p className="text-[10px] text-gray-600 mb-2">{metric.desc}</p>
                 <div className="h-1.5 bg-white/[0.03] rounded-full overflow-hidden">
                   <div 
                     className="h-full rounded-full transition-all duration-1000 ease-out" 
@@ -204,6 +285,98 @@ export default async function BrandPage({ params }: Props) {
             )}
           </div>
         </div>
+
+        {/* Per-Model Comparison */}
+        {perModelScores.length > 0 && (
+          <div className="rounded-xl border border-white/[0.04] bg-white/[0.015] p-6 mb-8">
+            <h3 className="text-sm font-semibold text-white mb-6 flex items-center gap-2">
+              <span className="w-1.5 h-1.5 rounded-full bg-cyan-500"></span>
+              Per-Model Scores
+            </h3>
+            <p className="text-[11px] text-gray-500 mb-5 -mt-3">How each AI model scored this brand independently</p>
+
+            <div className="space-y-4">
+              {perModelScores.map((ms, idx) => {
+                const barColors = ['#22d3ee', '#a78bfa', '#f472b6', '#34d399', '#fbbf24'];
+                const c = barColors[idx % barColors.length];
+                return (
+                  <div key={ms.model} className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
+                    <div className="flex justify-between items-center sm:w-56 shrink-0">
+                      <span className="text-xs text-gray-300 font-medium truncate">{ms.model}</span>
+                      <span className="text-sm font-bold tabular-nums sm:hidden" style={{ color: scoreColor(ms.score) }}>{ms.score}</span>
+                    </div>
+                    <div className="flex-1 flex gap-[2px] h-3 rounded-full overflow-hidden bg-white/[0.03] w-full">
+                      <div className="rounded-l-full transition-all duration-500" style={{ width: `${(ms.recommendation / 40) * 100}%`, backgroundColor: c, opacity: 1 }} title={`Rec: ${ms.recommendation}/40`} />
+                      <div className="transition-all duration-500" style={{ width: `${(ms.sentiment / 30) * 100}%`, backgroundColor: c, opacity: 0.65 }} title={`Sent: ${ms.sentiment}/30`} />
+                      <div className="transition-all duration-500" style={{ width: `${(ms.prominence / 20) * 100}%`, backgroundColor: c, opacity: 0.4 }} title={`Prom: ${ms.prominence}/20`} />
+                      <div className="rounded-r-full transition-all duration-500" style={{ width: `${(ms.accuracy / 10) * 100}%`, backgroundColor: c, opacity: 0.2 }} title={`Acc: ${ms.accuracy}/10`} />
+                    </div>
+                    <span className="text-sm font-bold w-12 text-right tabular-nums hidden sm:block" style={{ color: scoreColor(ms.score) }}>{ms.score}</span>
+                  </div>
+                );
+              })}
+            </div>
+
+            <div className="flex flex-wrap gap-x-5 gap-y-2 mt-5 text-[10px] text-gray-400 tracking-wide pt-3 border-t border-white/[0.04]">
+              <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-sm" style={{backgroundColor: '#22d3ee', opacity:1}}></span> Recommendation</span>
+              <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-sm" style={{backgroundColor: '#22d3ee', opacity:0.65}}></span> Sentiment</span>
+              <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-sm" style={{backgroundColor: '#22d3ee', opacity:0.4}}></span> Prominence</span>
+              <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-sm" style={{backgroundColor: '#22d3ee', opacity:0.25}}></span> Accuracy</span>
+            </div>
+          </div>
+        )}
+
+        {/* Industry Ranking Context */}
+        {rankingContext && (
+          <div className="rounded-xl border border-white/[0.04] bg-white/[0.015] p-6 mb-8">
+            <h3 className="text-sm font-semibold text-white mb-5 flex items-center gap-2">
+              <span className="w-1.5 h-1.5 rounded-full bg-yellow-500"></span>
+              Industry Ranking
+            </h3>
+
+            <div className="space-y-1">
+              {/* Brands above */}
+              {rankingContext.above.map((b, i) => (
+                <Link key={b.brand} href={`/brand/${encodeURIComponent(b.brand)}`}
+                  className="flex items-center justify-between px-4 py-2.5 rounded-lg hover:bg-white/[0.03] transition-colors">
+                  <div className="flex items-center gap-3">
+                    <span className="text-xs text-gray-600 font-medium w-6 text-right tabular-nums">#{rankingContext!.rank - rankingContext!.above.length + i}</span>
+                    <BrandLogo brand={b.brand} size={20} />
+                    <span className="text-sm text-gray-400">{b.brand}</span>
+                  </div>
+                  <span className="text-sm font-medium tabular-nums" style={{ color: scoreColor(b.score) }}>{b.score}</span>
+                </Link>
+              ))}
+
+              {/* Current brand (highlighted) */}
+              <div className="flex items-center justify-between px-4 py-3 rounded-xl bg-primary-500/[0.08] border border-primary-500/20">
+                <div className="flex items-center gap-3">
+                  <span className="text-xs text-primary-400 font-bold w-6 text-right tabular-nums">#{rankingContext.rank}</span>
+                  <BrandLogo brand={latestBreakdown.brand} size={24} />
+                  <span className="text-sm text-white font-semibold">{latestBreakdown.brand}</span>
+                </div>
+                <span className={`text-lg font-bold tabular-nums bg-gradient-to-r ${scoreGradient(latestBreakdown.score)} bg-clip-text text-transparent`}>{latestBreakdown.score}</span>
+              </div>
+
+              {/* Brands below */}
+              {rankingContext.below.map((b, i) => (
+                <Link key={b.brand} href={`/brand/${encodeURIComponent(b.brand)}`}
+                  className="flex items-center justify-between px-4 py-2.5 rounded-lg hover:bg-white/[0.03] transition-colors">
+                  <div className="flex items-center gap-3">
+                    <span className="text-xs text-gray-600 font-medium w-6 text-right tabular-nums">#{rankingContext!.rank + i + 1}</span>
+                    <BrandLogo brand={b.brand} size={20} />
+                    <span className="text-sm text-gray-400">{b.brand}</span>
+                  </div>
+                  <span className="text-sm font-medium tabular-nums" style={{ color: scoreColor(b.score) }}>{b.score}</span>
+                </Link>
+              ))}
+            </div>
+
+            <p className="text-[10px] text-gray-600 mt-4 pt-3 border-t border-white/[0.04]">
+              Showing brands ranked around {latestBreakdown.brand} in the {industries[0]?.name || 'industry'} category
+            </p>
+          </div>
+        )}
       </div>
     </div>
   );

@@ -106,9 +106,8 @@ async function main() {
   if (activeProviders.length === 0) {
     console.error('\n❌ No API keys configured!');
     console.error('Please add at least one of these GitHub Secrets:');
-    console.error('  • GEMINI_API_KEY');
-    console.error('  • GROQ_API_KEY');
     console.error('  • NVIDIA_API_KEY');
+    console.error('  • GROQ_API_KEY');
     console.error('\nSkipping pipeline run to preserve existing data.');
     process.exit(0); // Exit cleanly so the workflow doesn't fail
   }
@@ -121,7 +120,8 @@ async function main() {
 
   const pipeline = new BrandAnalysisPipeline({
     delayBetweenIndustries: 10000,  // 10s between industries to respect rate limits
-    timeoutMs: 180000,              // 3 min per-model timeout (Gemini thinks long)
+    timeoutMs: 180000,              // 3 min per-model timeout
+    retryDelaysMs: [30000, 60000, 90000],  // 30s, 60s, 90s retry gaps for GitHub Actions
   });
 
   console.log('\n🚀 Starting analysis...\n');

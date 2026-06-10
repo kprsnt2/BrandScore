@@ -1,19 +1,18 @@
 /**
  * AI Industry Insights Generator
  *
- * Generates daily per-industry insights using Gemini (primary).
+ * Generates daily per-industry insights using NVIDIA (primary) with Groq fallback.
  *
  * Generation logic:
  * - First time (no prior insight): uses data from last 2 pipeline runs
  * - Subsequent days: uses yesterday's insight + today's new data
  *
- * Fallback chain: gemini-2.5-flash → gemini-2.0-flash-lite
- * If both fail, wait 60 s then retry: flash → flash-lite
+ * Fallback chain: NVIDIA (nemotron → step-3.7-flash → glm-5.1) → Groq (gpt-oss-120b → compound → llama-3.3)
+ * Retry delays for GitHub Actions: 30s, 60s, 90s between attempts
  *
  * Output format: bullet-point list with emojis (3–5 bullets)
  */
 
-import { GoogleGenerativeAI } from '@google/generative-ai';
 import { getEnv } from './env';
 
 export interface InsightRow {
@@ -117,66 +116,115 @@ Rules:
 
 // ─── AI Callers ──────────────────────────────────────────────────────────────
 
-const MODEL_RETRY_DELAY_MS = 60_000; // 60s wait between each failed model attempt
+// Retry delays: 30s → 60s → 90s (increasing gap for GitHub Actions rate limits)
+const RETRY_DELAYS_MS = [30_000, 60_000, 90_000];
 
-type GeminiModel = 'gemini-2.5-flash' | 'gemini-3.0-flash' | 'gemini-2.5-flash-lite';
+const NVIDIA_BASE_URL = "https://integrate.api.nvidia.com/v1";
+const GROQ_BASE_URL = "https://api.groq.com/openai/v1";
 
-async function callGeminiModel(prompt: string, geminiModel: GeminiModel): Promise<string> {
+// All models to try in order (NVIDIA primary → NVIDIA fallbacks → Groq primary → Groq fallbacks)
+interface ModelConfig {
+  provider: 'nvidia' | 'groq';
+  model: string;
+  label: string;
+  baseUrl: string;
+  apiKeyField: 'NVIDIA_API_KEY' | 'GROQ_API_KEY';
+}
+
+const MODEL_CHAIN: ModelConfig[] = [
+  { provider: 'nvidia', model: 'nvidia/nemotron-3-ultra-550b-a55b', label: 'Nemotron Ultra (NVIDIA)', baseUrl: NVIDIA_BASE_URL, apiKeyField: 'NVIDIA_API_KEY' },
+  { provider: 'nvidia', model: 'stepfun-ai/step-3.7-flash', label: 'Step 3.7 Flash (NVIDIA)', baseUrl: NVIDIA_BASE_URL, apiKeyField: 'NVIDIA_API_KEY' },
+  { provider: 'nvidia', model: 'z-ai/glm-5.1', label: 'GLM 5.1 (NVIDIA)', baseUrl: NVIDIA_BASE_URL, apiKeyField: 'NVIDIA_API_KEY' },
+  { provider: 'groq', model: 'openai/gpt-oss-120b', label: 'GPT-OSS 120B (Groq)', baseUrl: GROQ_BASE_URL, apiKeyField: 'GROQ_API_KEY' },
+  { provider: 'groq', model: 'groq/compound', label: 'Compound (Groq)', baseUrl: GROQ_BASE_URL, apiKeyField: 'GROQ_API_KEY' },
+  { provider: 'groq', model: 'llama-3.3-70b-versatile', label: 'Llama 3.3 70B (Groq)', baseUrl: GROQ_BASE_URL, apiKeyField: 'GROQ_API_KEY' },
+];
+
+async function callModel(config: ModelConfig, prompt: string): Promise<string> {
   const env = getEnv();
-  const apiKey = env.GEMINI_API_KEY || env.GEMINI_API_KEY_PAID;
-  if (!apiKey) throw new Error('No Gemini API key configured');
+  const apiKey = env[config.apiKeyField];
+  if (!apiKey) throw new Error(`${config.apiKeyField} is not configured`);
 
-  const genAI = new GoogleGenerativeAI(apiKey);
-  const model = genAI.getGenerativeModel({
-    model: geminiModel,
-    generationConfig: { maxOutputTokens: 2048, temperature: 0.5 },
-  });
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 60_000); // 60s timeout for insights
 
-  const result = await model.generateContent(prompt);
-  const text = result.response.text().trim();
-  if (!text) throw new Error(`${geminiModel} returned empty response`);
-  return text;
+  try {
+    const response = await fetch(`${config.baseUrl}/chat/completions`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${apiKey}`,
+      },
+      body: JSON.stringify({
+        model: config.model,
+        messages: [{ role: "user", content: prompt }],
+        temperature: 0.5,
+        max_tokens: 2048,
+      }),
+      signal: controller.signal,
+    });
+
+    clearTimeout(timeout);
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(`${config.label} API error: ${response.status} - ${errorText}`);
+    }
+
+    const data = await response.json();
+    const text = data.choices?.[0]?.message?.content?.trim() || '';
+    if (!text) throw new Error(`${config.label} returned empty response`);
+    return text;
+  } catch (error) {
+    clearTimeout(timeout);
+    throw error;
+  }
 }
 
 // ─── Public API ──────────────────────────────────────────────────────────────
 
 /**
  * Generate an insight for an industry.
- * Fallback chain (60s wait between each failed attempt):
- *   1. gemini-2.5-flash   (most capable flash)
- *   2. gemini-2.0-flash   (previous flash)
- *   3. gemini-2.0-flash-lite (lightest, highest quota)
- * Throws if all three fail.
+ * Tries NVIDIA models first, then Groq models as backup.
+ * Waits 30s → 60s → 90s between failed attempts (for GitHub Actions rate limits).
+ * Throws if all models fail.
  */
 export async function generateInsight(
   prompt: string
 ): Promise<{ text: string; generatedBy: string }> {
-  const models: { id: GeminiModel; label: string }[] = [
-    { id: 'gemini-2.5-flash',      label: 'Gemini 2.5 Flash' },
-    { id: 'gemini-3.0-flash',      label: 'Gemini 3.0 Flash' },
-    { id: 'gemini-2.5-flash-lite', label: 'Gemini 2.5 Flash Lite' },
-  ];
+  const env = getEnv();
 
-  for (let i = 0; i < models.length; i++) {
-    const { id, label } = models[i];
+  // Filter to models we have API keys for
+  const availableModels = MODEL_CHAIN.filter(m => {
+    const key = env[m.apiKeyField];
+    return key && key.length > 0;
+  });
+
+  if (availableModels.length === 0) {
+    throw new Error('No AI provider API keys configured (need NVIDIA_API_KEY or GROQ_API_KEY)');
+  }
+
+  for (let i = 0; i < availableModels.length; i++) {
+    const config = availableModels[i];
     try {
-      if (i > 0) console.log(`  ⏩ Trying ${label} fallback...`);
-      const text = await callGeminiModel(prompt, id);
-      return { text, generatedBy: id };
+      if (i > 0) console.log(`  ⏩ Trying ${config.label} fallback...`);
+      const text = await callModel(config, prompt);
+      return { text, generatedBy: `${config.provider}-${config.model.split('/').pop()}` };
     } catch (err) {
       const msg = (err as Error).message || '';
-      const isQuota = msg.includes('429') || msg.includes('quota');
-      console.warn(`  ⚠ ${label} failed${isQuota ? ' (quota/rate-limit)' : ''}: ${msg.split('\n')[0]}`);
+      const isQuota = msg.includes('429') || msg.includes('quota') || msg.includes('rate');
+      console.warn(`  ⚠ ${config.label} failed${isQuota ? ' (quota/rate-limit)' : ''}: ${msg.split('\n')[0]}`);
 
-      // Wait 60s before trying the next model (skip wait after the last model)
-      if (i < models.length - 1) {
-        console.warn(`  ⏳ Waiting ${MODEL_RETRY_DELAY_MS / 1000}s before trying next model...`);
-        await new Promise(resolve => setTimeout(resolve, MODEL_RETRY_DELAY_MS));
+      // Wait with increasing delay before trying the next model (skip wait after the last)
+      if (i < availableModels.length - 1) {
+        const delay = RETRY_DELAYS_MS[Math.min(i, RETRY_DELAYS_MS.length - 1)];
+        console.warn(`  ⏳ Waiting ${delay / 1000}s before trying next model...`);
+        await new Promise(resolve => setTimeout(resolve, delay));
       }
     }
   }
 
-  throw new Error('All Gemini models (2.5-flash, 3.0-flash, 2.5-flash-lite) failed');
+  throw new Error(`All AI models failed for insight generation`);
 }
 
 /**

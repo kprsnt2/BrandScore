@@ -1,21 +1,103 @@
-import Groq from "groq-sdk";
+/**
+ * Groq AI Provider — Primary model with fallback chain.
+ * Uses OpenAI-compatible API at api.groq.com.
+ *
+ * Primary: openai/gpt-oss-120b
+ * Fallbacks: groq/compound → llama-3.3-70b-versatile → llama-3.1-8b-instant
+ */
 import { getEnv } from "./env";
 import { generateStructuredBrandPrompt, parseAIScoreResponse, AIScoreResponse } from "./prompts";
 
-// Lazy initialization
-let groq: Groq | null = null;
+const GROQ_BASE_URL = "https://api.groq.com/openai/v1";
 
-function getClient(): Groq {
-    if (!groq) {
-        const env = getEnv();
-        if (!env.GROQ_API_KEY) {
-            throw new Error("GROQ_API_KEY is not configured");
-        }
-        groq = new Groq({
-            apiKey: env.GROQ_API_KEY,
-        });
+// Model configuration
+const GROQ_PRIMARY_MODEL = "openai/gpt-oss-120b";
+const GROQ_FALLBACK_MODELS = [
+    "groq/compound",
+    "llama-3.3-70b-versatile",
+    "llama-3.1-8b-instant",
+];
+
+interface OpenAIResponse {
+    id: string;
+    choices: {
+        index: number;
+        message: {
+            role: string;
+            content: string;
+        };
+        finish_reason: string;
+    }[];
+    usage?: {
+        prompt_tokens: number;
+        completion_tokens: number;
+        total_tokens: number;
+    };
+}
+
+/**
+ * Call Groq API with OpenAI-compatible format.
+ * Tries primary model, then iterates through fallbacks on failure.
+ */
+async function callGroqAPI(
+    messages: { role: string; content: string }[],
+    maxTokens: number = 1000,
+    temperature: number = 0.7,
+    model?: string,
+): Promise<{ text: string; modelUsed: string }> {
+    const env = getEnv();
+    if (!env.GROQ_API_KEY) {
+        throw new Error("GROQ_API_KEY is not configured");
     }
-    return groq;
+
+    const modelsToTry = model
+        ? [model, ...GROQ_FALLBACK_MODELS.filter(m => m !== model)]
+        : [GROQ_PRIMARY_MODEL, ...GROQ_FALLBACK_MODELS];
+
+    let lastError: Error | null = null;
+
+    for (const currentModel of modelsToTry) {
+        try {
+            const controller = new AbortController();
+            const timeout = setTimeout(() => controller.abort(), 30000); // 30s timeout
+
+            const response = await fetch(`${GROQ_BASE_URL}/chat/completions`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${env.GROQ_API_KEY}`,
+                },
+                body: JSON.stringify({
+                    model: currentModel,
+                    messages,
+                    temperature,
+                    max_tokens: maxTokens,
+                }),
+                signal: controller.signal,
+            });
+
+            clearTimeout(timeout);
+
+            if (!response.ok) {
+                const errorText = await response.text();
+                throw new Error(`Groq ${currentModel} API error: ${response.status} - ${errorText}`);
+            }
+
+            const data: OpenAIResponse = await response.json();
+            const text = data.choices[0]?.message?.content || "";
+
+            if (!text) {
+                throw new Error(`Groq ${currentModel} returned empty response`);
+            }
+
+            return { text, modelUsed: currentModel };
+        } catch (error) {
+            console.warn(`[Groq ${currentModel}] Failed:`, error instanceof Error ? error.message : error);
+            lastError = error instanceof Error ? error : new Error(String(error));
+        }
+    }
+
+    throw lastError || new Error("All Groq models failed");
 }
 
 export interface StructuredModelResponse {
@@ -25,61 +107,58 @@ export interface StructuredModelResponse {
     structured?: AIScoreResponse;
 }
 
+/**
+ * Query Groq for brand analysis with structured JSON scoring.
+ */
 export async function queryGroq(brand: string, category: string): Promise<StructuredModelResponse> {
-    // Groq models (free tier)
-    // Free: Llama 3.3 70B (fast and good quality)
-    const modelName = "llama-3.3-70b-versatile";
-
-    // Use the new structured prompt
     const prompt = generateStructuredBrandPrompt(brand, category);
 
-    try {
-        const chatCompletion = await getClient().chat.completions.create({
-            messages: [{ role: "user", content: prompt }],
-            model: modelName,
-            max_tokens: 1000,
-            temperature: 0.7,
-        });
+    const { text, modelUsed } = await callGroqAPI(
+        [{ role: "user", content: prompt }],
+        1000,
+        0.7,
+    );
 
-        const text = chatCompletion.choices[0]?.message?.content || "No response generated";
+    // Extract display name
+    const displayModel = modelUsed.includes("/")
+        ? modelUsed.split("/").pop() || modelUsed
+        : modelUsed;
 
-        // Try to parse structured response
-        const structured = parseAIScoreResponse(text);
+    // Try to parse structured response
+    const structured = parseAIScoreResponse(text);
 
-        return {
-            text,
-            model: "Llama 3.3 70B (Groq)",
-            modelType: "free" as const,
-            structured: structured || undefined,
-        };
-    } catch (error) {
-        console.error("Groq API error:", error);
-        throw error;
-    }
+    return {
+        text,
+        model: `${displayModel} (Groq)`,
+        modelType: "free" as const,
+        structured: structured || undefined,
+    };
 }
 
-export async function queryGroqRecommendation(brand: string, category: string) {
-    const modelName = "llama-3.3-70b-versatile";
+/**
+ * Query Groq with a raw prompt (used by pipeline for batch scoring).
+ */
+export async function queryGroqRaw(prompt: string): Promise<{ text: string; model: string }> {
+    const { text, modelUsed } = await callGroqAPI(
+        [{ role: "user", content: prompt }],
+        8000,
+        0.3,
+    );
 
-    const categoryContext = category && category !== "general"
-        ? category
-        : "brand in this category";
+    const displayModel = modelUsed.includes("/")
+        ? modelUsed.split("/").pop() || modelUsed
+        : modelUsed;
+    return { text, model: `${displayModel} (Groq)` };
+}
 
-    const prompt = `A user asks: "What is the best ${categoryContext}?"
-
-Provide a helpful recommendation response. Discuss leading options and mention ${brand} if it is a relevant and competitive choice in this space. Be balanced, objective, and informative.`;
-
-    try {
-        const chatCompletion = await getClient().chat.completions.create({
-            messages: [{ role: "user", content: prompt }],
-            model: modelName,
-            max_tokens: 500,
-            temperature: 0.7,
-        });
-
-        return chatCompletion.choices[0]?.message?.content || "";
-    } catch (error) {
-        console.error("Groq recommendation error:", error);
-        throw error;
-    }
+/**
+ * Query Groq for brand comparison.
+ */
+export async function queryGroqComparison(prompt: string): Promise<string> {
+    const { text } = await callGroqAPI(
+        [{ role: "user", content: prompt }],
+        2000,
+        0.7,
+    );
+    return text;
 }

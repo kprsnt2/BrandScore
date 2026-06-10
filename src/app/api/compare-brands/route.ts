@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
-import { GoogleGenerativeAI, HarmCategory, HarmBlockThreshold } from "@google/generative-ai";
-import { generateComparisonPrompt, parseComparisonResponse, ComparisonResponse } from "@/lib/prompts";
-import { getEnv, hasApiKeys } from "@/lib/env";
+import { queryNvidiaComparison } from "@/lib/nvidia";
+import { queryGroqComparison } from "@/lib/groq";
+import { generateComparisonPrompt, parseComparisonResponse } from "@/lib/prompts";
+import { hasApiKeys } from "@/lib/env";
 import { LRUCache } from "@/lib/cache";
 import { z } from "zod";
 
@@ -15,6 +16,7 @@ function getRateLimitKey(request: NextRequest): string {
 }
 
 function checkRateLimit(key: string): { allowed: boolean; remaining: number; resetIn: number } {
+    const { getEnv } = require("@/lib/env");
     const env = getEnv();
     const now = Date.now();
     const windowMs = env.RATE_LIMIT_WINDOW_MS;
@@ -86,47 +88,44 @@ export async function POST(request: NextRequest) {
             return errorResponse("Cannot compare a brand with itself", 400, "SAME_BRAND");
         }
 
-        // Check API key availability
+        // Check API key availability — need at least NVIDIA or Groq
         const apiKeys = hasApiKeys();
-        if (!apiKeys.gemini) {
+        if (!apiKeys.nvidia && !apiKeys.groq) {
             return errorResponse(
-                "Gemini API not configured for comparison.",
+                "No AI providers configured for comparison. Set NVIDIA_API_KEY or GROQ_API_KEY.",
                 503,
                 "NO_API_KEY"
             );
         }
 
-        // Generate comparison using Gemini
-        const env = getEnv();
-        let apiKey = env.GEMINI_API_KEY;
-        let isPro = false;
-        
-        if (env.GEMINI_API_KEY_PAID) {
-            apiKey = env.GEMINI_API_KEY_PAID;
-            isPro = true;
-        }
-
-        const genAI = new GoogleGenerativeAI(apiKey!);
-        const modelName = isPro ? "gemini-pro-latest" : "gemini-2.5-flash-lite";
-
-        const model = genAI.getGenerativeModel({
-            model: modelName,
-            generationConfig: {
-                maxOutputTokens: 2000,
-                temperature: 0.7,
-            },
-            safetySettings: [
-                { category: HarmCategory.HARM_CATEGORY_HARASSMENT, threshold: HarmBlockThreshold.BLOCK_NONE },
-                { category: HarmCategory.HARM_CATEGORY_HATE_SPEECH, threshold: HarmBlockThreshold.BLOCK_NONE },
-                { category: HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT, threshold: HarmBlockThreshold.BLOCK_NONE },
-                { category: HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT, threshold: HarmBlockThreshold.BLOCK_NONE },
-            ],
-        });
-
         const prompt = generateComparisonPrompt(brand1, brand2, category);
 
-        const result = await model.generateContent(prompt);
-        const responseText = result.response.text();
+        // Try NVIDIA first, fall back to Groq
+        let responseText: string | null = null;
+
+        if (apiKeys.nvidia) {
+            try {
+                responseText = await queryNvidiaComparison(prompt);
+            } catch (error) {
+                console.warn("NVIDIA comparison failed, trying Groq:", error instanceof Error ? error.message : error);
+            }
+        }
+
+        if (!responseText && apiKeys.groq) {
+            try {
+                responseText = await queryGroqComparison(prompt);
+            } catch (error) {
+                console.error("Groq comparison also failed:", error instanceof Error ? error.message : error);
+            }
+        }
+
+        if (!responseText) {
+            return errorResponse(
+                "All AI providers failed for comparison. Please try again.",
+                502,
+                "ALL_PROVIDERS_FAILED"
+            );
+        }
 
         // Parse the comparison response
         const comparison = parseComparisonResponse(responseText);

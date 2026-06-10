@@ -31,8 +31,8 @@ jobs:
 
       - name: Generate AI Insights
         env:
-          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           NVIDIA_API_KEY: ${{ secrets.NVIDIA_API_KEY }}
+          GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
           NODE_ENV: production
         run: npx tsx scripts/run-insights.ts
 

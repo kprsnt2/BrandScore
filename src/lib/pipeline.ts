@@ -1,7 +1,6 @@
 import { Industry, getIndustryById, getAllIndustries } from './industry-data';
-import { queryGemini } from './gemini';
-import { queryGroq } from './groq';
-import { queryNvidia } from './nvidia';
+import { queryNvidiaRaw } from './nvidia';
+import { queryGroqRaw } from './groq';
 import { generateBatchIndustryPrompt, parseBatchIndustryResponse, BatchBrandScore } from './prompts';
 import { hasApiKeys } from './env';
 
@@ -49,7 +48,12 @@ export interface IndustryAnalysisResult {
 export interface PipelineConfig {
   delayBetweenIndustries: number;
   timeoutMs: number;
+  /** Retry delays in ms for failed model queries. Default: [30000, 60000, 90000] */
+  retryDelaysMs: number[];
 }
+
+// Default retry delays: 30s → 60s → 90s (for GitHub Actions rate limits)
+const DEFAULT_RETRY_DELAYS = [30_000, 60_000, 90_000];
 
 export class BrandAnalysisPipeline {
   private config: PipelineConfig;
@@ -59,6 +63,7 @@ export class BrandAnalysisPipeline {
     this.config = {
       delayBetweenIndustries: 5000,
       timeoutMs: 120000,
+      retryDelaysMs: DEFAULT_RETRY_DELAYS,
       ...config
     };
     this.apiKeys = hasApiKeys();
@@ -156,28 +161,48 @@ export class BrandAnalysisPipeline {
       ]);
     };
 
+    // Helper: wrap a query with retries (30s, 60s, 90s delays)
+    const withRetry = async <T>(
+      queryFn: () => Promise<T>,
+      model: string,
+    ): Promise<T> => {
+      let lastError: Error | null = null;
+
+      for (let attempt = 0; attempt <= this.config.retryDelaysMs.length; attempt++) {
+        try {
+          return await withTimeout(queryFn(), model);
+        } catch (error) {
+          lastError = error instanceof Error ? error : new Error(String(error));
+          const isQuota = lastError.message.includes('429') || lastError.message.includes('quota') || lastError.message.includes('rate');
+
+          if (attempt < this.config.retryDelaysMs.length) {
+            const delay = this.config.retryDelaysMs[attempt];
+            console.warn(`    ⚠ ${model} attempt ${attempt + 1} failed${isQuota ? ' (rate-limit)' : ''}: ${lastError.message.split('\n')[0]}`);
+            console.warn(`    ⏳ Retrying in ${delay / 1000}s...`);
+            await this.delay(delay);
+          }
+        }
+      }
+
+      throw lastError || new Error(`${model} failed after all retries`);
+    };
+
     const queries: Promise<{ model: string; text: string; error?: unknown }>[] = [];
 
-    if (this.apiKeys.gemini) {
-      queries.push(
-        withTimeout(this.queryGeminiRaw(prompt), 'Gemini').catch(e => ({
-          text: '', model: 'Gemini 2.5 Flash', error: e
-        }))
-      );
-    }
-
-    if (this.apiKeys.groq) {
-      queries.push(
-        withTimeout(this.queryGroqRaw(prompt), 'Groq').catch(e => ({
-          text: '', model: 'Llama 3.3 70B (Groq)', error: e
-        }))
-      );
-    }
-
+    // NVIDIA (primary) — with retry
     if (this.apiKeys.nvidia) {
       queries.push(
-        withTimeout(this.queryNvidiaRaw(prompt), 'NVIDIA').catch(e => ({
-          text: '', model: 'MiniMax M2.7 (NVIDIA)', error: e
+        withRetry(() => queryNvidiaRaw(prompt), 'NVIDIA').catch(e => ({
+          text: '', model: 'NVIDIA', error: e
+        }))
+      );
+    }
+
+    // Groq (primary) — with retry
+    if (this.apiKeys.groq) {
+      queries.push(
+        withRetry(() => queryGroqRaw(prompt), 'Groq').catch(e => ({
+          text: '', model: 'Groq', error: e
         }))
       );
     }
@@ -276,79 +301,6 @@ export class BrandAnalysisPipeline {
         timestamp: new Date().toISOString()
       };
     });
-  }
-
-  // Direct model queries that send raw prompts (not the structured brand prompt)
-  private async queryGeminiRaw(prompt: string) {
-    const { GoogleGenerativeAI } = await import("@google/generative-ai");
-    const env = (await import('./env')).getEnv();
-    const apiKey = env.GEMINI_API_KEY || env.GEMINI_API_KEY_PAID;
-    if (!apiKey) throw new Error("No Gemini API key");
-
-    const genAI = new GoogleGenerativeAI(apiKey);
-    const model = genAI.getGenerativeModel({
-      model: env.GEMINI_API_KEY_PAID ? "gemini-pro-latest" : "gemini-2.5-flash",
-      generationConfig: { maxOutputTokens: 8000, temperature: 0.3 },
-    });
-
-    const result = await model.generateContent(prompt);
-    return { text: result.response.text(), model: "Gemini 2.5 Flash" };
-  }
-
-  private async queryGroqRaw(prompt: string) {
-    const env = (await import('./env')).getEnv();
-    if (!env.GROQ_API_KEY) throw new Error("No Groq API key");
-
-    const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${env.GROQ_API_KEY}`,
-      },
-      body: JSON.stringify({
-        model: "llama-3.3-70b-versatile",
-        messages: [{ role: "user", content: prompt }],
-        max_tokens: 8000,
-        temperature: 0.3,
-      }),
-    });
-
-    if (!response.ok) throw new Error(`Groq API error: ${response.status}`);
-    const data = await response.json();
-    return { text: data.choices[0]?.message?.content || '', model: "Llama 3.3 70B (Groq)" };
-  }
-
-  private async queryNvidiaRaw(prompt: string) {
-    const env = (await import('./env')).getEnv();
-    if (!env.NVIDIA_API_KEY) throw new Error("No NVIDIA API key");
-
-    const tryModel = async (model: string) => {
-      const response = await fetch("https://integrate.api.nvidia.com/v1/chat/completions", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${env.NVIDIA_API_KEY}`,
-        },
-        body: JSON.stringify({
-          model,
-          messages: [{ role: "user", content: prompt }],
-          max_tokens: 8000,
-          temperature: 0.3,
-        }),
-      });
-      if (!response.ok) throw new Error(`NVIDIA API error: ${response.status}`);
-      const data = await response.json();
-      return data.choices[0]?.message?.content || '';
-    };
-
-    try {
-      const text = await tryModel("minimaxai/minimax-m2.7");
-      return { text, model: "MiniMax M2.7 (NVIDIA)" };
-    } catch (err) {
-      console.warn(`  ⚠ NVIDIA MiniMax M2.7 failed, trying Mistral Large 3: ${(err as Error).message}`);
-      const text = await tryModel("mistralai/mistral-large-3-675b-instruct-2512");
-      return { text, model: "Mistral Large 3 (NVIDIA)" };
-    }
   }
 
   private calculateIndustryAverage(results: BrandAnalysisResult[]) {

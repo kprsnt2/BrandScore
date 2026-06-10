@@ -20,11 +20,12 @@ async function main() {
 
   // Check API keys
   const keys = hasApiKeys();
-  if (!keys.gemini) {
-    console.error('❌ No Gemini API key configured. Exiting.');
+  if (!keys.nvidia && !keys.groq) {
+    console.error('❌ No NVIDIA or Groq API key configured. Exiting.');
     process.exit(1);
   }
-  console.log('✅ Gemini available (Flash → Flash Lite fallback)');
+  const providers = [keys.nvidia ? 'NVIDIA' : '', keys.groq ? 'Groq' : ''].filter(Boolean).join(' + ');
+  console.log(`✅ AI providers: ${providers} (with fallback chains)`);
 
   const dbPath = path.join(process.cwd(), 'data', 'brand-intelligence.db');
   if (!fs.existsSync(dbPath)) {
@@ -197,8 +198,8 @@ async function main() {
       console.log(`  ✅ ${industry.name}: saved (${generatedBy})`);
       generated++;
 
-      // 60s between industries to respect Gemini rate limits
-      await new Promise(resolve => setTimeout(resolve, 60_000));
+      // 30s between industries to respect rate limits
+      await new Promise(resolve => setTimeout(resolve, 30_000));
     } catch (err) {
       console.error(`  ❌ ${industry.name}: failed — ${(err as Error).message}`);
       failed++;
