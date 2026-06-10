@@ -58,7 +58,7 @@ async function callNvidiaAPI(
     for (const currentModel of modelsToTry) {
         try {
             const controller = new AbortController();
-            const timeout = setTimeout(() => controller.abort(), 30000); // 30s timeout
+            const timeout = setTimeout(() => controller.abort(), 12000); // 12s timeout (Vercel limit ~25s)
 
             const response = await fetch(`${NVIDIA_BASE_URL}/chat/completions`, {
                 method: "POST",

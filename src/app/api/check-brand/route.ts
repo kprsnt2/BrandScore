@@ -353,14 +353,24 @@ export async function POST(request: NextRequest) {
             );
         }
 
-        // Execute with timeout
-        const timeoutMs = 45000;
-        const results = await Promise.race([
-            Promise.all(modelQueries),
-            new Promise<never>((_, reject) =>
-                setTimeout(() => reject(new Error("Request timeout")), timeoutMs)
-            ),
-        ]);
+        // Execute all models in parallel — allSettled so fast ones aren't blocked by slow ones
+        const perModelTimeoutMs = 15000; // 15s per model (Vercel serverless limit ~25s)
+        
+        const timedQueries = modelQueries.map(q => 
+            Promise.race([
+                q,
+                new Promise<{ text: string; model: string; modelType: "free" | "pro"; error: Error }>(
+                    (resolve) => setTimeout(() => resolve({
+                        text: "", model: "timeout", modelType: "free", error: new Error("Model timed out after 15s")
+                    }), perModelTimeoutMs)
+                )
+            ])
+        );
+
+        const settled = await Promise.allSettled(timedQueries);
+        const results = settled
+            .filter((s): s is PromiseFulfilledResult<typeof settled[0] extends PromiseSettledResult<infer T> ? T : never> => s.status === 'fulfilled')
+            .map(s => s.value);
 
         // Filter out complete failures
         const validResults = results.filter(r => !r.error || r.text.length > 0);
