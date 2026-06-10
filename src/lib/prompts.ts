@@ -12,6 +12,12 @@ export interface AIScoreResponse {
         prominence: number;         // 0-20: Brand visibility/recognition
         accuracy: number;           // 0-10: Confidence in data accuracy
     };
+    socialBuzz?: {
+        trending: boolean;          // Is the brand trending on social media?
+        sentiment: "positive" | "mixed" | "negative"; // Social media mood
+        platforms: string[];        // Where it's being discussed
+        summary: string;            // Brief summary of recent chatter
+    };
     overallSentiment: "positive" | "neutral" | "negative";
     totalScore: number;             // 0-100
     tips: string[];                 // Improvement suggestions
@@ -47,11 +53,38 @@ Provide a helpful recommendation response. Discuss leading options and mention $
 }
 
 // Unified scoring guidelines to ensure consistent AI scoring across all endpoints
-const SCORING_GUIDELINES = `Scoring guidelines:
-- recommendation (0-40): 40=highly recommend, 30=would recommend, 20=neutral, 10=concerns, 0=would not recommend
-- sentiment (0-30): 30=excellent reputation, 20=positive, 15=neutral, 10=mixed, 0=negative
-- prominence (0-20): 20=household name, 15=well-known, 10=known in industry, 5=niche, 0=unknown
-- accuracy (0-10): 10=extensive data, 5=moderate data, 0=very limited info`;
+const SCORING_GUIDELINES = `STRICT Scoring guidelines — do NOT inflate scores. Be honest and critical:
+- recommendation (0-40): 35-40=top 3 in category globally, 25-34=strong recommend, 15-24=average/neutral, 5-14=concerns exist, 0-4=actively avoid
+- sentiment (0-30): 26-30=universally loved, 18-25=mostly positive, 10-17=mixed reviews, 5-9=mostly negative, 0-4=PR crisis / scandals
+- prominence (0-20): 18-20=global household name, 13-17=well-known nationally, 8-12=known in industry, 3-7=niche/emerging, 0-2=unknown
+- accuracy (0-10): 9-10=extensive verified data, 5-8=moderate data, 2-4=limited info, 0-1=almost no data
+
+IMPORTANT scoring rules:
+- Most brands should score 40-70. Only truly exceptional global brands score 80+.
+- A score of 90+ should be EXTREMELY rare (Apple, Google, Samsung tier).
+- If you are unsure about a brand, score accuracy LOW (0-3) and be conservative on other metrics.
+- NEVER give a perfect 100. No brand is flawless.`;
+
+// Social media research instruction for prompts
+const SOCIAL_MEDIA_RESEARCH = `SOCIAL MEDIA & FORUM RESEARCH:
+Before scoring, research and consider the brand's recent presence and sentiment on:
+- Reddit (subreddit mentions, reviews, complaints)
+- X / Twitter (trending topics, brand mentions, customer complaints)
+- Threads (recent discussions)
+- TikTok (brand mentions, viral content, reviews)
+- Quora (questions and answers about the brand)
+- Facebook (page engagement, community sentiment)
+- Instagram (brand presence, influencer mentions)
+- News articles and press coverage
+
+Factor in:
+- Recent controversies, scandals, or PR issues (last 24 hours to last week)
+- Customer complaints trending on social media
+- Viral positive or negative content
+- Recent product launches, recalls, or service outages
+- Community sentiment shifts
+
+This social research MUST influence your scores — especially sentiment and recommendation.`;
 
 // NEW: Structured prompt that returns JSON with scores
 export function generateStructuredBrandPrompt(brand: string, category: string): string {
@@ -59,7 +92,11 @@ export function generateStructuredBrandPrompt(brand: string, category: string): 
         ? category
         : "general";
 
-    return `Analyze the brand "${brand}" in the ${categoryContext} industry.
+    return `You are an expert brand intelligence analyst. Analyze the brand "${brand}" in the ${categoryContext} industry.
+
+${SOCIAL_MEDIA_RESEARCH}
+
+${SCORING_GUIDELINES}
 
 You MUST respond ONLY with valid JSON matching this exact structure (no markdown, no explanation):
 {
@@ -75,14 +112,18 @@ You MUST respond ONLY with valid JSON matching this exact structure (no markdown
     "prominence": <number 0-20>,
     "accuracy": <number 0-10>
   },
+  "socialBuzz": {
+    "trending": <true if brand is trending on any platform, false otherwise>,
+    "sentiment": "positive" | "mixed" | "negative",
+    "platforms": ["list of platforms where brand is being discussed"],
+    "summary": "1-2 sentence summary of what people are saying on social media right now"
+  },
   "overallSentiment": "positive" | "neutral" | "negative",
-  "totalScore": <number 0-100, sum of all scores>,
-  "tips": ["improvement tip 1", "improvement tip 2", "improvement tip 3"]
+  "totalScore": <number 0-100, MUST equal sum of all 4 scores>,
+  "tips": ["tip 1", "tip 2", "tip 3"]
 }
 
-${SCORING_GUIDELINES}
-
-Be objective and fair in your scoring. Provide 2-4 actionable tips for improving brand visibility.`;
+Be brutally honest. Do NOT inflate scores. Most brands score 40-70. Provide 3 actionable tips.`;
 }
 
 // Batch prompt: score ALL brands in an industry in a single request
@@ -100,7 +141,9 @@ export interface BatchBrandScore {
 export function generateBatchIndustryPrompt(brands: string[], category: string): string {
   const brandList = brands.map((b, i) => `${i + 1}. ${b}`).join('\n');
 
-  return `Score these ${brands.length} brands in the Indian ${category} industry for AI visibility.
+  return `You are an expert brand intelligence analyst. Score these ${brands.length} brands in the Indian ${category} industry for AI visibility.
+
+${SOCIAL_MEDIA_RESEARCH}
 
 Brands:
 ${brandList}
@@ -122,9 +165,9 @@ Respond ONLY with valid JSON (no markdown, no explanation):
 }
 
 ${SCORING_GUIDELINES}
-- score = sum of all breakdown values (max 100)
+- score MUST equal sum of all breakdown values (max 100)
 
-Score ALL ${brands.length} brands. Be objective and fair.`;
+Score ALL ${brands.length} brands. Be brutally honest — most should score 40-70.`;
 }
 
 export function parseBatchIndustryResponse(text: string): BatchBrandScore[] {
@@ -181,6 +224,19 @@ export function parseAIScoreResponse(text: string): AIScoreResponse | null {
             return null;
         }
 
+        // Handle optional socialBuzz
+        let socialBuzz = undefined;
+        if (parsed.socialBuzz) {
+            socialBuzz = {
+                trending: Boolean(parsed.socialBuzz.trending),
+                sentiment: ["positive", "mixed", "negative"].includes(parsed.socialBuzz.sentiment)
+                    ? parsed.socialBuzz.sentiment
+                    : "mixed",
+                platforms: Array.isArray(parsed.socialBuzz.platforms) ? parsed.socialBuzz.platforms.map(String) : [],
+                summary: String(parsed.socialBuzz.summary || "")
+            };
+        }
+
         // Validate and clamp score ranges
         const scores = {
             recommendation: Math.min(40, Math.max(0, Number(parsed.scores.recommendation) || 0)),
@@ -211,6 +267,7 @@ export function parseAIScoreResponse(text: string): AIScoreResponse | null {
                     : [],
             },
             scores,
+            socialBuzz,
             overallSentiment: overallSentiment as "positive" | "neutral" | "negative",
             totalScore,
             tips: Array.isArray(parsed.tips) ? parsed.tips.map(String).slice(0, 4) : [],
@@ -247,12 +304,15 @@ export interface ComparisonResponse {
 export function generateComparisonPrompt(brand1: string, brand2: string, category: string): string {
     const categoryContext = category && category !== "general" ? category : "general";
 
-    return `Compare these two brands HEAD-TO-HEAD in the ${categoryContext} industry.
+    return `You are an expert brand intelligence analyst. Compare these two brands HEAD-TO-HEAD in the ${categoryContext} industry.
+
+${SOCIAL_MEDIA_RESEARCH}
 
 Brand 1: ${brand1}
 Brand 2: ${brand2}
 
-IMPORTANT: You MUST score both brands using the EXACT SAME criteria and context. The relative scores must be consistent - if Brand A scores higher than Brand B, this must be true regardless of which brand is listed first.
+IMPORTANT: You MUST score both brands using the EXACT SAME strict criteria and context. The relative scores must be consistent.
+Do NOT inflate scores. Be brutally honest.
 
 Respond ONLY with valid JSON (no markdown, no explanation):
 {
