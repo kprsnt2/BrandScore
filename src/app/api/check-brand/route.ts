@@ -322,55 +322,38 @@ export async function POST(request: NextRequest) {
             );
         }
 
-        // Query both Groq and NVIDIA in parallel (Groq first — faster)
-        const modelQueries: Promise<{
+        // Groq = primary, NVIDIA = backup (sequential, not parallel)
+        type ModelResult = {
             text: string;
             model: string;
             modelType: "free" | "pro";
             structured?: AIScoreResponse;
             error?: unknown;
-        }>[] = [];
+        };
 
+        const results: ModelResult[] = [];
+
+        // Step A: Try Groq first (fast, reliable)
         if (apiKeys.groq) {
-            modelQueries.push(
-                queryGroq(brand, category).catch(e => ({
-                    text: "Unable to fetch response from Groq",
-                    model: "Groq",
-                    modelType: "free" as const,
-                    error: e
-                }))
-            );
+            try {
+                const groqResult = await queryGroq(brand, category);
+                results.push(groqResult);
+                console.log(`✅ Groq responded for "${brand}"`);
+            } catch (e) {
+                console.warn(`⚠ Groq failed for "${brand}":`, e instanceof Error ? e.message : e);
+            }
         }
 
-        if (apiKeys.nvidia) {
-            modelQueries.push(
-                queryNvidia(brand, category).catch(e => ({
-                    text: "Unable to fetch response from NVIDIA",
-                    model: "NVIDIA",
-                    modelType: "free" as const,
-                    error: e
-                }))
-            );
+        // Step B: Only try NVIDIA if Groq failed or not configured
+        if (results.filter(r => !r.error).length === 0 && apiKeys.nvidia) {
+            try {
+                const nvidiaResult = await queryNvidia(brand, category);
+                results.push(nvidiaResult);
+                console.log(`✅ NVIDIA responded for "${brand}" (fallback)`);
+            } catch (e) {
+                console.warn(`⚠ NVIDIA also failed for "${brand}":`, e instanceof Error ? e.message : e);
+            }
         }
-
-        // Execute all models in parallel — allSettled so fast ones aren't blocked by slow ones
-        const perModelTimeoutMs = 15000; // 15s per model (Vercel serverless limit ~25s)
-        
-        const timedQueries = modelQueries.map(q => 
-            Promise.race([
-                q,
-                new Promise<{ text: string; model: string; modelType: "free" | "pro"; error: Error }>(
-                    (resolve) => setTimeout(() => resolve({
-                        text: "", model: "timeout", modelType: "free", error: new Error("Model timed out after 15s")
-                    }), perModelTimeoutMs)
-                )
-            ])
-        );
-
-        const settled = await Promise.allSettled(timedQueries);
-        const results = settled
-            .filter((s): s is PromiseFulfilledResult<typeof settled[0] extends PromiseSettledResult<infer T> ? T : never> => s.status === 'fulfilled')
-            .map(s => s.value);
 
         // Filter out complete failures
         const validResults = results.filter(r => !r.error || r.text.length > 0);
