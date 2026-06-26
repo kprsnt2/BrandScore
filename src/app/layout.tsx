@@ -165,6 +165,18 @@ export default function RootLayout({
                                                 Reports
                                             </a>
                                             <a
+                                                href="/arena"
+                                                className="hover:text-white transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 focus:ring-offset-gray-900 rounded hidden lg:inline"
+                                            >
+                                                Arena
+                                            </a>
+                                            <a
+                                                href="/chat"
+                                                className="hover:text-white transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 focus:ring-offset-gray-900 rounded hidden lg:inline text-purple-400 font-medium"
+                                            >
+                                                Ask AI ✨
+                                            </a>
+                                            <a
                                                 href="/dashboard"
                                                 className="px-3 py-1.5 sm:px-4 bg-gradient-to-r from-primary-500 to-purple-600 text-white rounded-lg font-medium hover:shadow-lg hover:shadow-primary-500/25 transition-all text-xs sm:text-sm"
                                             >

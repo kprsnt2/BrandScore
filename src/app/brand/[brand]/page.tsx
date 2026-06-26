@@ -3,6 +3,7 @@ import { getBrandHistory, getDb, BrandRow } from '@/lib/db';
 import { INDUSTRIES } from '@/lib/industry-data';
 import BrandLogo from '@/components/BrandLogo';
 import Link from 'next/link';
+import RashEngineButton from './RashEngineButton';
 import { notFound } from 'next/navigation';
 import { scoreColor, scoreGradient, scoreLabel } from '@/lib/ui-utils';
 
@@ -175,6 +176,7 @@ export default async function BrandPage({ params }: Props) {
               <span className={`text-xs font-medium mt-1`} style={{ color: scoreColor(latestBreakdown.score) }}>
                 {scoreLabel(latestBreakdown.score)}
               </span>
+              <RashEngineButton brand={latestBreakdown.brand} industry={latestBreakdown.industry_id} />
             </div>
           </div>
         </div>
