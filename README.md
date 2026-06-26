@@ -45,6 +45,18 @@ Enter any brand name → get real-time AI visibility analysis from multiple mode
 ### 📈 Brand Detail Pages
 Per-brand deep dives with historical trend charts (custom SVG), per-model score comparison, industry ranking context, and competitor analysis.
 
+### ⚔️ Battle Arena (Head-to-Head AI Debate)
+Pit any two brands against each other in an autonomous multi-agent showdown. The system pulls their historical data and tasks the LLM to act as three agents: Pro-Brand A, Pro-Brand B, and The Judge, outputting a real-time debate.
+
+### 💬 Ask the Data (Text-to-SQL RAG)
+A natural language chat interface that lets you ask questions about the SQLite dataset. The AI dynamically translates your English into a raw SQL query, executes it securely in memory, and formats the response conversationally.
+
+### ⚡ rAsh Engine (LLMO Strategy)
+A tailored Large Language Model Optimization strategy generator. When viewing a brand, the engine passes its score, sentiment, and recommendation metrics to the LLM to create a personalized 3-step action plan to manipulate the AI algorithm.
+
+### 📰 AI Weekly Reports
+A fully automated AI journalist script (`generate-weekly-report.ts`) that calculates the top brands and biggest movers over a 7-day window, then uses the LLM to author a 500-word professional Markdown blog post, saved to the database and rendered beautifully using Tailwind Typography.
+
 ### 🤖 Multi-Model Pipeline
 Daily automated scoring via GitHub Actions querying:
 - **NVIDIA Nemotron** (550B parameter model)
@@ -199,6 +211,10 @@ Open [http://localhost:3000](http://localhost:3000)
 | `/api/analytics` | GET | Anomaly detection, forecasting, volatility |
 | `/api/check-brand` | POST | Live AI brand analysis |
 | `/api/compare-brands` | POST | Head-to-head comparison |
+| `/api/arena` | GET | Multi-agent brand debate generation |
+| `/api/chat` | POST | Text-to-SQL RAG chat endpoint |
+| `/api/rs` | GET | rAsh Engine tailored LLMO action plans |
+| `/api/reports` | GET | Fetch AI weekly reports |
 | `/api/health` | GET | System health check |
 
 > 📖 See [docs/INTELLIGENCE.md](docs/INTELLIGENCE.md) for Intelligence API response schema
