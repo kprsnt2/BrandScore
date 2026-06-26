@@ -376,7 +376,7 @@ function DashboardInner() {
       setLoading(true);
       try {
         const [brandsRes, timelineRes] = await Promise.all([
-          fetch(`/api/brands?industry=${selectedIndustry}&model=${encodeURIComponent(selectedModel)}`),
+          fetch(`/api/brands?industry=${selectedIndustry}&model=${encodeURIComponent(selectedModel)}&top=10`),
           fetch(`/api/brands/timeline?industry=${selectedIndustry}`),
         ]);
 

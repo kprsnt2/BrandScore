@@ -103,7 +103,7 @@ export default function GalaxyPage() {
 
         const brandPromises = industries.map(async (ind: { industry_id: string; industry_name: string }) => {
           try {
-            const bRes = await fetch(`/api/brands?industry=${ind.industry_id}`);
+            const bRes = await fetch(`/api/brands?industry=${ind.industry_id}&top=10`);
             if (!bRes.ok) return [];
             const bData = await bRes.json();
             return (bData.brands || []).map((b: {

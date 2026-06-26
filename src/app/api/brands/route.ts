@@ -15,6 +15,7 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const industryId = searchParams.get('industry') || 'technology';
     const model = searchParams.get('model') || 'all';
+    const topN = searchParams.get('top') ? parseInt(searchParams.get('top')!, 10) : null;
 
     // Validate industry
     const industryMeta = INDUSTRIES.find(i => i.id === industryId);
@@ -85,7 +86,7 @@ export async function GET(request: NextRequest) {
         name: industryMeta.name,
         category: industryMeta.category,
       },
-      brands: rankedBrands,
+      brands: topN ? rankedBrands.slice(0, topN) : rankedBrands,
       industryAverage: {
         score: industryResult?.avg_score || 0,
         recommendation: industryResult?.avg_recommendation || 0,

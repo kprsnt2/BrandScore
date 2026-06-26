@@ -88,12 +88,18 @@ export async function GET() {
       current_score: number;
       prev_score: number;
     }>(db.exec(`
+      WITH RankedBrands AS (
+        SELECT brand, industry_id, score,
+               ROW_NUMBER() OVER(PARTITION BY industry_id ORDER BY score DESC) as rn
+        FROM brand_results
+        WHERE run_id = ${latestRun.id} AND model IS NULL AND score > 0
+      )
       SELECT 
         c.brand, c.industry_id, c.score as current_score, p.score as prev_score
-      FROM brand_results c
+      FROM RankedBrands c
       INNER JOIN brand_results p 
         ON p.run_id = ${prevRun.id} AND p.brand = c.brand AND p.industry_id = c.industry_id AND p.model IS NULL
-      WHERE c.run_id = ${latestRun.id} AND c.model IS NULL AND c.score > 0 AND p.score > 0
+      WHERE c.rn <= 10 AND p.score > 0
     `));
 
     // For each brand, get historical changes across all runs
@@ -229,17 +235,27 @@ export async function GET() {
       score_range: number;
       run_count: number;
     }>(db.exec(`
+      WITH TopBrands AS (
+        SELECT brand, industry_id
+        FROM (
+          SELECT brand, industry_id,
+                 ROW_NUMBER() OVER(PARTITION BY industry_id ORDER BY score DESC) as rn
+          FROM brand_results
+          WHERE run_id = ${latestRun.id} AND model IS NULL AND score > 0
+        ) WHERE rn <= 10
+      )
       SELECT 
-        brand, industry_id,
-        ROUND(AVG(score), 1) as avg_score,
-        MIN(score) as min_score,
-        MAX(score) as max_score,
-        (MAX(score) - MIN(score)) as score_range,
-        COUNT(*) as run_count
-      FROM brand_results
-      WHERE model IS NULL AND score > 0
-      GROUP BY brand, industry_id
-      HAVING COUNT(*) >= 5
+        br.brand, br.industry_id,
+        ROUND(AVG(br.score), 1) as avg_score,
+        MIN(br.score) as min_score,
+        MAX(br.score) as max_score,
+        (MAX(br.score) - MIN(br.score)) as score_range,
+        COUNT(br.score) as run_count
+      FROM brand_results br
+      INNER JOIN TopBrands tb ON br.brand = tb.brand AND br.industry_id = tb.industry_id
+      WHERE br.model IS NULL AND br.score > 0
+      GROUP BY br.brand, br.industry_id
+      HAVING COUNT(br.score) >= 5
       ORDER BY score_range DESC
       LIMIT 20
     `));
@@ -287,13 +303,31 @@ export async function GET() {
 
     if (recentRunIds.length > 0) {
       const recent = rowsToObjects<{ avg_s: number; cnt: number }>(db.exec(
-        `SELECT ROUND(AVG(score), 1) as avg_s, COUNT(DISTINCT brand) as cnt FROM brand_results WHERE run_id IN (${recentRunIds.join(',')}) AND model IS NULL AND score > 0`
+        `WITH TopBrands AS (
+          SELECT brand, industry_id FROM (
+            SELECT brand, industry_id, ROW_NUMBER() OVER(PARTITION BY industry_id ORDER BY score DESC) as rn
+            FROM brand_results WHERE run_id = ${latestRun.id} AND model IS NULL AND score > 0
+          ) WHERE rn <= 10
+         )
+         SELECT ROUND(AVG(br.score), 1) as avg_s, COUNT(DISTINCT br.brand) as cnt 
+         FROM brand_results br
+         INNER JOIN TopBrands tb ON br.brand = tb.brand AND br.industry_id = tb.industry_id
+         WHERE br.run_id IN (${recentRunIds.join(',')}) AND br.model IS NULL AND br.score > 0`
       ));
       if (recent[0]) { weeklyAvgRecent = recent[0].avg_s; weeklyBrandsRecent = recent[0].cnt; }
     }
     if (prevRunIds.length > 0) {
       const prev = rowsToObjects<{ avg_s: number; cnt: number }>(db.exec(
-        `SELECT ROUND(AVG(score), 1) as avg_s, COUNT(DISTINCT brand) as cnt FROM brand_results WHERE run_id IN (${prevRunIds.join(',')}) AND model IS NULL AND score > 0`
+        `WITH TopBrands AS (
+          SELECT brand, industry_id FROM (
+            SELECT brand, industry_id, ROW_NUMBER() OVER(PARTITION BY industry_id ORDER BY score DESC) as rn
+            FROM brand_results WHERE run_id = ${latestRun.id} AND model IS NULL AND score > 0
+          ) WHERE rn <= 10
+         )
+         SELECT ROUND(AVG(br.score), 1) as avg_s, COUNT(DISTINCT br.brand) as cnt 
+         FROM brand_results br
+         INNER JOIN TopBrands tb ON br.brand = tb.brand AND br.industry_id = tb.industry_id
+         WHERE br.run_id IN (${prevRunIds.join(',')}) AND br.model IS NULL AND br.score > 0`
       ));
       if (prev[0]) { weeklyAvgPrev = prev[0].avg_s; weeklyBrandsPrev = prev[0].cnt; }
     }
@@ -306,22 +340,30 @@ export async function GET() {
       prev_avg: number;
       change: number;
     }>(db.exec(`
+      WITH TopBrands AS (
+        SELECT brand, industry_id FROM (
+          SELECT brand, industry_id, ROW_NUMBER() OVER(PARTITION BY industry_id ORDER BY score DESC) as rn
+          FROM brand_results WHERE run_id = ${latestRun.id} AND model IS NULL AND score > 0
+        ) WHERE rn <= 10
+      )
       SELECT 
         r.brand, r.industry_id,
         ROUND(r.avg_score, 1) as recent_avg,
         ROUND(p.avg_score, 1) as prev_avg,
         ROUND(r.avg_score - p.avg_score, 1) as change
       FROM (
-        SELECT brand, industry_id, AVG(score) as avg_score 
-        FROM brand_results 
-        WHERE run_id IN (${recentRunIds.join(',')}) AND model IS NULL AND score > 0 
-        GROUP BY brand, industry_id
+        SELECT br.brand, br.industry_id, AVG(br.score) as avg_score 
+        FROM brand_results br
+        INNER JOIN TopBrands tb ON br.brand = tb.brand AND br.industry_id = tb.industry_id
+        WHERE br.run_id IN (${recentRunIds.join(',')}) AND br.model IS NULL AND br.score > 0 
+        GROUP BY br.brand, br.industry_id
       ) r
       INNER JOIN (
-        SELECT brand, industry_id, AVG(score) as avg_score 
-        FROM brand_results 
-        WHERE run_id IN (${prevRunIds.join(',')}) AND model IS NULL AND score > 0 
-        GROUP BY brand, industry_id
+        SELECT br.brand, br.industry_id, AVG(br.score) as avg_score 
+        FROM brand_results br
+        INNER JOIN TopBrands tb ON br.brand = tb.brand AND br.industry_id = tb.industry_id
+        WHERE br.run_id IN (${prevRunIds.join(',')}) AND br.model IS NULL AND br.score > 0 
+        GROUP BY br.brand, br.industry_id
       ) p ON r.brand = p.brand AND r.industry_id = p.industry_id
       ORDER BY change DESC
     `)) : [];

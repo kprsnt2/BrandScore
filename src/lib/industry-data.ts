@@ -32,25 +32,25 @@ export const INDUSTRIES: Industry[] = [
   },
   {
     id: "automotive",
-    name: "Automotive",
+    name: "Automotive (Cars & Bikes)",
     category: "automotive",
-    description: "Car, two-wheeler, and commercial vehicle manufacturers in India",
+    description: "Car manufacturers, two-wheeler brands, and electric vehicles in India",
     topBrands: [
       "Maruti Suzuki",
       "Tata Motors",
-      "Mahindra & Mahindra",
       "Hyundai India",
+      "Mahindra & Mahindra",
       "Hero MotoCorp",
       "Bajaj Auto",
-      "TVS Motor",
       "Royal Enfield",
+      "TVS Motor",
       "Kia India",
       "MG Motor India",
-      "Ashok Leyland",
       "Ola Electric",
       "Ather Energy",
-      "Tata Passenger Electric",
-      "Honda Cars India"
+      "Yamaha",
+      "Honda",
+      "Toyota India"
     ]
   },
   {
@@ -95,8 +95,8 @@ export const INDUSTRIES: Industry[] = [
       "Kalyan Jewellers",
       "Levi's India",
       "Bewakoof",
-      "boAt Lifestyle",
-      "Noise"
+      "Puma India",
+      "Nike India"
     ]
   },
   {
@@ -111,7 +111,6 @@ export const INDUSTRIES: Industry[] = [
       "Parle",
       "Haldiram's",
       "MDH Spices",
-      "Dabur",
       "Nestle India",
       "Tata Consumer Products",
       "Paper Boat",
@@ -119,7 +118,8 @@ export const INDUSTRIES: Industry[] = [
       "Bira 91",
       "Zomato",
       "Swiggy",
-      "Domino's India"
+      "Domino's India",
+      "Cafe Coffee Day"
     ]
   },
   {
@@ -361,9 +361,6 @@ export const INDUSTRIES: Industry[] = [
       "Samsung",
       "LG",
       "Sony",
-      "Xiaomi",
-      "OnePlus",
-      "Realme",
       "Boat",
       "Noise",
       "Lenovo",
@@ -372,7 +369,10 @@ export const INDUSTRIES: Industry[] = [
       "Acer",
       "Zebronics",
       "Portronics",
-      "TCL"
+      "TCL",
+      "JBL India",
+      "Sennheiser India",
+      "Bose India"
     ]
   },
   {
@@ -419,29 +419,6 @@ export const INDUSTRIES: Industry[] = [
       "Panasonic",
       "Borosil",
       "Morphy Richards"
-    ]
-  },
-  {
-    id: "two-wheelers",
-    name: "Two Wheelers",
-    category: "two-wheelers",
-    description: "Motorcycles, scooters, and electric two-wheelers in India",
-    topBrands: [
-      "Hero MotoCorp",
-      "Honda",
-      "TVS Motor",
-      "Bajaj Auto",
-      "Royal Enfield",
-      "Ola Electric",
-      "Ather Energy",
-      "Yamaha",
-      "Suzuki",
-      "KTM",
-      "Jawa",
-      "Revolt",
-      "Ultraviolette",
-      "Aprilia",
-      "Simple Energy"
     ]
   }
 ];
