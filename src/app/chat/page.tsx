@@ -61,7 +61,7 @@ export default function ChatPage() {
     } catch (err) {
       setMessages(prev => [
         ...prev,
-        { role: 'assistant', content: \`⚠️ **Error:** \${err instanceof Error ? err.message : 'Something went wrong.'}\` }
+        { role: 'assistant', content: `⚠️ **Error:** ${err instanceof Error ? err.message : 'Something went wrong.'}` }
       ]);
     } finally {
       setLoading(false);
@@ -84,13 +84,13 @@ export default function ChatPage() {
       <div className="flex-1 overflow-y-auto p-4 sm:p-6 pb-32">
         <div className="max-w-4xl mx-auto space-y-6">
           {messages.map((msg, i) => (
-            <div key={i} className={\`flex \${msg.role === 'user' ? 'justify-end' : 'justify-start'}\`}>
+            <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
               <div 
-                className={\`max-w-[90%] sm:max-w-[80%] rounded-2xl px-5 py-4 \${
+                className={`max-w-[90%] sm:max-w-[80%] rounded-2xl px-5 py-4 ${
                   msg.role === 'user' 
                     ? 'bg-blue-600 text-white rounded-tr-sm' 
                     : 'bg-white/[0.05] border border-white/10 text-gray-200 rounded-tl-sm'
-                }\`}
+                }`}
               >
                 {msg.role === 'assistant' && msg.generatedBy && (
                   <div className="text-[10px] text-gray-500 font-mono mb-2 flex items-center gap-2">
@@ -98,7 +98,7 @@ export default function ChatPage() {
                   </div>
                 )}
                 
-                <div className={\`prose prose-sm max-w-none \${msg.role === 'user' ? 'prose-invert text-white' : 'prose-invert prose-p:text-gray-300'}\`}>
+                <div className={`prose prose-sm max-w-none ${msg.role === 'user' ? 'prose-invert text-white' : 'prose-invert prose-p:text-gray-300'}`}>
                   <ReactMarkdown remarkPlugins={[remarkGfm]}>
                     {msg.content}
                   </ReactMarkdown>

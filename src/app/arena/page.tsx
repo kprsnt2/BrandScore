@@ -137,7 +137,7 @@ export default function ArenaPage() {
                         {/* Bar A */}
                         <div 
                           className="w-1/2 bg-blue-500/80 rounded-t-sm transition-all relative"
-                          style={{ height: \`\${ptA ? ptA.score : 0}%\` }}
+                          style={{ height: `${ptA ? ptA.score : 0}%` }}
                         >
                           {ptA && (
                             <div className="absolute -top-8 left-1/2 -translate-x-1/2 bg-blue-500 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 whitespace-nowrap pointer-events-none z-10 transition-opacity">
@@ -148,7 +148,7 @@ export default function ArenaPage() {
                         {/* Bar B */}
                         <div 
                           className="w-1/2 bg-red-500/80 rounded-t-sm transition-all relative"
-                          style={{ height: \`\${ptB ? ptB.score : 0}%\` }}
+                          style={{ height: `${ptB ? ptB.score : 0}%` }}
                         >
                           {ptB && (
                             <div className="absolute -top-8 left-1/2 -translate-x-1/2 bg-red-500 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 whitespace-nowrap pointer-events-none z-10 transition-opacity">
