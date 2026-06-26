@@ -207,7 +207,7 @@ export async function GET() {
       industryForecasts.push({
         industry_id,
         industry_name: meta?.name || industry_id,
-        historical: histData,
+        historical: histData.map(h => ({ date: h.run_date, avg_score: h.avg_score })),
         slope: Math.round(slope * 1000) / 1000,
         r2,
         forecast,
