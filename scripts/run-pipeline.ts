@@ -46,6 +46,14 @@ function initDatabase(dbPath: string) {
       FOREIGN KEY (run_id) REFERENCES pipeline_runs(id)
     );
 
+    CREATE TABLE IF NOT EXISTS reports (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      slug TEXT UNIQUE NOT NULL,
+      title TEXT NOT NULL,
+      content_md TEXT NOT NULL,
+      published_at TEXT DEFAULT (datetime('now'))
+    );
+
     CREATE TABLE IF NOT EXISTS brand_results (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       run_id INTEGER NOT NULL,
