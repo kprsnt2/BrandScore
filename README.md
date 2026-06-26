@@ -1,229 +1,280 @@
-# rAsh Score
+<div align="center">
 
-**Check your brand's AI visibility. See what AI models say about you and get your rAsh Score.**
+# 🔥 rAsh Score
 
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/kprsnt2/BrandPulseAI)
+### AI Brand Intelligence Platform for India
+
+**Measure how AI models perceive, recommend, and rank your brand**
+
+[![Live Demo](https://img.shields.io/badge/Live-bs.kprsnt.in-667eea?style=for-the-badge&logo=vercel&logoColor=white)](https://bs.kprsnt.in)
+[![Dashboard](https://img.shields.io/badge/Dashboard-India%20rAsh%20Index-34d399?style=for-the-badge)](https://bs.kprsnt.in/dashboard)
+[![Intelligence](https://img.shields.io/badge/Intelligence-Cross--Industry-a855f7?style=for-the-badge)](https://bs.kprsnt.in/intelligence)
+
+**285 brands · 19 industries · 61+ days of data · multi-model AI analysis**
+
+[Live Demo](https://bs.kprsnt.in) · [Architecture Docs](docs/ARCHITECTURE.md) · [Data Dictionary](docs/DATA_DICTIONARY.md) · [Changelog](docs/CHANGELOG.md)
+
+</div>
 
 ---
 
-## ✨ Features
+## What is rAsh Score?
 
-- 🔍 **Multi-Model Analysis** - Query Gemini & Claude simultaneously
-- 📊 **LLMO Score** - Get a 0-100 AI visibility score with detailed breakdown
-- 🆚 **Free vs Pro Comparison** - Compare responses between model tiers
-- ⚔️ **Competitor Analysis** - Compare your AI visibility against competitors
-- 📋 **Copy Results** - Export your analysis with one click
-- 🔒 **Rate Limited** - Protected API with 10 requests/minute limit
-- ♿ **Accessible** - Full keyboard navigation and ARIA support
+rAsh Score answers a question every brand will face: **"When someone asks an AI about your industry, does it recommend you?"**
+
+It queries multiple AI models with standardized prompts and computes a **0-100 visibility score** across four dimensions — Recommendation, Sentiment, Prominence, and Accuracy. It runs daily via GitHub Actions, building a longitudinal dataset of how AI perception changes over time.
+
+> Based on [LLM Recommendation Manipulation Research](https://kprsnt.in/blog/manipulating-llm-recommendations-brand-influence) — published research on how AI recommendations can be influenced.
 
 ---
 
-## 🚀 Quick Start
+## Key Features
+
+### 📊 India rAsh Index Dashboard
+Live dashboard tracking 285 Indian brands across 19 industries with daily score updates, rank deltas, model filtering, and export (CSV/JSON/PDF).
+
+### 🧠 Cross-Industry Intelligence
+Bird's-eye analytics page with industry leaderboard, **model bias heatmap** (how NVIDIA vs Groq perceive brands differently), top movers, score distributions with statistical analysis, and Pearson correlation matrix.
+
+### 🔍 Live Brand Check
+Enter any brand name → get real-time AI visibility analysis from multiple models with actionable optimization tips.
+
+### 📈 Brand Detail Pages
+Per-brand deep dives with historical trend charts (custom SVG), per-model score comparison, industry ranking context, and competitor analysis.
+
+### 🤖 Multi-Model Pipeline
+Daily automated scoring via GitHub Actions querying:
+- **NVIDIA Nemotron** (550B parameter model)
+- **Groq Llama 3.3** (70B, ultra-fast inference)
+- **NVIDIA GLM 5.1** (specialized for structured output)
+
+### 💡 AI-Generated Insights
+Daily narrative insights per industry — AI analyzes score movements and generates contextual analysis with chained memory (each insight references the previous day's).
+
+---
+
+## Architecture
+
+```
+GitHub Actions (Daily Cron 01:30 UTC)
+  → run-pipeline.ts (better-sqlite3)
+    → NVIDIA Nemotron API
+    → Groq API (Llama, GLM)
+  → brand-intelligence.db (SQLite)
+  → Git commit + push
+
+Vercel (Auto-deploy on push)
+  → Next.js 16 (sql.js WASM)
+    → /api/brands          (Dashboard data)
+    → /api/intelligence    (Cross-industry analytics)
+    → /api/check-brand     (Live AI analysis)
+    → /api/compare-brands  (Head-to-head)
+  → Dashboard UI
+  → Intelligence UI
+  → Brand Detail Pages (SSR + ISR)
+```
+
+> 📐 See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for full Mermaid diagrams (system, ER, pipeline)
+
+### Dual Database Strategy
+
+| Context | Library | Why |
+|---------|---------|-----|
+| Pipeline (GitHub Actions) | `better-sqlite3` (native) | Sync API, fast writes, WAL mode |
+| API Routes (Vercel) | `sql.js` (WASM) | Works in serverless, no native modules |
+
+The SQLite database is committed directly to git — Vercel reads it from the filesystem. No external database infrastructure needed.
+
+---
+
+## Tech Stack
+
+| Layer | Technology | Rationale |
+|-------|-----------|-----------|
+| **Framework** | Next.js 16, React 18, TypeScript | SSR/ISR, excellent DX |
+| **Styling** | Tailwind CSS 3.4 | Dark theme, utility-first |
+| **Animation** | Framer Motion | Smooth section transitions |
+| **Charts** | Custom SVG | Zero dependencies, full control |
+| **Database** | SQLite (sql.js + better-sqlite3) | Portable, serverless-compatible |
+| **AI Models** | NVIDIA Nemotron, Groq Llama/GLM | Multi-model bias detection |
+| **CI/CD** | GitHub Actions | Daily automated pipeline |
+| **Hosting** | Vercel | Zero-config, ISR caching |
+| **Validation** | Zod | Runtime type safety |
+
+---
+
+## Data Engineering Highlights
+
+- **ETL Pipeline**: TypeScript-based daily extraction from multiple AI APIs, transformation (JSON parsing, fuzzy brand matching, cross-model score aggregation), and loading into SQLite with transactions
+- **Statistical Computing**: Pearson correlation, median, standard deviation — all in pure TypeScript without external stats libraries
+- **SQL Analytics**: Window functions (`ROW_NUMBER`), CTEs, cross-model aggregation, rank deltas between pipeline runs
+- **Data Quality**: Fuzzy brand name matching across models, score validation, error handling with fallback chains
+- **Schema Design**: Normalized tables with dual-row pattern — `model=NULL` for aggregated scores, `model=<name>` for per-model bias analysis
+
+> 📖 See [docs/DATA_DICTIONARY.md](docs/DATA_DICTIONARY.md) for full schema documentation
+
+---
+
+## AI Engineering Highlights
+
+- **Multi-Model Orchestration**: Parallel API calls to NVIDIA + Groq with retry logic, model fallback chains, and timeout handling
+- **Structured Output Parsing**: Extracts typed JSON scores from LLM free-text responses using Zod validation
+- **Model Bias Detection**: Cross-model score comparison reveals systematic biases (e.g., NVIDIA rates Finance higher, Groq rates FMCG higher)
+- **Insight Chaining**: Daily AI-generated insights use previous day's insight as context, creating coherent narrative threads
+- **Prompt Engineering**: Standardized evaluation prompts ensure consistent cross-model comparison
+
+---
+
+## Scoring System
+
+| Dimension | Max Score | Weight | What It Measures |
+|-----------|----------|--------|-----------------|
+| **Recommendation** | 40 | 40% | How strongly AI recommends the brand |
+| **Sentiment** | 30 | 30% | Positive vs negative perception tone |
+| **Prominence** | 20 | 20% | How early and often the brand appears |
+| **Accuracy** | 10 | 10% | Factual correctness of AI's knowledge |
+| **rAsh Score** | **100** | **100%** | Composite AI visibility score |
+
+### Interpretation
+
+| Score | Rating | Meaning |
+|-------|--------|---------|
+| 85–100 | 🟢 Excellent | Brand dominates AI recommendations |
+| 70–84 | 🟢 Good | Strong AI visibility |
+| 55–69 | 🟡 Average | Decent presence, room for improvement |
+| 40–54 | 🟠 Low | Minimal AI visibility |
+| 0–39 | 🔴 Poor | Brand is largely invisible to AI |
+
+---
+
+## Quick Start
 
 ### Prerequisites
-
 - Node.js 18+
-- npm or yarn
-- Gemini API key (from [Google AI Studio](https://aistudio.google.com/))
-- Anthropic API key (from [Anthropic Console](https://console.anthropic.com/))
+- NVIDIA API key ([build.nvidia.com](https://build.nvidia.com))
+- Groq API key ([console.groq.com](https://console.groq.com))
 
 ### Installation
 
 ```bash
-# Clone the repository
-git clone https://github.com/kprsnt2/BrandPulseAI.git
-cd BrandPulseAI
+git clone https://github.com/kprsnt2/BrandScore.git
+cd BrandScore
 
-# Install dependencies
 npm install
 
-# Copy environment template
+# Configure environment
 cp .env.example .env.local
+# Add: NVIDIA_API_KEY=your_key
+# Add: GROQ_API_KEY=your_key
 
-# Add your API keys to .env.local
-# GEMINI_API_KEY=your_key
-# ANTHROPIC_API_KEY=your_key
-
-# Run development server
 npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) to see the app.
+Open [http://localhost:3000](http://localhost:3000)
 
----
-
-## 📦 Scripts
+### Available Scripts
 
 | Command | Description |
 |---------|-------------|
-| `npm run dev` | Start development server |
-| `npm run build` | Build for production |
-| `npm run start` | Start production server |
-| `npm run lint` | Run ESLint |
+| `npm run dev` | Development server |
+| `npm run build` | Production build |
+| `npm run lint` | ESLint |
 | `npm test` | Run tests |
-| `npm run test:watch` | Run tests in watch mode |
-| `npm run test:coverage` | Run tests with coverage |
-| `npm run typecheck` | Type check with TypeScript |
+| `npm run typecheck` | TypeScript type check |
 
 ---
 
-## 🔧 Configuration
+## API Reference
 
-### Environment Variables
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/api/brands` | GET | Industry brand rankings with deltas |
+| `/api/brands/search` | GET | Brand search across industries |
+| `/api/brands/timeline` | GET | Historical score data |
+| `/api/brands/insights` | GET | AI-generated daily insights |
+| `/api/intelligence` | GET | Cross-industry analytics |
+| `/api/check-brand` | POST | Live AI brand analysis |
+| `/api/compare-brands` | POST | Head-to-head comparison |
+| `/api/health` | GET | System health check |
 
-| Variable | Required | Description |
-|----------|----------|-------------|
-| `GEMINI_API_KEY` | Yes* | Google Gemini API key |
-| `ANTHROPIC_API_KEY` | Yes* | Anthropic Claude API key |
-| `RATE_LIMIT_REQUESTS` | No | Max requests per window (default: 10) |
-| `RATE_LIMIT_WINDOW_MS` | No | Rate limit window in ms (default: 60000) |
-| `CACHE_TTL_MS` | No | Cache TTL in ms (default: 300000) |
-
-*At least one API key is required.
-
----
-
-## 🏗️ Architecture
-
-```
-src/
-├── app/
-│   ├── api/
-│   │   ├── check-brand/   # Brand analysis endpoint
-│   │   └── health/        # Health check endpoint
-│   ├── globals.css        # Global styles
-│   ├── layout.tsx         # Root layout with SEO
-│   └── page.tsx           # Main page
-├── components/
-│   ├── AIResponse.tsx     # Individual AI response card
-│   ├── BrandInput.tsx     # Brand search input
-│   ├── CompetitorComparison.tsx
-│   ├── ErrorBoundary.tsx  # Error handling
-│   ├── LLMOScore.tsx      # Score display
-│   ├── LoadingSkeleton.tsx
-│   ├── ModelComparison.tsx
-│   └── Toast.tsx          # Notifications
-└── lib/
-    ├── cache.ts           # LRU cache
-    ├── claude.ts          # Anthropic client
-    ├── env.ts             # Environment validation
-    ├── gemini.ts          # Google Gemini client
-    ├── logger.ts          # Structured logging
-    ├── scoring.ts         # LLMO scoring logic
-    └── validation.ts      # Zod schemas
-```
+> 📖 See [docs/INTELLIGENCE.md](docs/INTELLIGENCE.md) for Intelligence API response schema
 
 ---
 
-## 🔌 API Reference
+## Project Structure
 
-### POST /api/check-brand
-
-Analyze a brand's AI visibility.
-
-**Request:**
-```json
-{
-  "brand": "Apple"
-}
 ```
-
-**Response:**
-```json
-{
-  "brand": "Apple",
-  "score": 85,
-  "responses": [...],
-  "breakdown": {
-    "recommendation": 35,
-    "sentiment": 28,
-    "prominence": 15,
-    "accuracy": 7
-  },
-  "tips": [...],
-  "meta": {
-    "responseTime": 2341,
-    "modelsQueried": 4,
-    "timestamp": "2026-01-27T03:30:00.000Z"
-  }
-}
-```
-
-### GET /api/health
-
-Health check endpoint.
-
-**Response:**
-```json
-{
-  "status": "ok",
-  "timestamp": "2026-01-27T03:30:00.000Z",
-  "uptime": 12345.67,
-  "services": {
-    "gemini": "configured",
-    "anthropic": "configured"
-  }
-}
+├── .github/workflows/
+│   ├── daily-pipeline.yml        # Daily brand scoring (01:30 UTC)
+│   └── daily-insights.yml        # Daily insight generation (03:00 UTC)
+├── data/
+│   └── brand-intelligence.db     # SQLite database (committed to git)
+├── docs/
+│   ├── ARCHITECTURE.md           # System architecture + Mermaid diagrams
+│   ├── DATA_DICTIONARY.md        # Tables, columns, metrics
+│   ├── INTELLIGENCE.md           # Intelligence feature docs
+│   └── CHANGELOG.md              # Version history
+├── scripts/
+│   ├── run-pipeline.ts           # Daily ETL pipeline
+│   └── run-insights.ts           # Daily insight generation
+├── src/
+│   ├── app/
+│   │   ├── api/                  # Next.js API routes
+│   │   ├── brand/[brand]/        # Dynamic brand pages (SSR)
+│   │   ├── dashboard/            # India rAsh Index
+│   │   └── intelligence/         # Cross-industry analytics
+│   ├── components/               # React components
+│   └── lib/
+│       ├── db.ts                 # Database helpers (sql.js)
+│       ├── nvidia.ts             # NVIDIA API client
+│       ├── groq.ts               # Groq API client
+│       ├── scoring.ts            # Score calculation logic
+│       ├── industry-data.ts      # 19 industry definitions
+│       ├── ui-utils.ts           # Shared score utilities
+│       ├── types.ts              # Shared TypeScript interfaces
+│       └── validation.ts         # Zod schemas
+└── package.json
 ```
 
 ---
 
-## 🚢 Deployment
+## Deployment
 
 ### Vercel (Recommended)
 
-1. Click the "Deploy with Vercel" button above
-2. Add environment variables in Vercel dashboard:
-   - `GEMINI_API_KEY`
-   - `ANTHROPIC_API_KEY`
-3. Deploy!
+The app auto-deploys from the `main` branch. The daily pipeline (GitHub Actions) pushes DB updates → triggers Vercel rebuild.
 
-### Cloudflare Pages
+Required secrets in Vercel:
+- `NVIDIA_API_KEY`
+- `GROQ_API_KEY`
 
-1. Build the project: `npm run build`
-2. Deploy the `out` directory
-3. Add environment variables in Cloudflare dashboard
-
-### Docker (Coming Soon)
-
-```dockerfile
-# Dockerfile available in the repository
-docker build -t brandpulse-ai .
-docker run -p 3000:3000 --env-file .env.local brandpulse-ai
-```
+Required secrets in GitHub:
+- `NVIDIA_API_KEY`
+- `GROQ_API_KEY`
 
 ---
 
-## 🧪 Testing
+## Research Foundation
 
-```bash
-# Run all tests
-npm test
+This project operationalizes findings from published research on AI brand visibility:
 
-# Run with coverage
-npm run test:coverage
+> **"Manipulating LLM Recommendations: Brand Influence in the Age of AI"**
+> — [Read the research](https://kprsnt.in/blog/manipulating-llm-recommendations-brand-influence)
 
-# Watch mode
-npm run test:watch
-```
+Key finding: AI models develop persistent brand preferences based on training data, and these preferences systematically influence purchase recommendations. rAsh Score quantifies this effect at scale.
 
 ---
 
-## 📚 Based On
+## Author
 
-This product is based on [LLM Recommendation Manipulation Research](https://kprsnt.in/blog/manipulating-llm-recommendations-brand-influence) showing how AI recommendations can be influenced through strategic content.
+**Prashanth Kumar Kadasi** — AI & Data Engineer
 
----
-
-## 👤 Author
-
-Built by [Prashanth Kumar Kadasi](https://kprsnt.in)
-
-- Twitter: [@kprsnt2](https://twitter.com/kprsnt2)
-- GitHub: [@kprsnt2](https://github.com/kprsnt2)
+- 🌐 [kprsnt.in](https://kprsnt.in)
+- 🐦 [@kprsnt2](https://twitter.com/kprsnt2)
+- 💻 [@kprsnt2](https://github.com/kprsnt2)
 
 ---
 
-## 📄 License
+## License
 
-MIT License - see [LICENSE](LICENSE) for details.
+MIT License — see [LICENSE](LICENSE) for details.
