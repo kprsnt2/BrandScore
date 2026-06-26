@@ -198,11 +198,11 @@ export default function ChatPage() {
         </div>
       </div>
 
-      {/* Input panel fixed at bottom */}
-      <div className="fixed bottom-0 left-0 right-0 bg-gradient-to-t from-[#07070c] via-[#07070c] to-transparent pt-12 pb-6 px-4 z-20">
+      {/* Input panel sticky at bottom */}
+      <div className="sticky bottom-0 bg-[#07070c] border-t border-white/[0.08] pt-6 pb-6 px-4 z-20">
         <div className="max-w-4xl mx-auto">
           {/* Suggestion Chips */}
-          <div className="flex gap-2 mb-4 overflow-x-auto pb-2 scrollbar-none whitespace-nowrap">
+          <div className="flex gap-2 mb-4 overflow-x-auto pb-2 no-scrollbar whitespace-nowrap">
             {SUGGESTIONS.map((sug, idx) => (
               <button
                 key={idx}

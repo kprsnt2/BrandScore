@@ -250,33 +250,40 @@ export default function ArenaPage() {
                     
                     return (
                       <div key={i} className="flex-1 h-[90%] flex flex-col justify-end group/bar relative">
+                        {/* Unified Tooltip at column group level */}
+                        {(ptA || ptB) && (
+                          <div className="absolute -top-20 left-1/2 -translate-x-1/2 bg-[#09090f]/95 border border-purple-500/30 text-white text-[10px] px-3 py-2 rounded-xl opacity-0 group-hover/bar:opacity-100 whitespace-nowrap pointer-events-none z-30 transition-all duration-200 shadow-xl shadow-black/90 font-mono min-w-[130px] flex flex-col gap-1 backdrop-blur-md">
+                            <div className="text-gray-500 border-b border-white/[0.06] pb-1 mb-0.5 text-center font-bold">
+                              {new Date((ptA || ptB)!.run_date).toLocaleDateString(undefined, {month: 'short', day: 'numeric'})}
+                            </div>
+                            {ptA && (
+                              <div className="flex justify-between items-center gap-4">
+                                <span className="text-blue-400 font-semibold">{brandA}</span>
+                                <span className="font-bold text-white bg-blue-500/10 px-1.5 py-0.5 rounded">{ptA.score}</span>
+                              </div>
+                            )}
+                            {ptB && (
+                              <div className="flex justify-between items-center gap-4">
+                                <span className="text-red-400 font-semibold">{brandB}</span>
+                                <span className="font-bold text-white bg-red-500/10 px-1.5 py-0.5 rounded">{ptB.score}</span>
+                              </div>
+                            )}
+                          </div>
+                        )}
+
                         <div className="w-full relative h-[95%] flex items-end px-[5%] gap-0.5 sm:gap-1">
                           
                           {/* Bar A */}
                           <div 
                             className="w-1/2 bg-gradient-to-t from-blue-600/30 to-blue-500 hover:to-blue-400 rounded-t-md transition-all duration-300 relative group-hover/bar:shadow-[0_0_15px_rgba(59,130,246,0.3)] cursor-pointer"
                             style={{ height: `${ptA ? ptA.score : 0}%` }}
-                          >
-                            {ptA && (
-                              <div className="absolute -top-16 left-1/2 -translate-x-1/2 bg-slate-900 border border-blue-500/20 text-white text-[11px] px-2.5 py-1.5 rounded-lg opacity-0 group-hover/bar:opacity-100 whitespace-nowrap pointer-events-none z-30 transition-all duration-200 shadow-xl shadow-black/80 font-mono">
-                                <span className="text-blue-400 font-bold">{brandA}</span>
-                                <div className="text-xs font-bold text-center mt-0.5">{ptA.score} / 100</div>
-                              </div>
-                            )}
-                          </div>
+                          />
 
                           {/* Bar B */}
                           <div 
                             className="w-1/2 bg-gradient-to-t from-red-600/30 to-red-500 hover:to-red-400 rounded-t-md transition-all duration-300 relative group-hover/bar:shadow-[0_0_15px_rgba(239,68,68,0.3)] cursor-pointer"
                             style={{ height: `${ptB ? ptB.score : 0}%` }}
-                          >
-                            {ptB && (
-                              <div className="absolute -top-16 left-1/2 -translate-x-1/2 bg-slate-900 border border-red-500/20 text-white text-[11px] px-2.5 py-1.5 rounded-lg opacity-0 group-hover/bar:opacity-100 whitespace-nowrap pointer-events-none z-30 transition-all duration-200 shadow-xl shadow-black/80 font-mono">
-                                <span className="text-red-400 font-bold">{brandB}</span>
-                                <div className="text-xs font-bold text-center mt-0.5">{ptB.score} / 100</div>
-                              </div>
-                            )}
-                          </div>
+                          />
 
                         </div>
                         <div className="h-6 mt-3 border-t border-white/[0.05] w-full flex justify-center pt-2">
@@ -292,14 +299,14 @@ export default function ArenaPage() {
               </div>
 
               {/* Quick Insight Bar */}
-              <div className="mt-8 pt-6 border-t border-white/[0.05] flex items-center justify-between text-xs text-gray-400 font-mono">
-                <span>VERDICT ADVANTAGE:</span>
+              <div className="mt-8 pt-6 border-t border-white/[0.05] flex items-center gap-3 text-xs text-gray-400 font-mono">
+                <span className="uppercase tracking-wider">Verdict Advantage:</span>
                 {avgA === avgB ? (
-                  <span className="text-purple-400 font-bold">DRAW</span>
+                  <span className="text-purple-400 font-bold bg-purple-500/10 px-2.5 py-1 border border-purple-500/20 rounded-lg">DRAW</span>
                 ) : avgA > avgB ? (
-                  <span className="text-blue-400 font-bold">+{avgA - avgB} PTS ({brandA})</span>
+                  <span className="text-blue-400 font-bold bg-blue-500/10 px-2.5 py-1 border border-blue-500/20 rounded-lg">+{avgA - avgB} PTS ({brandA})</span>
                 ) : (
-                  <span className="text-red-400 font-bold">+{avgB - avgA} PTS ({brandB})</span>
+                  <span className="text-red-400 font-bold bg-red-500/10 px-2.5 py-1 border border-red-500/20 rounded-lg">+{avgB - avgA} PTS ({brandB})</span>
                 )}
               </div>
             </div>
