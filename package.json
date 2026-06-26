@@ -1,6 +1,6 @@
 {
     "name": "rash-score",
-    "version": "1.0.0",
+    "version": "1.1.0",
     "description": "Check your brand's AI visibility. See what AI models say about you and get your rAsh Score.",
     "private": true,
     "author": {
@@ -9,9 +9,9 @@
     },
     "repository": {
         "type": "git",
-        "url": "https://github.com/kprsnt2/BrandPulseAI"
+        "url": "https://github.com/kprsnt2/BrandScore"
     },
-    "homepage": "https://brandpulse.kprsnt.in",
+    "homepage": "https://bs.kprsnt.in",
     "keywords": [
         "ai",
         "llm",
@@ -19,8 +19,8 @@
         "llmo",
         "seo",
         "ai-optimization",
-        "gemini",
-        "claude"
+        "nvidia",
+        "groq"
     ],
     "scripts": {
         "dev": "next dev",
@@ -33,12 +33,9 @@
         "typecheck": "tsc --noEmit"
     },
     "dependencies": {
-        "@anthropic-ai/sdk": "^0.26.0",
-        "@google/generative-ai": "^0.19.0",
         "@types/better-sqlite3": "^7.6.13",
         "better-sqlite3": "^12.9.0",
         "framer-motion": "^12.29.2",
-        "groq-sdk": "^0.37.0",
         "next": "^16.1.5",
         "react": "^18.3.1",
         "react-dom": "^18.3.1",

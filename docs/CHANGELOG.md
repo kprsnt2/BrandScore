@@ -5,7 +5,7 @@ All notable changes to rAsh Score are documented here.
 ## [1.1.0] - 2026-06-26
 
 ### Added
-- **Cross-Industry Intelligence page** (`/intelligence`) with:
+- Cross-Industry Intelligence page (`/intelligence`) with:
   - Industry Leaderboard — All 19 industries ranked by AI visibility score
   - Model Bias Heatmap — How NVIDIA Nemotron vs Groq models score each industry differently
   - Top Movers — Biggest score gainers and decliners across all industries
@@ -16,8 +16,24 @@ All notable changes to rAsh Score are documented here.
   - Uses SQL window functions (ROW_NUMBER) and CTEs
   - Computes Pearson correlation in pure TypeScript
   - Statistical calculations: median, standard deviation
-- **Navigation**: Added "Intelligence" link in header navigation
-- **Architecture documentation** (`docs/ARCHITECTURE.md`)
+- Navigation link to Intelligence page in header
+
+### Changed
+- Extracted shared `scoreColor`, `scoreGradient`, `scoreLabel` utilities to `src/lib/ui-utils.ts`
+- Extracted shared `StructuredModelResponse` interface to `src/lib/types.ts`
+- Bumped version to 1.1.0
+- Updated package.json: corrected repo URL, homepage, and keywords
+
+### Fixed
+- HTML export bug: `<div="summary-card">` → `<div class="summary-card">` in `export.ts`
+
+### Removed
+- Dead code: `src/lib/scheduler.ts` (in-memory scheduler, unusable on Vercel serverless)
+- Dead code: `src/app/api/scheduler/route.ts` (depended on deleted scheduler)
+- Unused dependencies: `@anthropic-ai/sdk`, `@google/generative-ai`, `groq-sdk` (app uses raw `fetch()`)
+
+### Documentation
+- Architecture documentation (`docs/ARCHITECTURE.md`)
   - System overview with Mermaid data flow diagram
   - Database ER diagram
   - Pipeline stage diagram

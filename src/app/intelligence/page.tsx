@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { INDUSTRIES } from '@/lib/industry-data';
 import Link from 'next/link';
+import { scoreColor, scoreGradient } from '@/lib/ui-utils';
 
 // ── Types ───────────────────────────────────────────────────────────
 interface IndustryLeaderboardItem {
@@ -56,21 +57,7 @@ interface IntelligenceData {
 }
 
 // ── Helpers ──────────────────────────────────────────────────────────
-function scoreColor(score: number): string {
-  if (score >= 85) return '#34d399';
-  if (score >= 70) return '#a3e635';
-  if (score >= 55) return '#facc15';
-  if (score >= 40) return '#fb923c';
-  return '#f87171';
-}
 
-function scoreGradient(score: number): string {
-  if (score >= 85) return 'from-emerald-400 to-cyan-400';
-  if (score >= 70) return 'from-lime-400 to-emerald-400';
-  if (score >= 55) return 'from-yellow-400 to-lime-400';
-  if (score >= 40) return 'from-orange-400 to-yellow-400';
-  return 'from-red-400 to-orange-400';
-}
 
 const INDUSTRY_EMOJIS: Record<string, string> = {
   technology: '💻', automotive: '🚗', ecommerce: '🛒', fashion: '👗',

@@ -5,6 +5,7 @@ import { useSearchParams, useRouter } from 'next/navigation';
 import { INDUSTRIES } from '@/lib/industry-data';
 import BrandLogo from '@/components/BrandLogo';
 import Link from 'next/link';
+import { scoreColor, scoreGradient } from '@/lib/ui-utils';
 
 interface BrandData {
   brand: string;
@@ -48,22 +49,7 @@ const CHART_COLORS = [
   '#fb923c', '#60a5fa', '#e879f9', '#4ade80', '#f87171',
 ];
 
-// Score color: red → amber → green based on value
-function scoreColor(score: number): string {
-  if (score >= 85) return '#34d399'; // emerald
-  if (score >= 70) return '#a3e635'; // lime
-  if (score >= 55) return '#facc15'; // yellow
-  if (score >= 40) return '#fb923c'; // orange
-  return '#f87171'; // red
-}
 
-function scoreGradient(score: number): string {
-  if (score >= 85) return 'from-emerald-400 to-cyan-400';
-  if (score >= 70) return 'from-lime-400 to-emerald-400';
-  if (score >= 55) return 'from-yellow-400 to-lime-400';
-  if (score >= 40) return 'from-orange-400 to-yellow-400';
-  return 'from-red-400 to-orange-400';
-}
 
 // ========== SVG Line Chart Component ==========
 function TimelineChart({ data, brands, dates }: { data: { [brand: string]: TimelineEntry[] }; brands: string[]; dates: string[] }) {

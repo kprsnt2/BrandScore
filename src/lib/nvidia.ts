@@ -100,12 +100,8 @@ async function callNvidiaAPI(
     throw lastError || new Error("All NVIDIA models failed");
 }
 
-export interface StructuredModelResponse {
-    text: string;
-    model: string;
-    modelType: "free" | "pro";
-    structured?: AIScoreResponse;
-}
+export type { StructuredModelResponse } from './types';
+import type { StructuredModelResponse } from './types';
 
 /**
  * Query NVIDIA for brand analysis with structured JSON scoring.

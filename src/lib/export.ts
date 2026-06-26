@@ -219,7 +219,7 @@ export class ReportExporter {
             <h3>${data.summary.totalIndustries}</h3>
             <p>Industries Analyzed</p>
         </div>
-        <div="summary-card">
+        <div class="summary-card">
             <h3>${data.summary.totalBrands}</h3>
             <p>Brands Covered</p>
         </div>

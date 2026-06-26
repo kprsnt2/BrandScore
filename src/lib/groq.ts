@@ -100,12 +100,8 @@ async function callGroqAPI(
     throw lastError || new Error("All Groq models failed");
 }
 
-export interface StructuredModelResponse {
-    text: string;
-    model: string;
-    modelType: "free" | "pro";
-    structured?: AIScoreResponse;
-}
+export type { StructuredModelResponse } from './types';
+import type { StructuredModelResponse } from './types';
 
 /**
  * Query Groq for brand analysis with structured JSON scoring.
