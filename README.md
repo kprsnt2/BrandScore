@@ -36,6 +36,9 @@ Live dashboard tracking 285 Indian brands across 19 industries with daily score 
 ### 🧠 Cross-Industry Intelligence
 Bird's-eye analytics page with industry leaderboard, **model bias heatmap** (how NVIDIA vs Groq perceive brands differently), top movers, score distributions with statistical analysis, and Pearson correlation matrix.
 
+### 📉 Advanced Analytics
+Anomaly detection (z-score method), **trend forecasting** (linear regression with R²), brand volatility index (coefficient of variation), weekly summary reports, and score stability analysis.
+
 ### 🔍 Live Brand Check
 Enter any brand name → get real-time AI visibility analysis from multiple models with actionable optimization tips.
 
@@ -193,6 +196,7 @@ Open [http://localhost:3000](http://localhost:3000)
 | `/api/brands/timeline` | GET | Historical score data |
 | `/api/brands/insights` | GET | AI-generated daily insights |
 | `/api/intelligence` | GET | Cross-industry analytics |
+| `/api/analytics` | GET | Anomaly detection, forecasting, volatility |
 | `/api/check-brand` | POST | Live AI brand analysis |
 | `/api/compare-brands` | POST | Head-to-head comparison |
 | `/api/health` | GET | System health check |

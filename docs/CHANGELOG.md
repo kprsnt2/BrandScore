@@ -2,6 +2,19 @@
 
 All notable changes to rAsh Score are documented here.
 
+## [1.2.0] - 2026-06-27
+
+### Added
+- **Advanced Analytics page** (`/analytics`) with:
+  - Anomaly Detection — Z-score method flagging brands with score changes >2σ from historical mean
+  - Trend Forecasting — Linear regression per industry with R², slope, and 3-day forecast
+  - Brand Volatility Index — Top 15 most unpredictable brands ranked by Coefficient of Variation
+  - Weekly Summary Report — This week vs last week performance with top improvers/decliners
+  - Score Stability Report — Donut chart showing % of brands with stable/minor/moderate/major changes
+  - Sparkline charts with forecast overlay (dashed purple line)
+- New API endpoint: `GET /api/analytics` for anomaly detection, forecasting, and volatility data
+- Navigation: added "Analytics" link in header
+
 ## [1.1.0] - 2026-06-26
 
 ### Added
