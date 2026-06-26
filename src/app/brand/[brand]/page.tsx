@@ -8,13 +8,14 @@ import { notFound } from 'next/navigation';
 import { scoreColor, scoreGradient, scoreLabel } from '@/lib/ui-utils';
 
 interface Props {
-  params: {
+  params: Promise<{
     brand: string;
-  };
+  }>;
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const decodedBrand = decodeURIComponent(params.brand);
+  const resolvedParams = await params;
+  const decodedBrand = decodeURIComponent(resolvedParams.brand);
   const formattedBrand = decodedBrand.charAt(0).toUpperCase() + decodedBrand.slice(1);
 
   return {
@@ -28,7 +29,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 export const revalidate = 3600;
 
 export default async function BrandPage({ params }: Props) {
-  const decodedBrand = decodeURIComponent(params.brand);
+  const resolvedParams = await params;
+  const decodedBrand = decodeURIComponent(resolvedParams.brand);
   const data = await getBrandHistory(decodedBrand);
 
   if (!data.latestBreakdown) {
