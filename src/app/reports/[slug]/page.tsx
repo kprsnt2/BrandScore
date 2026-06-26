@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, use } from 'react';
 import Link from 'next/link';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
@@ -12,7 +12,8 @@ interface Report {
   published_at: string;
 }
 
-export default function ReportDetailPage({ params }: { params: { slug: string } }) {
+export default function ReportDetailPage({ params }: { params: Promise<{ slug: string }> }) {
+  const { slug } = use(params);
   const [report, setReport] = useState<Report | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -20,7 +21,7 @@ export default function ReportDetailPage({ params }: { params: { slug: string } 
   useEffect(() => {
     async function fetchReport() {
       try {
-        const res = await fetch(`/api/reports/${params.slug}`);
+        const res = await fetch(`/api/reports/${slug}`);
         if (!res.ok) throw new Error('Report not found');
         const data = await res.json();
         setReport(data.report);
@@ -31,7 +32,7 @@ export default function ReportDetailPage({ params }: { params: { slug: string } 
       }
     }
     fetchReport();
-  }, [params.slug]);
+  }, [slug]);
 
   if (loading) {
     return (

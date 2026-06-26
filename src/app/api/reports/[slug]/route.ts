@@ -3,9 +3,9 @@ import { getDb } from '@/lib/db';
 
 export const revalidate = 3600;
 
-export async function GET(request: NextRequest, { params }: { params: { slug: string } }) {
+export async function GET(request: NextRequest, { params }: { params: Promise<{ slug: string }> }) {
   try {
-    const slug = params.slug;
+    const { slug } = await params;
     const db = await getDb();
     
     // Create table if not exists (in case it's not yet created by pipeline)
