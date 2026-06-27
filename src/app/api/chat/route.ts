@@ -5,39 +5,68 @@ import { generateInsight } from '@/lib/insights';
 const SCHEMA = `
 TABLE pipeline_runs (
   id INTEGER PRIMARY KEY,
-  run_date TEXT,
+  run_date TEXT NOT NULL,
+  total_industries INTEGER,
   total_brands INTEGER,
-  average_score REAL
+  successful_brands INTEGER,
+  average_score REAL,
+  highest_score INTEGER,
+  lowest_score INTEGER,
+  total_time_ms INTEGER,
+  created_at TEXT
 )
 TABLE industry_results (
   id INTEGER PRIMARY KEY,
-  run_id INTEGER, -- FK to pipeline_runs
-  industry_id TEXT,
-  industry_name TEXT,
-  avg_score REAL
+  run_id INTEGER NOT NULL, -- FK to pipeline_runs
+  industry_id TEXT NOT NULL,
+  industry_name TEXT NOT NULL,
+  avg_score REAL,
+  avg_recommendation REAL,
+  avg_sentiment REAL,
+  avg_prominence REAL,
+  avg_accuracy REAL,
+  total_brands INTEGER,
+  successful_brands INTEGER,
+  response_time_ms INTEGER,
+  error TEXT
 )
 TABLE brand_results (
   id INTEGER PRIMARY KEY,
-  run_id INTEGER, -- FK to pipeline_runs
-  industry_id TEXT,
-  brand TEXT,
-  score REAL,
-  recommendation REAL,
-  sentiment REAL,
+  run_id INTEGER NOT NULL, -- FK to pipeline_runs
+  industry_id TEXT NOT NULL,
+  brand TEXT NOT NULL,
+  category TEXT,
+  score INTEGER,
+  recommendation INTEGER,
+  sentiment INTEGER,
+  prominence INTEGER,
+  accuracy INTEGER,
+  response_time_ms INTEGER,
+  error TEXT,
   model TEXT -- NULL means aggregated across all models
 )
-TABLE reports (
-  slug TEXT,
-  title TEXT,
-  published_at TEXT
+TABLE industry_insights (
+  id INTEGER PRIMARY KEY,
+  industry_id TEXT NOT NULL,
+  insight_date TEXT NOT NULL,
+  insight_text TEXT NOT NULL,
+  generated_by TEXT NOT NULL,
+  previous_insight_id INTEGER,
+  created_at TEXT
 )
 `;
+
+const MAX_MESSAGE_LENGTH = 500;
 
 export async function POST(request: NextRequest) {
   try {
     const { message } = await request.json();
-    if (!message) {
+    if (!message || typeof message !== 'string') {
       return NextResponse.json({ error: 'Message is required' }, { status: 400 });
+    }
+
+    if (message.length > MAX_MESSAGE_LENGTH) {
+      return NextResponse.json({ error: `Message too long (max ${MAX_MESSAGE_LENGTH} characters)` }, { status: 400 });
     }
 
     // Step 1: Text-to-SQL

@@ -49,40 +49,47 @@ export default function ArenaPage() {
   // Parse debate sections
   const parsedDebate = results ? parseDebate(results.debateMarkdown, brandA, brandB) : null;
 
-  function parseDebate(markdown: string, a: string, b: string) {
+  function parseDebate(markdown: string, _a: string, _b: string) {
     if (!markdown) return null;
-    const sections = markdown.split(/(?=###\s+)/g);
-    let agentAContent = '';
-    let agentBContent = '';
-    let judgeContent = '';
-
-    sections.forEach(sec => {
-      const trimmed = sec.trim();
-      if (!trimmed) return;
-
-      if (trimmed.startsWith('###')) {
-        const firstLineEnd = trimmed.indexOf('\n');
-        if (firstLineEnd === -1) return;
-        const header = trimmed.substring(0, firstLineEnd).replace(/###/g, '').trim().toLowerCase();
-        const content = trimmed.substring(firstLineEnd).trim();
-
-        if (header.includes('judge') || header.includes('verdict')) {
-          judgeContent = content;
-        } else if (header.includes(a.toLowerCase()) || header.includes('pro-a') || (!agentAContent && !header.includes(b.toLowerCase()))) {
-          agentAContent = content;
-        } else {
-          agentBContent = content;
-        }
-      }
-    });
-
-    if (!agentAContent && !agentBContent && !judgeContent) {
+    const sections = markdown.split(/(?=###\s+)/g).filter(s => s.trim());
+    
+    if (sections.length < 3) {
+      // Not enough sections to parse reliably
       return null;
     }
+
+    // Extract content from each section (skip the ### header line)
+    function extractContent(sec: string): string {
+      const trimmed = sec.trim();
+      const firstLineEnd = trimmed.indexOf('\n');
+      if (firstLineEnd === -1) return '';
+      return trimmed.substring(firstLineEnd).trim();
+    }
+
+    // Check if a section header contains judge/verdict keywords
+    function isJudgeSection(sec: string): boolean {
+      const header = sec.split('\n')[0].toLowerCase();
+      return header.includes('judge') || header.includes('verdict');
+    }
+
+    // Strategy: find the judge section first (usually last), assign others by order
+    const judgeIdx = sections.findIndex(isJudgeSection);
+    
+    if (judgeIdx >= 0) {
+      // Judge found — the other two sections are A and B in order
+      const nonJudge = sections.filter((_, i) => i !== judgeIdx);
+      return {
+        agentA: extractContent(nonJudge[0] || ''),
+        agentB: extractContent(nonJudge[1] || ''),
+        judge: extractContent(sections[judgeIdx])
+      };
+    }
+
+    // Fallback: assume order is A, B, Judge
     return {
-      agentA: agentAContent,
-      agentB: agentBContent,
-      judge: judgeContent
+      agentA: extractContent(sections[0]),
+      agentB: extractContent(sections[1]),
+      judge: extractContent(sections[2])
     };
   }
 

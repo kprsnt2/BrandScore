@@ -20,9 +20,9 @@ export async function GET(request: NextRequest) {
     const safeBrand = brand.replace(/'/g, "''");
     
     const result = db.exec(`
-      SELECT score, recommendation, sentiment
+      SELECT score, recommendation, sentiment, prominence, accuracy
       FROM brand_results
-      WHERE brand = '${safeBrand}' AND model IS NULL
+      WHERE brand = '${safeBrand}' AND model IS NULL AND score > 0
       ORDER BY run_id DESC
       LIMIT 1
     `);
@@ -35,17 +35,26 @@ export async function GET(request: NextRequest) {
     const score = row[0] as number;
     const recommendation = row[1] as number;
     const sentiment = row[2] as number;
+    const prominence = row[3] as number;
+    const accuracy = row[4] as number;
 
     const prompt = `You are the "rAsh Engine", an elite SEO and LLMO (Large Language Model Optimization) strategist.
 Your client is the brand "${brand}" in the "${industry}" industry.
 
 Their current AI Visibility Metrics:
 - Overall Score: ${score}/100
-- Recommendation Rate: ${recommendation}%
-- Sentiment Score: ${sentiment}%
+- Recommendation Rate: ${recommendation}% (how often AI models recommend this brand)
+- Sentiment Score: ${sentiment}% (overall reputation & tone in AI responses)
+- Prominence Score: ${prominence}% (brand visibility & recognition in AI)
+- Accuracy Score: ${accuracy}% (data confidence level)
 
 Write a highly actionable, 3-step action plan on how this brand can manipulate or improve its visibility in Large Language Models.
-If sentiment is low, suggest reputation management. If recommendation is low, suggest product comparisons. If everything is high, suggest defensive moat strategies.
+Consider these rules:
+- If sentiment is low (<50%), prioritize reputation management and PR strategies.
+- If recommendation is low (<50%), suggest product comparison positioning and review seeding.
+- If prominence is low (<50%), suggest content marketing and knowledge graph optimization.
+- If accuracy is low (<50%), suggest authoritative source building and structured data improvements.
+- If everything is high (>70%), suggest defensive moat strategies to maintain dominance.
 
 Output ONLY the action plan formatted in clean Markdown. Start directly with the first step (e.g., "### Step 1: ..."). Use bold text for emphasis. Do not include introductory text.`;
 
@@ -53,7 +62,7 @@ Output ONLY the action plan formatted in clean Markdown. Start directly with the
 
     return NextResponse.json({
       plan: text,
-      metrics: { score, recommendation, sentiment },
+      metrics: { score, recommendation, sentiment, prominence, accuracy },
       generatedBy,
     });
   } catch (error) {

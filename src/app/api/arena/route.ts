@@ -24,7 +24,7 @@ export async function GET(request: NextRequest) {
       SELECT br.brand, br.score, br.recommendation, br.sentiment, pr.run_date
       FROM brand_results br
       JOIN pipeline_runs pr ON br.run_id = pr.id
-      WHERE br.brand IN ('${safeBrandA}', '${safeBrandB}') AND br.model IS NULL AND br.score > 0
+      WHERE (br.brand COLLATE NOCASE = '${safeBrandA}' OR br.brand COLLATE NOCASE = '${safeBrandB}') AND br.model IS NULL AND br.score > 0
       ORDER BY pr.run_date ASC
     `);
 
@@ -39,8 +39,8 @@ export async function GET(request: NextRequest) {
       return obj as { brand: string; score: number; recommendation: number; sentiment: number; run_date: string };
     });
 
-    const dataA = history.filter(h => h.brand === brandA);
-    const dataB = history.filter(h => h.brand === brandB);
+    const dataA = history.filter(h => h.brand.toLowerCase() === brandA.toLowerCase());
+    const dataB = history.filter(h => h.brand.toLowerCase() === brandB.toLowerCase());
 
     if (dataA.length === 0 || dataB.length === 0) {
       return NextResponse.json({ error: 'One or both brands have no data' }, { status: 404 });
