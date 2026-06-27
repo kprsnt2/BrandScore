@@ -15,10 +15,10 @@ export const metadata: Metadata = {
   openGraph: {
     title: 'Cross-Industry Intelligence | AI Brand Analytics',
     description: 'Analyze AI brand visibility across all 19 Indian industries. Compare model biases, discover top movers, and explore score distributions.',
-    url: 'https://brandscore.kprsnt.in/intelligence',
+    url: 'https://rashscore.live/intelligence',
   },
   alternates: {
-    canonical: 'https://brandscore.kprsnt.in/intelligence',
+    canonical: 'https://rashscore.live/intelligence',
   },
 };
 
@@ -27,7 +27,7 @@ const jsonLd = {
   '@type': 'Dataset',
   name: 'India AI Brand Intelligence — Cross-Industry Analysis',
   description: 'A cross-industry analysis of 285 Indian brands across 19 industries, comparing AI model biases, score distributions, and trend movements.',
-  url: 'https://brandscore.kprsnt.in/intelligence',
+  url: 'https://rashscore.live/intelligence',
   keywords: ['AI brand intelligence', 'cross-industry analysis', 'model bias', 'AI visibility'],
   creator: {
     '@type': 'Organization',

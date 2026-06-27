@@ -6,9 +6,9 @@ export const metadata: Metadata = {
   openGraph: {
     title: 'Brand Galaxy | rAsh Score',
     description: 'An interactive universe of AI brand visibility. Every star is a real brand.',
-    url: 'https://brandscore.kprsnt.in/galaxy',
+    url: 'https://rashscore.live/galaxy',
   },
-  alternates: { canonical: 'https://brandscore.kprsnt.in/galaxy' },
+  alternates: { canonical: 'https://rashscore.live/galaxy' },
 };
 
 export default function GalaxyLayout({ children }: { children: React.ReactNode }) {

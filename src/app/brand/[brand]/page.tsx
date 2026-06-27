@@ -4,6 +4,7 @@ import { INDUSTRIES } from '@/lib/industry-data';
 import BrandLogo from '@/components/BrandLogo';
 import Link from 'next/link';
 import RashEngineButton from './RashEngineButton';
+import ShareBrandButton from './ShareBrandButton';
 import { notFound } from 'next/navigation';
 import { scoreColor, scoreGradient, scoreLabel } from '@/lib/ui-utils';
 
@@ -163,6 +164,7 @@ export default async function BrandPage({ params }: Props) {
                 <h1 className="text-4xl sm:text-6xl font-bold text-white tracking-tight">
                   {latestBreakdown.brand}
                 </h1>
+                <ShareBrandButton brand={latestBreakdown.brand} score={latestBreakdown.score} />
               </div>
               <p className="text-gray-400">AI Visibility Deep Dive</p>
             </div>

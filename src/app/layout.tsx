@@ -3,6 +3,7 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import { ToastProvider } from "@/components/Toast";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
+import NavHeader from "@/components/NavHeader";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -13,7 +14,7 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
-    metadataBase: new URL("https://brandscore.kprsnt.in"),
+    metadataBase: new URL("https://rashscore.live"),
     title: {
         default: "rAsh Score - Check Your Brand's AI Visibility",
         template: "%s | rAsh Score",
@@ -49,7 +50,7 @@ export const metadata: Metadata = {
     openGraph: {
         type: "website",
         locale: "en_US",
-        url: "https://brandscore.kprsnt.in",
+        url: "https://rashscore.live",
         siteName: "rAsh Score",
         title: "rAsh Score - Check Your Brand's AI Visibility",
         description:
@@ -72,7 +73,7 @@ export const metadata: Metadata = {
         creator: "@kprsnt2",
     },
     alternates: {
-        canonical: "https://brandscore.kprsnt.in",
+        canonical: "https://rashscore.live",
     },
     category: "Technology",
 };
@@ -84,7 +85,7 @@ const jsonLd = {
     name: "rAsh Score",
     description:
         "Check your brand's visibility in AI models like NVIDIA Nemotron and Groq. Get your rAsh Score.",
-    url: "https://brandscore.kprsnt.in",
+    url: "https://rashscore.live",
     applicationCategory: "BusinessApplication",
     operatingSystem: "Any",
     offers: {
@@ -124,68 +125,7 @@ export default function RootLayout({
                                 Skip to main content
                             </a>
 
-                            {/* Header */}
-                            <header className="border-b border-gray-800 backdrop-blur-sm bg-gray-900/50 sticky top-0 z-50">
-                                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                                    <div className="flex justify-between items-center py-3 sm:py-4">
-                                        <a href="/" className="flex items-center gap-2 shrink-0" aria-label="rAsh Score Home">
-                                            <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-gradient-to-br from-primary-500 to-purple-600 flex items-center justify-center">
-                                                <span className="text-white font-bold text-xs sm:text-sm">rS</span>
-                                            </div>
-                                            <span className="font-bold text-base sm:text-xl gradient-text hidden sm:block">rAsh Score</span>
-                                        </a>
-                                        <nav className="flex gap-3 sm:gap-6 text-xs sm:text-sm text-gray-400 items-center overflow-x-auto whitespace-nowrap" aria-label="Main navigation">
-                                            <a href="#features" className="hover:text-white transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 focus:ring-offset-gray-900 rounded hidden sm:inline">
-                                                How it Works
-                                            </a>
-                                            <a
-                                                href="https://kprsnt.in"
-                                                target="_blank"
-                                                rel="noopener noreferrer"
-                                                className="hover:text-white transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 focus:ring-offset-gray-900 rounded hidden xs:inline"
-                                            >
-                                                About
-                                            </a>
-                                            <a
-                                                href="/intelligence"
-                                                className="hover:text-white transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 focus:ring-offset-gray-900 rounded hidden sm:inline"
-                                            >
-                                                Intelligence
-                                            </a>
-                                            <a
-                                                href="/analytics"
-                                                className="hover:text-white transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 focus:ring-offset-gray-900 rounded hidden sm:inline"
-                                            >
-                                                Analytics
-                                            </a>
-                                            <a
-                                                href="/reports"
-                                                className="hover:text-white transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 focus:ring-offset-gray-900 rounded hidden sm:inline"
-                                            >
-                                                Reports
-                                            </a>
-                                            <a
-                                                href="/arena"
-                                                className="hover:text-white transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 focus:ring-offset-gray-900 rounded hidden lg:inline"
-                                            >
-                                                Arena
-                                            </a>
-                                            <a
-                                                href="/chat"
-                                                className="hover:text-white transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 focus:ring-offset-gray-900 rounded hidden lg:inline text-purple-400 font-medium"
-                                            >
-                                                Ask AI ✨
-                                            </a>
-                                            <a
-                                                href="/dashboard"
-                                                className="px-3 py-1.5 sm:px-4 bg-gradient-to-r from-primary-500 to-purple-600 text-white rounded-lg font-medium hover:shadow-lg hover:shadow-primary-500/25 transition-all text-xs sm:text-sm"
-                                            >
-                                                🇮🇳 India rAsh Index
-                                            </a>
-                                        </nav>
-                                    </div>
-                                </div>
-                            </header>
+                            <NavHeader />
 
                             {/* Main Content */}
                             <main id="main-content" className="flex-grow" role="main">

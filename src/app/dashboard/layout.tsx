@@ -15,10 +15,10 @@ export const metadata: Metadata = {
   openGraph: {
     title: 'India rAsh Index | AI Visibility Scores & Ranks',
     description: 'View the AI visibility rankings and rAsh Scores for top Indian brands across 19 industries.',
-    url: 'https://brandscore.kprsnt.in/dashboard',
+    url: 'https://rashscore.live/dashboard',
   },
   alternates: {
-    canonical: 'https://brandscore.kprsnt.in/dashboard',
+    canonical: 'https://rashscore.live/dashboard',
   },
 };
 
@@ -27,7 +27,7 @@ const jsonLd = {
   '@type': 'Dataset',
   name: 'India AI Visibility Index',
   description: 'A comprehensive dataset ranking Indian brands across 19 industries based on their visibility and sentiment in top AI models.',
-  url: 'https://brandscore.kprsnt.in/dashboard',
+  url: 'https://rashscore.live/dashboard',
   keywords: ['rAsh scores', 'AI visibility index', 'market leaders', 'industry brand ranks'],
   creator: {
     '@type': 'Organization',

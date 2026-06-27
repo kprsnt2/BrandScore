@@ -15,10 +15,10 @@ export const metadata: Metadata = {
   openGraph: {
     title: 'Advanced Analytics | rAsh Score',
     description: 'Anomaly detection, trend forecasting, and brand volatility analysis across Indian industries.',
-    url: 'https://brandscore.kprsnt.in/analytics',
+    url: 'https://rashscore.live/analytics',
   },
   alternates: {
-    canonical: 'https://brandscore.kprsnt.in/analytics',
+    canonical: 'https://rashscore.live/analytics',
   },
 };
 
@@ -27,7 +27,7 @@ const jsonLd = {
   '@type': 'Dataset',
   name: 'India AI Brand Analytics — Advanced Statistical Analysis',
   description: 'Anomaly detection, trend forecasting, and volatility analysis of AI brand visibility across 19 Indian industries.',
-  url: 'https://brandscore.kprsnt.in/analytics',
+  url: 'https://rashscore.live/analytics',
   creator: { '@type': 'Organization', name: 'rAsh Score' },
 };
 

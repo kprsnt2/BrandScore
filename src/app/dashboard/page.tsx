@@ -362,8 +362,8 @@ function DashboardInner() {
     if (!industryData) return;
     const industryMeta = INDUSTRIES.find(i => i.id === selectedIndustry);
     const top3Text = industryData.brands.slice(0, 3).map((b, i) => `${i+1}. ${b.brand} (${b.score})`).join('\n');
-    const url = `https://bs.kprsnt.in/dashboard?industry=${selectedIndustry}`;
-    const text = `?? Top 3 ${industryMeta?.name} Brands in India AI Search:\n\n${top3Text}\n\n?? ${url}`;
+    const url = `${window.location.origin}/dashboard?industry=${selectedIndustry}`;
+    const text = `🏆 Top 3 ${industryMeta?.name} Brands in India AI Search:\n\n${top3Text}\n\n📊 ${url}`;
     navigator.clipboard.writeText(text);
     setCopied(true);
     setTimeout(() => setCopied(false), 2500);
@@ -573,38 +573,82 @@ function DashboardInner() {
                     {rankedBrands.map(b => <option key={b.brand} value={b.brand}>{b.brand} (Score: {b.score})</option>)}
                   </select>
                 </div>
-                {brand1 && brand2 && brand1 !== brand2 && (
-                  <div className="mt-6 pt-6 border-t border-white/5">
-                    {(() => {
-                      const b1 = rankedBrands.find(b => b.brand === brand1)!;
-                      const b2 = rankedBrands.find(b => b.brand === brand2)!;
-                      const diff = b1.score - b2.score;
-                      return (
-                        <div className="text-center">
-                          <div className="inline-block px-4 py-1.5 rounded-full bg-white/5 border border-white/10 text-sm font-medium mb-4">
-                            Advantage: <span className={diff > 0 ? 'text-primary-400' : diff < 0 ? 'text-purple-400' : 'text-gray-400'}>{Math.abs(diff)} points to {diff > 0 ? b1.brand : diff < 0 ? b2.brand : 'Tie'}</span>
-                          </div>
-                          <div className="grid grid-cols-2 gap-8 max-w-2xl mx-auto">
-                            <div className="space-y-3 text-right border-r border-white/5 pr-8">
-                              <h4 className="text-lg font-bold text-primary-400">{b1.brand}</h4>
-                              <div className="text-sm text-gray-400">Rec: <span className="text-white">{b1.breakdown.recommendation}</span></div>
-                              <div className="text-sm text-gray-400">Sent: <span className="text-white">{b1.breakdown.sentiment}</span></div>
-                              <div className="text-sm text-gray-400">Prom: <span className="text-white">{b1.breakdown.prominence}</span></div>
-                              <div className="text-sm text-gray-400">Acc: <span className="text-white">{b1.breakdown.accuracy}</span></div>
-                            </div>
-                            <div className="space-y-3 text-left pl-8">
-                              <h4 className="text-lg font-bold text-purple-400">{b2.brand}</h4>
-                              <div className="text-sm text-gray-400"><span className="text-white">{b2.breakdown.recommendation}</span> :Rec</div>
-                              <div className="text-sm text-gray-400"><span className="text-white">{b2.breakdown.sentiment}</span> :Sent</div>
-                              <div className="text-sm text-gray-400"><span className="text-white">{b2.breakdown.prominence}</span> :Prom</div>
-                              <div className="text-sm text-gray-400"><span className="text-white">{b2.breakdown.accuracy}</span> :Acc</div>
-                            </div>
-                          </div>
+                {brand1 && brand2 && brand1 !== brand2 && (() => {
+                  const b1 = rankedBrands.find(b => b.brand === brand1)!;
+                  const b2 = rankedBrands.find(b => b.brand === brand2)!;
+                  if (!b1 || !b2) return null;
+                  const diff = b1.score - b2.score;
+                  const metrics = [
+                    { label: 'Recommendation', key: 'recommendation' as const, max: 40, color1: '#22d3ee', color2: '#a78bfa' },
+                    { label: 'Sentiment', key: 'sentiment' as const, max: 30, color1: '#22d3ee', color2: '#a78bfa' },
+                    { label: 'Prominence', key: 'prominence' as const, max: 20, color1: '#22d3ee', color2: '#a78bfa' },
+                    { label: 'Accuracy', key: 'accuracy' as const, max: 10, color1: '#22d3ee', color2: '#a78bfa' },
+                  ];
+                  return (
+                    <div className="mt-6 pt-6 border-t border-white/5">
+                      {/* Score advantage badge */}
+                      <div className="text-center mb-6">
+                        <div className="inline-block px-4 py-1.5 rounded-full bg-white/5 border border-white/10 text-sm font-medium">
+                          Advantage: <span className={diff > 0 ? 'text-primary-400' : diff < 0 ? 'text-purple-400' : 'text-gray-400'}>{Math.abs(diff)} points to {diff > 0 ? b1.brand : diff < 0 ? b2.brand : 'Tie'}</span>
                         </div>
-                      );
-                    })()}
-                  </div>
-                )}
+                      </div>
+
+                      {/* Overall Score comparison */}
+                      <div className="grid grid-cols-3 items-center gap-4 mb-6 px-2">
+                        <div className="text-right">
+                          <div className="text-3xl font-bold tabular-nums" style={{ color: scoreColor(b1.score) }}>{b1.score}</div>
+                          <div className="text-xs text-gray-400 font-medium truncate">{b1.brand}</div>
+                        </div>
+                        <div className="text-center text-[10px] text-gray-600 uppercase tracking-widest font-bold">Overall</div>
+                        <div className="text-left">
+                          <div className="text-3xl font-bold tabular-nums" style={{ color: scoreColor(b2.score) }}>{b2.score}</div>
+                          <div className="text-xs text-gray-400 font-medium truncate">{b2.brand}</div>
+                        </div>
+                      </div>
+
+                      {/* Visual metric bars */}
+                      <div className="space-y-3">
+                        {metrics.map(m => {
+                          const v1 = b1.breakdown[m.key];
+                          const v2 = b2.breakdown[m.key];
+                          const pct1 = (v1 / m.max) * 100;
+                          const pct2 = (v2 / m.max) * 100;
+                          return (
+                            <div key={m.key} className="grid grid-cols-[1fr_auto_1fr] items-center gap-3">
+                              {/* Brand 1 bar (right-aligned) */}
+                              <div className="flex items-center gap-2 justify-end">
+                                <span className="text-xs tabular-nums font-semibold text-white">{v1}<span className="text-gray-600">/{m.max}</span></span>
+                                <div className="w-28 sm:w-40 h-2 bg-white/[0.03] rounded-full overflow-hidden flex justify-end">
+                                  <div className="h-full rounded-full transition-all duration-500" style={{ width: `${pct1}%`, backgroundColor: m.color1 }} />
+                                </div>
+                              </div>
+                              {/* Label */}
+                              <span className="text-[10px] text-gray-500 uppercase tracking-wider font-medium w-24 text-center">{m.label}</span>
+                              {/* Brand 2 bar (left-aligned) */}
+                              <div className="flex items-center gap-2">
+                                <div className="w-28 sm:w-40 h-2 bg-white/[0.03] rounded-full overflow-hidden">
+                                  <div className="h-full rounded-full transition-all duration-500" style={{ width: `${pct2}%`, backgroundColor: m.color2 }} />
+                                </div>
+                                <span className="text-xs tabular-nums font-semibold text-white">{v2}<span className="text-gray-600">/{m.max}</span></span>
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+
+                      {/* Arena CTA */}
+                      <div className="mt-6 pt-4 border-t border-white/[0.04] text-center">
+                        <Link
+                          href={`/arena`}
+                          className="inline-flex items-center gap-2 px-5 py-2 bg-gradient-to-r from-blue-600/10 via-purple-600/10 to-red-600/10 border border-purple-500/20 hover:border-purple-500/40 text-purple-300 hover:text-purple-200 text-xs font-bold uppercase tracking-wider rounded-xl transition-all hover:shadow-lg hover:shadow-purple-500/10"
+                        >
+                          <span>⚔️</span>
+                          <span>Take to Battle Arena for AI Debate</span>
+                        </Link>
+                      </div>
+                    </div>
+                  );
+                })()}
               </div>
             )}
             {/* Top 3 Podium */}
