@@ -133,31 +133,31 @@ export default function RootLayout({
                             </main>
 
                             {/* Footer */}
-                            <footer className="border-t border-gray-800 py-8 text-center text-gray-500 text-sm">
+                            <footer className="border-t py-10 text-center text-sm" style={{ borderColor: 'var(--rs-border)', color: 'var(--rs-text-muted)' }}>
                                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                                    <p>
+                                    <p style={{ color: 'var(--rs-text-secondary)' }}>
                                         Built by{" "}
                                         <a
                                             href="https://kprsnt.in"
-                                            className="text-primary-400 hover:underline focus:outline-none focus:ring-2 focus:ring-primary-500 rounded"
+                                            className="text-primary-400 hover:text-primary-300 hover:underline underline-offset-2 transition-colors"
                                             target="_blank"
                                             rel="noopener noreferrer"
                                         >
                                             Prashanth Kumar Kadasi
                                         </a>
                                     </p>
-                                    <p className="mt-1">
+                                    <p className="mt-1.5" style={{ color: 'var(--rs-text-secondary)' }}>
                                         Based on{" "}
                                         <a
                                             href="https://kprsnt.in/blog/manipulating-llm-recommendations-brand-influence"
-                                            className="text-primary-400 hover:underline focus:outline-none focus:ring-2 focus:ring-primary-500 rounded"
+                                            className="text-primary-400 hover:text-primary-300 hover:underline underline-offset-2 transition-colors"
                                             target="_blank"
                                             rel="noopener noreferrer"
                                         >
                                             LLM Manipulation Research
                                         </a>
                                     </p>
-                                    <p className="mt-4 text-gray-600">
+                                    <p className="mt-5 text-xs" style={{ color: 'var(--rs-text-faint)' }}>
                                         © {new Date().getFullYear()} rAsh Score. All rights reserved.
                                     </p>
                                 </div>

@@ -60,7 +60,7 @@ function TimelineChart({ data, brands, dates }: { data: { [brand: string]: Timel
 
   if (dates.length <= 1) {
     return (
-      <div className="flex flex-col items-center justify-center h-[260px] border border-dashed border-white/10 rounded-xl bg-white/[0.01]">
+      <div className="flex flex-col items-center justify-center h-[260px] border border-dashed rounded-xl" style={{ borderColor: 'var(--rs-border-hover)', background: 'var(--rs-bg-surface)' }}>
         <span className="px-3 py-1 bg-purple-500/20 text-purple-300 text-xs font-semibold rounded-full mb-3 uppercase tracking-widest border border-purple-500/30">New Industry</span>
         <p className="text-gray-400 text-sm">Historical trends will appear after the next pipeline run.</p>
       </div>
@@ -132,7 +132,7 @@ function TimelineChart({ data, brands, dates }: { data: { [brand: string]: Timel
               {points.map((p, pi) => (
                 <circle
                   key={pi} cx={p.x} cy={p.y} r="4" fill={color} stroke="#0a0a0f" strokeWidth="2"
-                  className="cursor-pointer"
+                  className="cursor-pointer" style={{ stroke: 'var(--rs-bg-base)' }}
                   onMouseEnter={() => setTooltip({ x: p.x, y: p.y, brand, score: p.score, date: p.date })}
                   onMouseLeave={() => setTooltip(null)}
                 />
@@ -145,8 +145,8 @@ function TimelineChart({ data, brands, dates }: { data: { [brand: string]: Timel
       {/* Tooltip */}
       {tooltip && (
         <div
-          className="absolute pointer-events-none bg-gray-900 border border-white/10 rounded-lg px-3 py-2 text-xs shadow-xl z-10"
-          style={{ left: `${(tooltip.x / W) * 100}%`, top: `${(tooltip.y / H) * 100 - 15}%`, transform: 'translate(-50%, -100%)' }}
+          className="absolute pointer-events-none rounded-lg px-3 py-2 text-xs shadow-xl z-10"
+          style={{ background: 'var(--rs-bg-elevated)', border: '1px solid var(--rs-border-hover)', left: `${(tooltip.x / W) * 100}%`, top: `${(tooltip.y / H) * 100 - 15}%`, transform: 'translate(-50%, -100%)' }}
         >
           <div className="text-gray-400">{new Date(tooltip.date + 'T00:00:00').toLocaleDateString('en-IN', { month: 'short', day: 'numeric', year: 'numeric' })}</div>
           <div className="text-white font-semibold">{tooltip.brand}: {tooltip.score}</div>
@@ -224,7 +224,7 @@ interface AIInsightCardProps {
 function AIInsightCard({ insight, loading, industryName }: AIInsightCardProps) {
   if (loading) {
     return (
-      <div className="rounded-xl border border-primary-500/10 bg-white/[0.015] p-5 mb-8 animate-pulse">
+      <div className="rs-card rounded-xl p-5 mb-8 animate-pulse" style={{ borderColor: 'rgba(var(--rs-accent-rgb), 0.1)' }}>
         <div className="flex items-center gap-2 mb-4">
           <div className="w-4 h-4 rounded-full bg-primary-500/20" />
           <div className="h-3 w-32 bg-white/[0.06] rounded" />
@@ -243,7 +243,7 @@ function AIInsightCard({ insight, loading, industryName }: AIInsightCardProps) {
   // No insight at all
   if (!insight || !insight.insight) {
     return (
-      <div className="rounded-xl border border-dashed border-white/[0.06] bg-white/[0.01] px-5 py-4 mb-8 flex items-center gap-3">
+      <div className="rounded-xl border border-dashed px-5 py-4 mb-8 flex items-center gap-3" style={{ borderColor: 'var(--rs-border)', background: 'var(--rs-bg-surface)' }}>
         <span className="text-lg">🤖</span>
         <p className="text-xs text-gray-600">
           {insight?.message || 'AI insights generate daily after the pipeline run.'}
@@ -271,9 +271,9 @@ function AIInsightCard({ insight, loading, industryName }: AIInsightCardProps) {
     : null;
 
   return (
-    <div className="rounded-xl border border-primary-500/15 bg-gradient-to-br from-primary-500/[0.04] to-purple-500/[0.03] p-5 mb-8 relative overflow-hidden">
+    <div className="rs-card p-5 mb-8 relative overflow-hidden" style={{ borderColor: 'rgba(var(--rs-accent-rgb), 0.12)', background: 'linear-gradient(135deg, rgba(var(--rs-accent-rgb), 0.03), rgba(139,92,246,0.02))' }}>
       {/* Subtle glow */}
-      <div className="absolute -top-10 -right-10 w-40 h-40 bg-primary-500/[0.06] rounded-full blur-3xl pointer-events-none" />
+      <div className="absolute -top-10 -right-10 w-40 h-40 rounded-full blur-3xl pointer-events-none" style={{ background: 'rgba(var(--rs-accent-rgb), 0.05)' }} />
 
       {/* Header */}
       <div className="relative flex items-center gap-2.5 mb-4 flex-wrap">
@@ -436,26 +436,25 @@ function DashboardInner() {
   }
 
   return (
-    <div className="min-h-screen bg-[#0a0a0f]">
+    <div className="rs-page theme-dashboard">
       {/* Hero */}
-      <section className="relative overflow-hidden pt-12 pb-10 sm:pt-20 sm:pb-14">
-        <div className="absolute inset-0 bg-gradient-to-b from-primary-500/[0.03] via-transparent to-transparent" />
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[300px] bg-primary-500/5 rounded-full blur-[120px]" />
+      <section className="rs-hero">
+        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-transparent" />
 
         <div className="max-w-5xl mx-auto px-4 text-center relative z-10">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary-500/10 border border-primary-500/20 text-primary-400 text-xs font-medium tracking-widest uppercase mb-6">
-            <span className="w-1.5 h-1.5 rounded-full bg-primary-400 animate-pulse"></span>
+          <div className="rs-badge mb-6">
+            <span className="rs-badge-dot"></span>
             India rAsh Index
           </div>
           <h1 className="text-3xl sm:text-5xl lg:text-6xl font-bold text-white mb-4 leading-[1.1] tracking-tight">
             See who is winning<br />
             <span className="bg-gradient-to-r from-primary-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">AI Search in India</span>
           </h1>
-          <p className="text-gray-500 text-base sm:text-lg max-w-xl mx-auto leading-relaxed">
+          <p className="text-base sm:text-lg max-w-xl mx-auto leading-relaxed" style={{ color: 'var(--rs-text-secondary)' }}>
             AI visibility rankings for top Indian brands across 19 industries.
           </p>
           {lastUpdated && (
-            <p className="text-gray-700 text-xs mt-5">
+            <p className="text-xs mt-5" style={{ color: 'var(--rs-text-faint)' }}>
               Last updated {lastUpdated.toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' })}
             </p>
           )}
@@ -463,7 +462,7 @@ function DashboardInner() {
       </section>
 
       {/* Filters */}
-      <section className="sticky top-[65px] z-40 bg-[#0a0a0f]/90 backdrop-blur-2xl border-b border-white/[0.04]">
+      <section className="rs-filter-bar">
         <div className="max-w-7xl mx-auto px-4 py-3 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
           <div className="flex items-center gap-4 min-w-0 w-full md:w-auto">
             <div className="flex items-center gap-2">
@@ -495,7 +494,7 @@ function DashboardInner() {
                 className="w-full bg-white/[0.04] border border-white/[0.08] rounded-lg px-3 py-2 text-sm text-gray-300 focus:outline-none focus:ring-1 focus:ring-primary-500/50 placeholder-gray-600"
               />
               {searchQuery.length >= 2 && (
-                <div className="absolute top-full left-0 right-0 mt-1 bg-gray-900 border border-white/10 rounded-lg shadow-xl overflow-hidden z-50">
+                <div className="absolute top-full left-0 right-0 mt-1 rounded-lg shadow-xl overflow-hidden z-50" style={{ background: 'var(--rs-bg-elevated)', border: '1px solid var(--rs-border-hover)' }}>
                   {searchResults.length > 0 ? (
                     <>
                       {searchResults.map(res => (
@@ -530,15 +529,15 @@ function DashboardInner() {
             <div className="relative flex-none hidden sm:block">
               <select value={selectedModel} onChange={e => setSelectedModel(e.target.value)}
                 className="appearance-none bg-white/[0.04] border border-white/[0.08] rounded-lg px-3 py-2 pr-8 text-sm text-gray-300 w-full cursor-pointer hover:bg-white/[0.07] transition-all focus:outline-none focus:ring-1 focus:ring-primary-500/50">
-                <option value="all" className="bg-[#1a1a2e] text-gray-200">All Models</option>
-                {(industryData?.availableModels || []).map(m => <option key={m} value={m} className="bg-[#1a1a2e] text-gray-200">{m}</option>)}
+                <option value="all" className="bg-rs-elevated text-gray-200">All Models</option>
+                {(industryData?.availableModels || []).map(m => <option key={m} value={m} className="bg-rs-elevated text-gray-200">{m}</option>)}
               </select>
               <svg className="absolute right-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-500 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
             </div>
             <div className="relative flex-none">
               <select value={selectedIndustry} onChange={e => { setSelectedIndustry(e.target.value); setSelectedModel('all'); router.replace('/dashboard?industry=' + e.target.value, { scroll: false }); }}
                 className="appearance-none bg-white/[0.04] border border-white/[0.08] rounded-lg px-3 py-2 pr-8 text-sm text-gray-300 w-full cursor-pointer hover:bg-white/[0.07] transition-all focus:outline-none focus:ring-1 focus:ring-primary-500/50">
-                {INDUSTRIES.map(i => <option key={i.id} value={i.id} className="bg-[#1a1a2e] text-gray-200">{i.name}</option>)}
+                {INDUSTRIES.map(i => <option key={i.id} value={i.id} className="bg-rs-elevated text-gray-200">{i.name}</option>)}
               </select>
               <svg className="absolute right-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-500 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
             </div>
@@ -559,15 +558,15 @@ function DashboardInner() {
         ) : (
           <>
             {compareMode && rankedBrands.length >= 2 && (
-              <div className="mb-8 p-5 bg-primary-500/[0.03] border border-primary-500/20 rounded-xl">
+              <div className="rs-card mb-8 p-5" style={{ borderColor: 'rgba(var(--rs-accent-rgb), 0.15)' }}>
                 <div className="flex flex-col sm:flex-row items-center gap-4">
-                  <select className="flex-1 bg-gray-900 border border-white/10 rounded-lg px-4 py-2.5 text-sm text-white focus:outline-none focus:ring-1 focus:ring-primary-500"
+                  <select className="flex-1 rounded-lg px-4 py-2.5 text-sm text-white focus:outline-none focus:ring-1 focus:ring-primary-500" style={{ background: 'var(--rs-bg-elevated)', border: '1px solid var(--rs-border-hover)' }}
                     value={brand1} onChange={e => setBrand1(e.target.value)}>
                     <option value="">Select Brand 1</option>
                     {rankedBrands.map(b => <option key={b.brand} value={b.brand}>{b.brand} (Score: {b.score})</option>)}
                   </select>
                   <span className="text-gray-500 font-bold italic text-xl">VS</span>
-                  <select className="flex-1 bg-gray-900 border border-white/10 rounded-lg px-4 py-2.5 text-sm text-white focus:outline-none focus:ring-1 focus:ring-primary-500"
+                  <select className="flex-1 rounded-lg px-4 py-2.5 text-sm text-white focus:outline-none focus:ring-1 focus:ring-primary-500" style={{ background: 'var(--rs-bg-elevated)', border: '1px solid var(--rs-border-hover)' }}
                     value={brand2} onChange={e => setBrand2(e.target.value)}>
                     <option value="">Select Brand 2</option>
                     {rankedBrands.map(b => <option key={b.brand} value={b.brand}>{b.brand} (Score: {b.score})</option>)}
@@ -663,7 +662,7 @@ function DashboardInner() {
                   const a = accents[index];
 
                   return (
-                    <div key={brand.brand} className={`relative overflow-hidden rounded-xl border ${a.border} bg-white/[0.02] p-5 hover:bg-white/[0.04] transition-all duration-300 shadow-lg ${a.glow}`}>
+                    <div key={brand.brand} className={`relative overflow-hidden rounded-rs-lg border ${a.border} p-5 transition-all duration-300 shadow-lg ${a.glow}`} style={{ background: 'var(--rs-bg-surface)' }}>
                       <div className={`absolute -right-3 -top-6 text-[140px] font-black ${a.num} leading-none select-none pointer-events-none`}>{index + 1}</div>
                       <div className="relative z-10">
                         <div className="flex items-center gap-1.5 mb-5">
@@ -698,8 +697,8 @@ function DashboardInner() {
 
             {/* Score Breakdown Chart */}
             {rankedBrands.length >= 3 && (
-              <div className="rounded-xl border border-white/[0.04] bg-white/[0.015] p-5 mb-8">
-                <h3 className="text-[10px] font-medium text-gray-500 mb-5 uppercase tracking-[0.2em]">
+              <div className="rs-card p-5 mb-8">
+                <h3 className="rs-section-label mb-5">
                   Score Breakdown — Top 3
                 </h3>
                 <ScoreBreakdownChart brands={rankedBrands} />
@@ -708,8 +707,8 @@ function DashboardInner() {
 
             {/* Timeline Chart */}
             {Object.keys(timelineBrands).length > 0 && (
-              <div className="rounded-xl border border-white/[0.04] bg-white/[0.015] p-5 mb-8">
-                <h3 className="text-[10px] font-medium text-gray-500 mb-4 uppercase tracking-[0.2em]">
+              <div className="rs-card p-5 mb-8">
+                <h3 className="rs-section-label mb-4">
                   Score Trend — Top 5
                 </h3>
                 <TimelineChart
@@ -721,8 +720,8 @@ function DashboardInner() {
             )}
 
             {/* Rankings Table */}
-            <div className="rounded-xl border border-white/[0.04] bg-white/[0.015] overflow-hidden">
-              <div className="grid grid-cols-12 px-4 sm:px-5 py-3 border-b border-white/[0.04] text-[10px] font-medium text-gray-600 uppercase tracking-[0.15em]">
+            <div className="rs-card overflow-hidden">
+              <div className="grid grid-cols-12 px-4 sm:px-5 py-3 border-b text-[10px] font-semibold uppercase tracking-[0.15em]" style={{ borderColor: 'var(--rs-border)', color: 'var(--rs-text-muted)' }}>
                 <div className="col-span-1">#</div>
                 <div className="col-span-7 sm:col-span-5">Company</div>
                 <div className="col-span-4 sm:col-span-2 text-right">Score</div>
@@ -732,7 +731,7 @@ function DashboardInner() {
 
               {rankedBrands.slice(0, 10).map((brand, index) => (
                 <div key={brand.brand}
-                  className={`grid grid-cols-12 px-4 sm:px-5 py-3.5 items-center border-b border-white/[0.02] transition-colors duration-150 ${index < 3 ? 'bg-white/[0.01]' : 'hover:bg-white/[0.02]'}`}>
+                  className={`grid grid-cols-12 px-4 sm:px-5 py-3.5 items-center border-b transition-colors duration-150 hover:bg-white/[0.02]`} style={{ borderColor: 'var(--rs-border)' }}>
                   <div className="col-span-1">
                     <span className={`text-xs font-medium tabular-nums ${index < 3 ? 'text-primary-400' : 'text-gray-600'}`}>{index + 1}</span>
                   </div>
