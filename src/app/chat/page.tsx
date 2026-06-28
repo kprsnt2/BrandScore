@@ -13,12 +13,12 @@ interface Message {
 }
 
 const SUGGESTIONS = [
-  { text: "Which brand has the highest score in Automotive?", icon: "🏆" },
-  { text: "What is the average sentiment across all brands?", icon: "📊" },
+  { text: "Which brand has the highest overall score in Automotive?", icon: "🏆" },
+  { text: "What is the average sentiment score across all brands?", icon: "📊" },
   { text: "List the pipeline runs and their dates", icon: "📅" },
-  { text: "Which brands have a recommendation rate > 80%?", icon: "🔍" },
-  { text: "Compare top 3 Technology brands", icon: "⚡" },
-  { text: "Show score trends for Zomato", icon: "📈" },
+  { text: "Which brands have a recommendation score above 80% (above 32 out of 40)?", icon: "🔍" },
+  { text: "Compare top 3 Technology brands by score", icon: "⚡" },
+  { text: "Show the top 5 brands with highest score", icon: "📈" },
 ];
 
 export default function ChatPage() {

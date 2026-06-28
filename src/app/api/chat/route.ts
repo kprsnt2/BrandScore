@@ -5,26 +5,26 @@ import { generateInsight } from '@/lib/insights';
 const SCHEMA = `
 TABLE pipeline_runs (
   id INTEGER PRIMARY KEY,
-  run_date TEXT NOT NULL,
+  run_date TEXT NOT NULL,          -- format: YYYY-MM-DD
   total_industries INTEGER,
   total_brands INTEGER,
   successful_brands INTEGER,
   average_score REAL,
-  highest_score INTEGER,
-  lowest_score INTEGER,
+  highest_score INTEGER,           -- 0-100 scale
+  lowest_score INTEGER,            -- 0-100 scale
   total_time_ms INTEGER,
   created_at TEXT
 )
 TABLE industry_results (
   id INTEGER PRIMARY KEY,
-  run_id INTEGER NOT NULL, -- FK to pipeline_runs
-  industry_id TEXT NOT NULL,
-  industry_name TEXT NOT NULL,
-  avg_score REAL,
-  avg_recommendation REAL,
-  avg_sentiment REAL,
-  avg_prominence REAL,
-  avg_accuracy REAL,
+  run_id INTEGER NOT NULL,         -- FK to pipeline_runs
+  industry_id TEXT NOT NULL,       -- e.g. 'technology', 'automotive'
+  industry_name TEXT NOT NULL,     -- e.g. 'Technology', 'Automotive'
+  avg_score REAL,                  -- 0-100 scale
+  avg_recommendation REAL,         -- 0-40 scale
+  avg_sentiment REAL,              -- 0-30 scale
+  avg_prominence REAL,             -- 0-20 scale
+  avg_accuracy REAL,               -- 0-10 scale
   total_brands INTEGER,
   successful_brands INTEGER,
   response_time_ms INTEGER,
@@ -32,18 +32,18 @@ TABLE industry_results (
 )
 TABLE brand_results (
   id INTEGER PRIMARY KEY,
-  run_id INTEGER NOT NULL, -- FK to pipeline_runs
+  run_id INTEGER NOT NULL,         -- FK to pipeline_runs
   industry_id TEXT NOT NULL,
   brand TEXT NOT NULL,
   category TEXT,
-  score INTEGER,
-  recommendation INTEGER,
-  sentiment INTEGER,
-  prominence INTEGER,
-  accuracy INTEGER,
+  score INTEGER,                   -- OVERALL SCORE: 0-100 (sum of the 4 components below)
+  recommendation INTEGER,          -- COMPONENT: 0-40 scale (40% weight)
+  sentiment INTEGER,               -- COMPONENT: 0-30 scale (30% weight)
+  prominence INTEGER,              -- COMPONENT: 0-20 scale (20% weight)
+  accuracy INTEGER,                -- COMPONENT: 0-10 scale (10% weight)
   response_time_ms INTEGER,
   error TEXT,
-  model TEXT -- NULL means aggregated across all models
+  model TEXT                       -- NULL = aggregated across all models; otherwise specific model name
 )
 TABLE industry_insights (
   id INTEGER PRIMARY KEY,
@@ -54,6 +54,12 @@ TABLE industry_insights (
   previous_insight_id INTEGER,
   created_at TEXT
 )
+
+SCORING SYSTEM:
+- "score" is the OVERALL score out of 100.
+- It is the SUM of 4 sub-scores: recommendation (max 40) + sentiment (max 30) + prominence (max 20) + accuracy (max 10) = 100.
+- When a user says "recommendation rate > 80%", convert to absolute: 80% of 40 = 32, so use "recommendation > 32".
+- When a user says "score > 80", use "score > 80" directly (it's already 0-100).
 `;
 
 const MAX_MESSAGE_LENGTH = 500;
@@ -74,11 +80,15 @@ export async function POST(request: NextRequest) {
 Schema:
 ${SCHEMA}
 
-Translate the following user question into a valid SQLite query.
-Only return the raw SQL code, nothing else. No markdown formatting, no explanation. Just the SELECT statement.
-Important: Always filter brand_results where model IS NULL and score > 0 unless specifically asked for a specific model.
+CRITICAL RULES:
+1. Always filter brand_results WHERE model IS NULL AND score > 0 unless the user specifically asks about a particular model.
+2. The "score" column is 0-100. The sub-scores have DIFFERENT RANGES: recommendation is 0-40, sentiment is 0-30, prominence is 0-20, accuracy is 0-10.
+3. If the user asks about PERCENTAGES (e.g. "recommendation > 80%"), convert to the correct absolute value (80% of 40 = 32).
+4. If the user asks about the latest data, use the most recent run_id: (SELECT MAX(id) FROM pipeline_runs).
+5. Only return the raw SQL SELECT statement. No markdown, no explanation, no backticks.
 
 User Question: "${message}"`;
+
 
     const { text: sqlRaw } = await generateInsight(sqlPrompt);
     // Clean up in case the LLM returned markdown blocks
