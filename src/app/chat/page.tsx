@@ -13,27 +13,30 @@ interface Message {
 }
 
 const SUGGESTIONS = [
-  "Which brand has the highest score in Automotive?",
-  "What is the average sentiment across all brands?",
-  "List the pipeline runs and their dates",
-  "Which brands have a recommendation rate > 80%?"
+  { text: "Which brand has the highest score in Automotive?", icon: "🏆" },
+  { text: "What is the average sentiment across all brands?", icon: "📊" },
+  { text: "List the pipeline runs and their dates", icon: "📅" },
+  { text: "Which brands have a recommendation rate > 80%?", icon: "🔍" },
+  { text: "Compare top 3 Technology brands", icon: "⚡" },
+  { text: "Show score trends for Zomato", icon: "📈" },
 ];
 
 export default function ChatPage() {
-  const [messages, setMessages] = useState<Message[]>([
-    {
-      role: 'assistant',
-      content: "Welcome to **Ask the Data**! I'm your analytical assistant. I translate natural language into SQL queries, fetch records in real time from our read-only SQLite engine, and present the findings. Ask me anything about brands, sentiments, scores, or trends."
-    }
-  ]);
+  const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
   const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
   const endOfMessagesRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     endOfMessagesRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
+
+  // Auto-focus input on mount
+  useEffect(() => {
+    inputRef.current?.focus();
+  }, []);
 
   async function handleSend(text: string) {
     if (!text.trim() || loading) return;
@@ -87,158 +90,217 @@ export default function ChatPage() {
     setTimeout(() => setCopiedIndex(null), 2000);
   }
 
+  const hasMessages = messages.length > 0;
+
   return (
-    <div className="relative min-h-screen bg-[#07070c] flex flex-col pt-24 pb-36">
-      {/* Background glow effects */}
-      <div className="absolute top-[10%] right-[10%] w-[350px] h-[350px] rounded-full bg-purple-500/5 blur-[120px] pointer-events-none" />
-      <div className="absolute bottom-[20%] left-[10%] w-[450px] h-[450px] rounded-full bg-blue-500/5 blur-[150px] pointer-events-none" />
+    <div className="rs-page theme-chat flex flex-col" style={{ minHeight: 'calc(100vh - 58px)' }}>
 
-      {/* Floating Status Bar */}
-      <div className="max-w-4xl mx-auto w-full px-4 sm:px-6 mb-6 relative z-10">
-        <div className="bg-white/[0.01] backdrop-blur-xl border border-white/[0.06] rounded-2xl px-6 py-4 flex items-center justify-between shadow-xl">
-          <div className="flex items-center gap-3">
-            <div className="relative flex h-2 w-2">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-purple-400 opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-2 w-2 bg-purple-500"></span>
+      {/* Empty State / Welcome */}
+      {!hasMessages && (
+        <div className="flex-grow flex flex-col items-center justify-center px-4 py-12 relative">
+          {/* Background ambient glow */}
+          <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] rounded-full blur-[160px] pointer-events-none" style={{ background: 'rgba(var(--rs-accent-rgb), 0.04)' }} />
+          
+          {/* Logo */}
+          <div className="relative mb-8">
+            <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-purple-500 to-violet-600 flex items-center justify-center shadow-xl shadow-purple-500/20 animate-float">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="w-8 h-8 text-white">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904 9 18.75l-.813-2.846a4.5 4.5 0 0 0-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 0 0 3.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 0 0 3.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 0 0-3.09 3.09ZM18.259 8.715 18 9.75l-.259-1.035a3.375 3.375 0 0 0-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 0 0 2.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 0 0 2.455 2.456L21.75 6l-1.036.259a3.375 3.375 0 0 0-2.455 2.456ZM16.894 20.567 16.5 21.75l-.394-1.183a2.25 2.25 0 0 0-1.423-1.423L13.5 18.75l1.183-.394a2.25 2.25 0 0 0 1.423-1.423l.394-1.183.394 1.183a2.25 2.25 0 0 0 1.423 1.423l1.183.394-1.183.394a2.25 2.25 0 0 0-1.423 1.423Z" />
+              </svg>
             </div>
-            <div>
-              <h1 className="text-sm font-bold text-white tracking-wide">Ask the Data</h1>
-              <p className="text-[10px] text-gray-500 font-mono">SECURE READ-ONLY SQL CONSOLE</p>
+            <div className="absolute -bottom-1 -right-1 w-5 h-5 rounded-full bg-emerald-500 border-2 flex items-center justify-center" style={{ borderColor: 'var(--rs-bg-base)' }}>
+              <span className="text-[8px] text-white font-bold">✓</span>
             </div>
           </div>
-          <div className="text-[10px] text-gray-500 font-mono bg-white/[0.03] border border-white/5 rounded px-2.5 py-1">
-            DATABASE: BRAND-INTELLIGENCE.DB
+          
+          <h1 className="text-2xl sm:text-3xl font-bold text-white mb-2 text-center">
+            Ask the Data
+          </h1>
+          <p className="text-sm max-w-md text-center leading-relaxed mb-2" style={{ color: 'var(--rs-text-secondary)' }}>
+            Natural language → SQL. Query 285 brands across 19 industries in real time.
+          </p>
+          <div className="flex items-center gap-2 mb-10">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+            <span className="text-[10px] font-mono uppercase tracking-wider" style={{ color: 'var(--rs-text-muted)' }}>Read-only · Secure · Live Data</span>
           </div>
-        </div>
-      </div>
 
-      {/* Messages container */}
-      <div className="flex-grow overflow-y-auto px-4 sm:px-6 relative z-10 mb-8">
-        <div className="max-w-4xl mx-auto space-y-6">
-          {messages.map((msg, i) => (
-            <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'} animate-in fade-in slide-in-from-bottom-2 duration-300`}>
-              <div 
-                className={`max-w-[85%] sm:max-w-[80%] rounded-2xl p-5 shadow-lg relative ${
-                  msg.role === 'user' 
-                    ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-tr-none' 
-                    : 'bg-[#0f0f18]/80 backdrop-blur-md border border-white/[0.06] text-gray-200 rounded-tl-none'
-                }`}
-              >
-                {msg.role === 'assistant' && (
-                  <div className="flex items-center justify-between text-[9px] text-gray-500 font-mono mb-3 border-b border-white/[0.04] pb-2">
-                    <span className="flex items-center gap-1.5 font-bold uppercase tracking-wider text-purple-400">
-                      <span className="w-1.5 h-1.5 bg-purple-500 rounded-full" />
-                      rAsh AI Analyst
-                    </span>
-                    {msg.generatedBy && <span>Engine: {msg.generatedBy}</span>}
-                  </div>
-                )}
-                
-                <div className={`prose prose-sm max-w-none font-light leading-relaxed ${
-                  msg.role === 'user' 
-                    ? 'prose-invert text-white prose-p:leading-relaxed' 
-                    : 'prose-invert prose-p:text-gray-300 prose-p:leading-relaxed prose-strong:text-purple-300 prose-strong:font-bold'
-                }`}>
-                  <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                    {msg.content}
-                  </ReactMarkdown>
-                </div>
-
-                {/* SQL execution drawer */}
-                {msg.sql && (
-                  <div className="mt-4 pt-4 border-t border-white/[0.05]">
-                    <details className="group/details">
-                      <summary className="cursor-pointer text-[10px] font-bold font-mono text-gray-500 hover:text-gray-400 select-none outline-none flex items-center gap-1">
-                        <span className="transition-transform group-open/details:rotate-90">▶</span>
-                        INSPECT SQL EXECUTION
-                      </summary>
-                      
-                      <div className="mt-3 bg-[#08080d] border border-white/[0.05] rounded-xl overflow-hidden shadow-inner">
-                        {/* Editor Header */}
-                        <div className="px-4 py-2 bg-[#0d0d15] border-b border-white/[0.05] flex items-center justify-between">
-                          <div className="flex items-center gap-1.5">
-                            <span className="w-2.5 h-2.5 rounded-full bg-red-500/60" />
-                            <span className="w-2.5 h-2.5 rounded-full bg-yellow-500/60" />
-                            <span className="w-2.5 h-2.5 rounded-full bg-green-500/60" />
-                            <span className="text-[9px] font-mono text-gray-500 ml-2">query.sql</span>
-                          </div>
-                          <button
-                            onClick={() => copyToClipboard(msg.sql || '', i)}
-                            className="text-[9px] font-mono text-gray-400 hover:text-white px-2 py-0.5 bg-white/[0.02] border border-white/10 rounded transition-colors"
-                          >
-                            {copiedIndex === i ? 'COPIED!' : 'COPY'}
-                          </button>
-                        </div>
-                        {/* SQL Text */}
-                        <pre className="p-4 text-xs font-mono text-blue-400/90 overflow-x-auto whitespace-pre-wrap leading-relaxed">
-                          {msg.sql}
-                        </pre>
-                      </div>
-                    </details>
-                  </div>
-                )}
-              </div>
-            </div>
-          ))}
-          
-          {loading && (
-            <div className="flex justify-start animate-pulse">
-              <div className="bg-[#0f0f18]/80 backdrop-blur-md border border-white/[0.06] rounded-2xl rounded-tl-none p-5 flex items-center gap-4">
-                <div className="flex gap-1.5">
-                  <span className="w-2.5 h-2.5 rounded-full bg-purple-500 animate-bounce" />
-                  <span className="w-2.5 h-2.5 rounded-full bg-purple-500 animate-bounce [animation-delay:-0.15s]" />
-                  <span className="w-2.5 h-2.5 rounded-full bg-purple-500 animate-bounce [animation-delay:-0.3s]" />
-                </div>
-                <span className="text-xs text-gray-400 font-mono">Executing SQLite Query...</span>
-              </div>
-            </div>
-          )}
-          
-          <div ref={endOfMessagesRef} />
-        </div>
-      </div>
-
-      {/* Input panel sticky at bottom */}
-      <div className="sticky bottom-0 bg-[#07070c] border-t border-white/[0.08] pt-6 pb-6 px-4 z-20">
-        <div className="max-w-4xl mx-auto">
-          {/* Suggestion Chips */}
-          <div className="flex gap-2 mb-4 overflow-x-auto pb-2 no-scrollbar whitespace-nowrap">
+          {/* Suggestion Grid */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 w-full max-w-xl">
             {SUGGESTIONS.map((sug, idx) => (
               <button
                 key={idx}
-                onClick={() => handleSend(sug)}
+                onClick={() => handleSend(sug.text)}
                 disabled={loading}
-                className="bg-white/[0.02] hover:bg-white/[0.05] border border-white/[0.06] hover:border-white/10 text-gray-400 hover:text-white text-xs px-3.5 py-2 rounded-xl transition-all font-light disabled:opacity-50 disabled:cursor-not-allowed"
+                className="group rs-card-glow text-left px-4 py-3.5 flex items-start gap-3 transition-all disabled:opacity-50 disabled:cursor-not-allowed hover:scale-[1.01] active:scale-[0.99]"
               >
-                {sug}
+                <span className="text-base mt-0.5 shrink-0 opacity-60 group-hover:opacity-100 transition-opacity">{sug.icon}</span>
+                <span className="text-[13px] leading-snug" style={{ color: 'var(--rs-text-secondary)' }}>
+                  {sug.text}
+                </span>
               </button>
             ))}
           </div>
+        </div>
+      )}
 
-          {/* Form */}
-          <form onSubmit={handleSubmit} className="relative flex items-center group">
-            <div className="absolute inset-0 bg-gradient-to-r from-blue-500/10 to-purple-500/10 rounded-2xl blur-md opacity-0 group-focus-within:opacity-100 transition-opacity duration-300 pointer-events-none" />
-            <input
-              type="text"
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              placeholder="Ask anything (e.g. 'What is the top brand in Automotive?')"
-              className="w-full bg-[#0d0d15]/85 border border-white/10 rounded-2xl pl-6 pr-16 py-4.5 text-white focus:outline-none focus:border-purple-500/50 focus:ring-4 focus:ring-purple-500/5 transition-all text-sm relative z-10 placeholder-gray-500 font-light"
-              disabled={loading}
-            />
-            <button
-              type="submit"
-              disabled={loading || !input.trim()}
-              className="absolute right-3.5 p-2.5 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white rounded-xl disabled:opacity-40 transition-all active:scale-95 z-20 shadow-md shadow-purple-500/10"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4">
-                <path d="M3.478 2.404a.75.75 0 00-.926.941l2.432 7.905H13.5a.75.75 0 010 1.5H4.984l-2.432 7.905a.75.75 0 00.926.94 60.519 60.519 0 0018.445-8.986.75.75 0 000-1.218A60.517 60.517 0 003.478 2.404z" />
-              </svg>
-            </button>
+      {/* Messages */}
+      {hasMessages && (
+        <div className="flex-grow overflow-y-auto px-4 sm:px-6 pt-6 pb-4 relative z-10">
+          <div className="max-w-3xl mx-auto space-y-5">
+            {messages.map((msg, i) => (
+              <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'} animate-fade-in`}>
+                <div className={`max-w-[88%] sm:max-w-[82%] relative ${
+                  msg.role === 'user' 
+                    ? '' 
+                    : ''
+                }`}>
+                  {/* User message */}
+                  {msg.role === 'user' && (
+                    <div className="rounded-2xl rounded-br-md px-5 py-3.5 text-[14px] leading-relaxed text-white shadow-lg" style={{ background: 'linear-gradient(135deg, rgba(var(--rs-accent-rgb), 0.9), rgba(139,92,246,0.85))' }}>
+                      {msg.content}
+                    </div>
+                  )}
+
+                  {/* Assistant message */}
+                  {msg.role === 'assistant' && (
+                    <div className="rounded-2xl rounded-bl-md p-5 shadow-lg" style={{ background: 'var(--rs-bg-surface)', border: '1px solid var(--rs-border)' }}>
+                      {/* Header */}
+                      <div className="flex items-center justify-between mb-3 pb-2.5" style={{ borderBottom: '1px solid var(--rs-border)' }}>
+                        <div className="flex items-center gap-2">
+                          <div className="w-5 h-5 rounded-md bg-gradient-to-br from-purple-500 to-violet-600 flex items-center justify-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-3 h-3 text-white">
+                              <path d="M9.813 15.904 9 18.75l-.813-2.846a4.5 4.5 0 0 0-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 0 0 3.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 0 0 3.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 0 0-3.09 3.09Z" />
+                            </svg>
+                          </div>
+                          <span className="text-[10px] font-semibold uppercase tracking-widest" style={{ color: 'var(--rs-text-muted)' }}>rAsh AI</span>
+                        </div>
+                        {msg.generatedBy && (
+                          <span className="text-[9px] font-mono px-2 py-0.5 rounded-full" style={{ background: 'rgba(var(--rs-accent-rgb), 0.08)', color: 'rgba(var(--rs-accent-rgb), 0.7)', border: '1px solid rgba(var(--rs-accent-rgb), 0.12)' }}>
+                            {msg.generatedBy}
+                          </span>
+                        )}
+                      </div>
+                      
+                      {/* Content */}
+                      <div className="prose prose-sm max-w-none prose-invert prose-p:text-gray-300 prose-p:leading-relaxed prose-strong:text-purple-300 prose-strong:font-semibold prose-code:text-purple-300 prose-code:bg-purple-500/10 prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded prose-code:text-xs prose-code:before:content-none prose-code:after:content-none prose-table:text-xs prose-th:text-left prose-th:text-gray-400 prose-th:font-semibold prose-td:text-gray-300">
+                        <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                          {msg.content}
+                        </ReactMarkdown>
+                      </div>
+
+                      {/* SQL Inspector */}
+                      {msg.sql && (
+                        <div className="mt-4 pt-3" style={{ borderTop: '1px solid var(--rs-border)' }}>
+                          <details className="group/sql">
+                            <summary className="cursor-pointer text-[10px] font-semibold font-mono uppercase tracking-wider select-none outline-none flex items-center gap-1.5 transition-colors" style={{ color: 'var(--rs-text-muted)' }}>
+                              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="2" stroke="currentColor" className="w-3 h-3 transition-transform group-open/sql:rotate-90">
+                                <path strokeLinecap="round" strokeLinejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5" />
+                              </svg>
+                              SQL Execution
+                            </summary>
+                            
+                            <div className="mt-3 rounded-xl overflow-hidden" style={{ background: 'var(--rs-bg-base)', border: '1px solid var(--rs-border)' }}>
+                              {/* Editor Header */}
+                              <div className="px-4 py-2.5 flex items-center justify-between" style={{ background: 'var(--rs-bg-elevated)', borderBottom: '1px solid var(--rs-border)' }}>
+                                <div className="flex items-center gap-1.5">
+                                  <span className="w-2.5 h-2.5 rounded-full bg-red-500/50" />
+                                  <span className="w-2.5 h-2.5 rounded-full bg-yellow-500/50" />
+                                  <span className="w-2.5 h-2.5 rounded-full bg-green-500/50" />
+                                  <span className="text-[9px] font-mono ml-2" style={{ color: 'var(--rs-text-muted)' }}>query.sql</span>
+                                </div>
+                                <button
+                                  onClick={() => copyToClipboard(msg.sql || '', i)}
+                                  className="text-[9px] font-mono px-2.5 py-1 rounded-md transition-all hover:bg-white/[0.05]"
+                                  style={{ color: 'var(--rs-text-secondary)', border: '1px solid var(--rs-border)' }}
+                                >
+                                  {copiedIndex === i ? '✓ Copied' : 'Copy'}
+                                </button>
+                              </div>
+                              <pre className="p-4 text-xs font-mono text-purple-300/80 overflow-x-auto whitespace-pre-wrap leading-relaxed">
+                                {msg.sql}
+                              </pre>
+                            </div>
+                          </details>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+              </div>
+            ))}
+            
+            {/* Loading indicator */}
+            {loading && (
+              <div className="flex justify-start animate-fade-in">
+                <div className="rounded-2xl rounded-bl-md px-5 py-4 flex items-center gap-3" style={{ background: 'var(--rs-bg-surface)', border: '1px solid var(--rs-border)' }}>
+                  <div className="flex gap-1">
+                    <span className="w-2 h-2 rounded-full bg-purple-500 animate-bounce" />
+                    <span className="w-2 h-2 rounded-full bg-purple-500 animate-bounce [animation-delay:0.15s]" />
+                    <span className="w-2 h-2 rounded-full bg-purple-500 animate-bounce [animation-delay:0.3s]" />
+                  </div>
+                  <span className="text-xs font-mono" style={{ color: 'var(--rs-text-muted)' }}>Querying database...</span>
+                </div>
+              </div>
+            )}
+            
+            <div ref={endOfMessagesRef} />
+          </div>
+        </div>
+      )}
+
+      {/* Input Area — always at bottom */}
+      <div className="shrink-0 px-4 sm:px-6 pb-5 pt-3 z-20" style={{ background: `linear-gradient(to top, var(--rs-bg-base) 70%, transparent)` }}>
+        <div className="max-w-3xl mx-auto">
+          {/* Quick suggestions when in conversation */}
+          {hasMessages && !loading && (
+            <div className="flex gap-2 mb-3 overflow-x-auto no-scrollbar whitespace-nowrap pb-1">
+              {SUGGESTIONS.slice(0, 4).map((sug, idx) => (
+                <button
+                  key={idx}
+                  onClick={() => handleSend(sug.text)}
+                  disabled={loading}
+                  className="shrink-0 text-[11px] px-3 py-1.5 rounded-lg transition-all disabled:opacity-50" 
+                  style={{ background: 'var(--rs-bg-surface)', border: '1px solid var(--rs-border)', color: 'var(--rs-text-secondary)' }}
+                >
+                  {sug.icon} {sug.text.length > 30 ? sug.text.slice(0, 30) + '…' : sug.text}
+                </button>
+              ))}
+            </div>
+          )}
+
+          {/* Input form */}
+          <form onSubmit={handleSubmit} className="relative group">
+            {/* Focus glow */}
+            <div className="absolute -inset-1 bg-gradient-to-r from-purple-500/20 via-violet-500/20 to-purple-500/20 rounded-2xl blur-lg opacity-0 group-focus-within:opacity-100 transition-opacity duration-500 pointer-events-none" />
+            
+            <div className="relative flex items-center rounded-2xl overflow-hidden" style={{ background: 'var(--rs-bg-surface)', border: '1px solid var(--rs-border)' }}>
+              <input
+                ref={inputRef}
+                type="text"
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                placeholder={hasMessages ? "Ask a follow-up question..." : "Ask anything about brands, scores, or trends..."}
+                className="w-full bg-transparent pl-5 pr-14 py-4 text-white focus:outline-none text-sm placeholder-gray-600"
+                style={{ caretColor: 'rgb(var(--rs-accent-rgb))' }}
+                disabled={loading}
+              />
+              <button
+                type="submit"
+                disabled={loading || !input.trim()}
+                className="absolute right-2.5 w-9 h-9 flex items-center justify-center rounded-xl text-white disabled:opacity-30 transition-all active:scale-90 z-20"
+                style={{ background: input.trim() ? 'linear-gradient(135deg, rgb(var(--rs-accent-rgb)), rgba(139,92,246,1))' : 'rgba(255,255,255,0.05)' }}
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4">
+                  <path d="M3.478 2.404a.75.75 0 00-.926.941l2.432 7.905H13.5a.75.75 0 010 1.5H4.984l-2.432 7.905a.75.75 0 00.926.94 60.519 60.519 0 0018.445-8.986.75.75 0 000-1.218A60.517 60.517 0 003.478 2.404z" />
+                </svg>
+              </button>
+            </div>
           </form>
           
           <div className="text-center mt-2.5">
-            <span className="text-[10px] text-gray-600 font-mono tracking-wider">SECURE QUERY SYSTEM • DATA REVALIDATES EVERY 60 MINUTES</span>
+            <span className="text-[10px] font-mono tracking-wider" style={{ color: 'var(--rs-text-faint)' }}>
+              Secure SQL · Read-only · Data refreshes hourly
+            </span>
           </div>
         </div>
       </div>
