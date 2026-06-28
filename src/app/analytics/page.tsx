@@ -227,7 +227,7 @@ export default function AnalyticsPage() {
   const { anomalies, forecasts, volatilityIndex, weeklySummary, stability, meta } = data;
 
   return (
-    <div className="min-h-screen bg-[#0a0a0f]">
+    <div className="min-h-screen rs-page theme-analytics">
       {/* ── Hero ──────────────────────────────────────────────── */}
       <section className="relative overflow-hidden pt-12 pb-10 sm:pt-20 sm:pb-14">
         <div className="absolute inset-0 bg-gradient-to-b from-rose-500/[0.03] via-transparent to-transparent" />

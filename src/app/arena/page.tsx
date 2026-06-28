@@ -106,7 +106,7 @@ export default function ArenaPage() {
   }
 
   return (
-    <div className="relative min-h-screen bg-[#07070c] pt-28 pb-20 px-4 sm:px-6 overflow-hidden">
+    <div className="relative min-h-screen rs-page theme-arena pt-28 pb-20 px-4 sm:px-6 overflow-hidden">
       {/* Background glow effects */}
       <div className="absolute top-[10%] left-[10%] w-[400px] h-[400px] rounded-full bg-blue-500/5 blur-[120px] pointer-events-none" />
       <div className="absolute bottom-[20%] right-[10%] w-[500px] h-[500px] rounded-full bg-red-500/5 blur-[150px] pointer-events-none" />
@@ -140,7 +140,8 @@ export default function ArenaPage() {
                 <select 
                   value={brandA}
                   onChange={(e) => setBrandA(e.target.value)}
-                  className="w-full bg-[#0a0a0f]/90 border border-white/10 group-hover:border-blue-500/30 focus:border-blue-500/60 rounded-2xl px-5 py-4 text-white font-semibold text-lg focus:ring-4 focus:ring-blue-500/10 outline-none transition-all duration-300 appearance-none cursor-pointer"
+                  className="w-full border border-white/10 group-hover:border-blue-500/30 focus:border-blue-500/60 rounded-2xl px-5 py-4 text-white font-semibold text-lg focus:ring-4 focus:ring-blue-500/10 outline-none transition-all duration-300 appearance-none cursor-pointer"
+                  style={{ background: 'var(--rs-bg-base)' }}
                 >
                   {ALL_BRANDS.map(b => <option key={b} value={b}>{b}</option>)}
                 </select>
@@ -154,7 +155,7 @@ export default function ArenaPage() {
 
             {/* VS Badge */}
             <div className="md:col-span-1 flex justify-center">
-              <div className="relative w-14 h-14 flex items-center justify-center rounded-full bg-[#0c0c14] border border-white/10 shadow-lg group">
+              <div className="relative w-14 h-14 flex items-center justify-center rounded-full border border-white/10 shadow-lg group" style={{ background: 'var(--rs-bg-elevated)' }}>
                 <div className="absolute inset-0 rounded-full bg-gradient-to-tr from-blue-500/20 to-red-500/20 blur-sm group-hover:blur-md transition-all duration-300" />
                 <span className="text-xl font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-red-400 italic z-10">VS</span>
               </div>
@@ -170,7 +171,8 @@ export default function ArenaPage() {
                 <select 
                   value={brandB}
                   onChange={(e) => setBrandB(e.target.value)}
-                  className="w-full bg-[#0a0a0f]/90 border border-white/10 group-hover:border-red-500/30 focus:border-red-500/60 rounded-2xl px-5 py-4 text-white font-semibold text-lg focus:ring-4 focus:ring-red-500/10 outline-none transition-all duration-300 appearance-none cursor-pointer"
+                  className="w-full border border-white/10 group-hover:border-red-500/30 focus:border-red-500/60 rounded-2xl px-5 py-4 text-white font-semibold text-lg focus:ring-4 focus:ring-red-500/10 outline-none transition-all duration-300 appearance-none cursor-pointer"
+                  style={{ background: 'var(--rs-bg-base)' }}
                 >
                   {ALL_BRANDS.map(b => <option key={b} value={b}>{b}</option>)}
                 </select>
@@ -215,7 +217,7 @@ export default function ArenaPage() {
           <div className="grid lg:grid-cols-2 gap-8 animate-in fade-in slide-in-from-bottom-6 duration-500">
             
             {/* Chart Column */}
-            <div className="bg-[#0b0b14]/60 backdrop-blur-xl border border-white/[0.05] rounded-3xl p-6 sm:p-8 flex flex-col relative overflow-hidden shadow-2xl">
+            <div className="backdrop-blur-xl border border-white/[0.05] rounded-3xl p-6 sm:p-8 flex flex-col relative overflow-hidden shadow-2xl" style={{ background: 'var(--rs-bg-surface)' }}>
               <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-blue-500 to-red-500/60" />
               
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
@@ -259,7 +261,7 @@ export default function ArenaPage() {
                       <div key={i} className="flex-1 h-[90%] flex flex-col justify-end group/bar relative">
                         {/* Unified Tooltip at column group level */}
                         {(ptA || ptB) && (
-                          <div className="absolute -top-20 left-1/2 -translate-x-1/2 bg-[#09090f]/95 border border-purple-500/30 text-white text-[10px] px-3 py-2 rounded-xl opacity-0 group-hover/bar:opacity-100 whitespace-nowrap pointer-events-none z-30 transition-all duration-200 shadow-xl shadow-black/90 font-mono min-w-[130px] flex flex-col gap-1 backdrop-blur-md">
+                          <div className="absolute -top-20 left-1/2 -translate-x-1/2 border border-purple-500/30 text-white text-[10px] px-3 py-2 rounded-xl opacity-0 group-hover/bar:opacity-100 whitespace-nowrap pointer-events-none z-30 transition-all duration-200 shadow-xl shadow-black/90 font-mono min-w-[130px] flex flex-col gap-1 backdrop-blur-md" style={{ background: 'var(--rs-bg-elevated)' }}>
                             <div className="text-gray-500 border-b border-white/[0.06] pb-1 mb-0.5 text-center font-bold">
                               {new Date((ptA || ptB)!.run_date).toLocaleDateString(undefined, {month: 'short', day: 'numeric'})}
                             </div>
@@ -319,7 +321,7 @@ export default function ArenaPage() {
             </div>
 
             {/* Debate Column */}
-            <div className="bg-[#0b0b14]/60 backdrop-blur-xl border border-white/[0.05] rounded-3xl p-6 sm:p-8 flex flex-col shadow-2xl relative">
+            <div className="backdrop-blur-xl border border-white/[0.05] rounded-3xl p-6 sm:p-8 flex flex-col shadow-2xl relative" style={{ background: 'var(--rs-bg-surface)' }}>
               <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-purple-500 to-pink-500/60" />
               
               <div className="flex items-center justify-between mb-6">

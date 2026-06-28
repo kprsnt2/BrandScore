@@ -421,7 +421,7 @@ export default function IntelligencePage() {
   const { industryLeaderboard, modelBias, models, topMovers, scoreDistribution, correlationMatrix, coverage } = data;
 
   return (
-    <div className="min-h-screen bg-[#0a0a0f]">
+    <div className="min-h-screen rs-page theme-intelligence">
       {/* ── Hero ──────────────────────────────────────────────── */}
       <section className="relative overflow-hidden pt-12 pb-10 sm:pt-20 sm:pb-14">
         <div className="absolute inset-0 bg-gradient-to-b from-purple-500/[0.04] via-transparent to-transparent" />

@@ -32,7 +32,7 @@ export default function ReportsPage() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-[#0a0a0f] pt-24 pb-16 px-4">
+    <div className="min-h-screen rs-page theme-reports pt-24 pb-16 px-4">
       <div className="max-w-4xl mx-auto space-y-12">
         <header className="text-center">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-400 text-xs font-medium tracking-widest uppercase mb-4">
