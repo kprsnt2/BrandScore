@@ -107,6 +107,12 @@ async function main() {
   console.log('🇮🇳 India rAsh Intelligence Pipeline');
   console.log('=====================================');
 
+  // === Parse CLI arguments ===
+  const args = process.argv.slice(2);
+  const providerArg = args.find(a => a.startsWith('--provider='))?.split('=')[1] as 'openai' | 'gemini' | 'groq' | 'nvidia' | undefined;
+  const modelsArg = args.find(a => a.startsWith('--models='))?.split('=')[1];
+  const apiKeyArg = args.find(a => a.startsWith('--api-key-env='))?.split('=')[1];
+
   // === Pre-flight: check that at least one API key is configured ===
   const keys = hasApiKeys();
   const activeProviders = Object.entries(keys).filter(([, v]) => v).map(([k]) => k);
@@ -116,6 +122,8 @@ async function main() {
     console.error('Please add at least one of these GitHub Secrets:');
     console.error('  • NVIDIA_API_KEY');
     console.error('  • GROQ_API_KEY');
+    console.error('  • OPENAI_API_KEY');
+    console.error('  • GEMINI_API_KEY');
     console.error('\nSkipping pipeline run to preserve existing data.');
     process.exit(0); // Exit cleanly so the workflow doesn't fail
   }
@@ -126,10 +134,26 @@ async function main() {
   const totalBrandCount = industries.reduce((s, i) => s + i.topBrands.length, 0);
   console.log(`📊 ${industries.length} industries, ${totalBrandCount} brands total`);
 
+  // === Build pipeline config ===
+  let modelPair: { provider: 'openai' | 'gemini' | 'groq' | 'nvidia'; primary: string; backup: string; apiKeyOverride?: string } | undefined;
+  let delayBetweenIndustries = 10000; // default 10s
+
+  if (providerArg && modelsArg) {
+    const [primary, backup] = modelsArg.split(',');
+    const apiKeyOverride = apiKeyArg ? process.env[apiKeyArg] : undefined;
+    modelPair = { provider: providerArg, primary, backup, apiKeyOverride };
+    delayBetweenIndustries = 70000; // 70s for RPM compliance
+    console.log(`🎯 Single model-pair mode: ${providerArg} → ${primary} (backup: ${backup})`);
+    if (apiKeyOverride) {
+      console.log(`🔑 Using API key from env: ${apiKeyArg}`);
+    }
+  }
+
   const pipeline = new BrandAnalysisPipeline({
-    delayBetweenIndustries: 10000,  // 10s between industries to respect rate limits
+    delayBetweenIndustries,
     timeoutMs: 180000,              // 3 min per-model timeout
     retryDelaysMs: [30000, 60000, 90000],  // 30s, 60s, 90s retry gaps for GitHub Actions
+    modelPair,
   });
 
   console.log('\n🚀 Starting analysis...\n');

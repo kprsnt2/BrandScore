@@ -4,6 +4,11 @@ import { z } from "zod";
 const envSchema = z.object({
     NVIDIA_API_KEY: z.string().optional().default(""),
     GROQ_API_KEY: z.string().optional().default(""),
+    OPENAI_API_KEY: z.string().optional().default(""),
+    GEMINI_API_KEY: z.string().optional().default(""),
+    GROQ_API_KEY_2: z.string().optional().default(""),
+    NVIDIA_API_KEY_2: z.string().optional().default(""),
+    GEMINI_API_KEY_2: z.string().optional().default(""),
     NODE_ENV: z.enum(["development", "production", "test"]).default("development"),
     RATE_LIMIT_REQUESTS: z.coerce.number().default(10),
     RATE_LIMIT_WINDOW_MS: z.coerce.number().default(60000),
@@ -36,6 +41,11 @@ export function getEnv(): Env {
             cachedEnv = {
                 NVIDIA_API_KEY: process.env.NVIDIA_API_KEY || "",
                 GROQ_API_KEY: process.env.GROQ_API_KEY || "",
+                OPENAI_API_KEY: process.env.OPENAI_API_KEY || "",
+                GEMINI_API_KEY: process.env.GEMINI_API_KEY || "",
+                GROQ_API_KEY_2: process.env.GROQ_API_KEY_2 || "",
+                NVIDIA_API_KEY_2: process.env.NVIDIA_API_KEY_2 || "",
+                GEMINI_API_KEY_2: process.env.GEMINI_API_KEY_2 || "",
                 NODE_ENV: "development",
                 RATE_LIMIT_REQUESTS: 10,
                 RATE_LIMIT_WINDOW_MS: 60000,
@@ -54,11 +64,13 @@ export function getEnv(): Env {
 /**
  * Check if API keys are configured
  */
-export function hasApiKeys(): { nvidia: boolean; groq: boolean } {
+export function hasApiKeys(): { nvidia: boolean; groq: boolean; openai: boolean; gemini: boolean } {
     const env = getEnv();
     return {
         nvidia: env.NVIDIA_API_KEY.length > 0,
         groq: env.GROQ_API_KEY.length > 0,
+        openai: env.OPENAI_API_KEY.length > 0,
+        gemini: env.GEMINI_API_KEY.length > 0,
     };
 }
 

@@ -1,6 +1,8 @@
 import { Industry, getIndustryById, getAllIndustries } from './industry-data';
 import { queryNvidiaRaw } from './nvidia';
 import { queryGroqRaw } from './groq';
+import { queryOpenAIRaw } from './openai';
+import { queryGeminiRaw } from './gemini';
 import { generateBatchIndustryPrompt, parseBatchIndustryResponse, BatchBrandScore } from './prompts';
 import { hasApiKeys } from './env';
 
@@ -50,6 +52,8 @@ export interface PipelineConfig {
   timeoutMs: number;
   /** Retry delays in ms for failed model queries. Default: [30000, 60000, 90000] */
   retryDelaysMs: number[];
+  /** If set, only run this specific model pair instead of all providers */
+  modelPair?: { provider: 'openai' | 'gemini' | 'groq' | 'nvidia'; primary: string; backup: string; apiKeyOverride?: string };
 }
 
 // Default retry delays: 30s → 60s → 90s (for GitHub Actions rate limits)
@@ -187,6 +191,35 @@ export class BrandAnalysisPipeline {
       throw lastError || new Error(`${model} failed after all retries`);
     };
 
+    // === Single model-pair mode ===
+    if (this.config.modelPair) {
+      const { provider, primary, backup } = this.config.modelPair;
+      const queryFn = (model: string) => {
+        switch (provider) {
+          case 'groq': return queryGroqRaw(prompt, model);
+          case 'nvidia': return queryNvidiaRaw(prompt, model);
+          case 'openai': return queryOpenAIRaw(prompt, model);
+          case 'gemini': return queryGeminiRaw(prompt, model);
+        }
+      };
+
+      let result: { text: string; model: string };
+      try {
+        result = await withRetry(() => queryFn(primary), primary);
+      } catch {
+        console.warn(`    ⚠ Primary model ${primary} failed, trying backup ${backup}...`);
+        result = await withRetry(() => queryFn(backup), backup);
+      }
+
+      const scores = parseBatchIndustryResponse(result.text);
+      if (scores.length > 0) {
+        console.log(`    ✓ ${result.model}: ${scores.length} brands parsed`);
+        return [{ model: result.model, scores }];
+      }
+      throw new Error(`${result.model} returned unparseable response`);
+    }
+
+    // === All-providers mode (existing behavior) ===
     const queries: Promise<{ model: string; text: string; error?: unknown }>[] = [];
 
     // Groq (primary — faster) — with retry

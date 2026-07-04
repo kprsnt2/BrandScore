@@ -134,11 +134,12 @@ export async function queryGroq(brand: string, category: string): Promise<Struct
 /**
  * Query Groq with a raw prompt (used by pipeline for batch scoring).
  */
-export async function queryGroqRaw(prompt: string): Promise<{ text: string; model: string }> {
+export async function queryGroqRaw(prompt: string, model?: string): Promise<{ text: string; model: string }> {
     const { text, modelUsed } = await callGroqAPI(
-        [{ role: "user", content: prompt }],
+        [{ role: 'user', content: prompt }],
         8000,
         0.3,
+        model,
     );
 
     const displayModel = modelUsed.includes("/")

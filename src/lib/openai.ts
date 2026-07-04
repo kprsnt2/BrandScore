@@ -1,20 +1,19 @@
 /**
- * NVIDIA AI Provider — Primary model with fallback chain.
- * Uses OpenAI-compatible API at integrate.api.nvidia.com.
+ * OpenAI Provider — Primary model with fallback chain.
+ * Uses OpenAI-compatible API at api.openai.com.
  *
- * Primary: nvidia/nemotron-3-ultra-550b-a55b
- * Fallbacks: stepfun-ai/step-3.7-flash → z-ai/glm-5.1
+ * Primary: gpt-5.4-mini
+ * Fallback: gpt-5.4-nano
  */
 import { getEnv } from "./env";
 import { generateStructuredBrandPrompt, parseAIScoreResponse, AIScoreResponse } from "./prompts";
 
-const NVIDIA_BASE_URL = "https://integrate.api.nvidia.com/v1";
+const OPENAI_BASE_URL = "https://api.openai.com/v1";
 
 // Model configuration
-const NVIDIA_PRIMARY_MODEL = "nvidia/nemotron-3-ultra-550b-a55b";
-const NVIDIA_FALLBACK_MODELS = [
-    "stepfun-ai/step-3.7-flash",
-    "z-ai/glm-5.1",
+const OPENAI_PRIMARY_MODEL = "gpt-5.4-mini";
+const OPENAI_FALLBACK_MODELS = [
+    "gpt-5.4-nano",
 ];
 
 interface OpenAIResponse {
@@ -35,42 +34,44 @@ interface OpenAIResponse {
 }
 
 /**
- * Call NVIDIA API with OpenAI-compatible format.
+ * Call OpenAI API with OpenAI-compatible format.
  * Tries primary model, then iterates through fallbacks on failure.
+ * If apiKeyOverride is provided, uses it instead of the env key.
  */
-async function callNvidiaAPI(
+async function callOpenAIAPI(
     messages: { role: string; content: string }[],
-    maxTokens: number = 2000,
+    maxTokens: number = 1000,
     temperature: number = 0.7,
     model?: string,
+    apiKeyOverride?: string,
 ): Promise<{ text: string; modelUsed: string }> {
     const env = getEnv();
-    if (!env.NVIDIA_API_KEY) {
-        throw new Error("NVIDIA_API_KEY is not configured");
+    const apiKey = apiKeyOverride || env.OPENAI_API_KEY;
+    if (!apiKey) {
+        throw new Error("OPENAI_API_KEY is not configured");
     }
 
     const modelsToTry = model
-        ? [model, ...NVIDIA_FALLBACK_MODELS.filter(m => m !== model)]
-        : [NVIDIA_PRIMARY_MODEL, ...NVIDIA_FALLBACK_MODELS];
+        ? [model, ...OPENAI_FALLBACK_MODELS.filter(m => m !== model)]
+        : [OPENAI_PRIMARY_MODEL, ...OPENAI_FALLBACK_MODELS];
 
     let lastError: Error | null = null;
 
     for (const currentModel of modelsToTry) {
         try {
             const controller = new AbortController();
-            const timeout = setTimeout(() => controller.abort(), 12000); // 12s timeout (Vercel limit ~25s)
+            const timeout = setTimeout(() => controller.abort(), 30000); // 30s timeout
 
-            const response = await fetch(`${NVIDIA_BASE_URL}/chat/completions`, {
+            const response = await fetch(`${OPENAI_BASE_URL}/chat/completions`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
-                    "Authorization": `Bearer ${env.NVIDIA_API_KEY}`,
+                    "Authorization": `Bearer ${apiKey}`,
                 },
                 body: JSON.stringify({
                     model: currentModel,
                     messages,
                     temperature,
-                    top_p: 0.95,
                     max_tokens: maxTokens,
                 }),
                 signal: controller.signal,
@@ -80,75 +81,79 @@ async function callNvidiaAPI(
 
             if (!response.ok) {
                 const errorText = await response.text();
-                throw new Error(`NVIDIA ${currentModel} API error: ${response.status} - ${errorText}`);
+                throw new Error(`OpenAI ${currentModel} API error: ${response.status} - ${errorText}`);
             }
 
             const data: OpenAIResponse = await response.json();
             const text = data.choices[0]?.message?.content || "";
 
             if (!text) {
-                throw new Error(`NVIDIA ${currentModel} returned empty response`);
+                throw new Error(`OpenAI ${currentModel} returned empty response`);
             }
 
             return { text, modelUsed: currentModel };
         } catch (error) {
-            console.warn(`[NVIDIA ${currentModel}] Failed:`, error instanceof Error ? error.message : error);
+            console.warn(`[OpenAI ${currentModel}] Failed:`, error instanceof Error ? error.message : error);
             lastError = error instanceof Error ? error : new Error(String(error));
         }
     }
 
-    throw lastError || new Error("All NVIDIA models failed");
+    throw lastError || new Error("All OpenAI models failed");
 }
 
 export type { StructuredModelResponse } from './types';
 import type { StructuredModelResponse } from './types';
 
 /**
- * Query NVIDIA for brand analysis with structured JSON scoring.
+ * Query OpenAI for brand analysis with structured JSON scoring.
  */
-export async function queryNvidia(brand: string, category: string): Promise<StructuredModelResponse> {
+export async function queryOpenAI(brand: string, category: string): Promise<StructuredModelResponse> {
     const prompt = generateStructuredBrandPrompt(brand, category);
 
-    const { text, modelUsed } = await callNvidiaAPI(
+    const { text, modelUsed } = await callOpenAIAPI(
         [{ role: "user", content: prompt }],
-        2000,
+        1000,
         0.7,
     );
 
-    // Extract display name from model path
-    const displayModel = modelUsed.split("/").pop() || modelUsed;
+    // Extract display name
+    const displayModel = modelUsed.includes("/")
+        ? modelUsed.split("/").pop() || modelUsed
+        : modelUsed;
 
     // Try to parse structured response
     const structured = parseAIScoreResponse(text);
 
     return {
         text,
-        model: `${displayModel} (NVIDIA)`,
+        model: `${displayModel} (OpenAI)`,
         modelType: "free" as const,
         structured: structured || undefined,
     };
 }
 
 /**
- * Query NVIDIA with a raw prompt (used by pipeline for batch scoring).
+ * Query OpenAI with a raw prompt (used by pipeline for batch scoring).
  */
-export async function queryNvidiaRaw(prompt: string, model?: string): Promise<{ text: string; model: string }> {
-    const { text, modelUsed } = await callNvidiaAPI(
-        [{ role: 'user', content: prompt }],
+export async function queryOpenAIRaw(prompt: string, model?: string): Promise<{ text: string; model: string }> {
+    const { text, modelUsed } = await callOpenAIAPI(
+        [{ role: "user", content: prompt }],
         8000,
         0.3,
         model,
     );
 
-    const displayModel = modelUsed.split("/").pop() || modelUsed;
-    return { text, model: `${displayModel} (NVIDIA)` };
+    const displayModel = modelUsed.includes("/")
+        ? modelUsed.split("/").pop() || modelUsed
+        : modelUsed;
+    return { text, model: `${displayModel} (OpenAI)` };
 }
 
 /**
- * Query NVIDIA for brand comparison.
+ * Query OpenAI for brand comparison.
  */
-export async function queryNvidiaComparison(prompt: string): Promise<string> {
-    const { text } = await callNvidiaAPI(
+export async function queryOpenAIComparison(prompt: string): Promise<string> {
+    const { text } = await callOpenAIAPI(
         [{ role: "user", content: prompt }],
         2000,
         0.7,
