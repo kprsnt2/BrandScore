@@ -105,11 +105,16 @@ function TimelineChart({ data, brands, dates }: { data: { [brand: string]: Timel
         ))}
 
         {/* X-axis labels */}
-        {dates.map((d, i) => (
-          <text key={d} x={xScale(i)} y={H - 8} textAnchor="middle" fill="rgba(255,255,255,0.25)" fontSize="10">
-            {new Date(d + 'T00:00:00').toLocaleDateString('en-IN', { month: 'short', day: 'numeric' })}
-          </text>
-        ))}
+        {dates.map((d, i) => {
+          // Show label if it's first, last, or every 6th date
+          const showLabel = i === 0 || i === dates.length - 1 || i % 6 === 0;
+          if (!showLabel) return null;
+          return (
+            <text key={d} x={xScale(i)} y={H - 8} textAnchor="middle" fill="rgba(255,255,255,0.25)" fontSize="10">
+              {new Date(d + 'T00:00:00').toLocaleDateString('en-IN', { month: 'short', day: 'numeric' })}
+            </text>
+          );
+        })}
 
         {/* Lines + dots for each brand */}
         {brands.slice(0, 5).map((brand, bi) => {
@@ -421,8 +426,25 @@ function DashboardInner() {
   const top3 = rankedBrands.slice(0, 3);
   const industryMeta = INDUSTRIES.find(i => i.id === selectedIndustry);
   const lastUpdated = industryData?.timestamp ? new Date(industryData.timestamp) : null;
-  const timelineBrands = timeline?.brands || {};
-  const timelineDates = timeline?.dates || [];
+  const filteredTimeline = useMemo(() => {
+    if (!timeline) return null;
+    const dates = timeline.dates || [];
+    const last30Dates = dates.slice(-30);
+    const dateSet = new Set(last30Dates);
+    
+    const brands: { [brand: string]: TimelineEntry[] } = {};
+    for (const [brand, entries] of Object.entries(timeline.brands || {})) {
+      brands[brand] = entries.filter(e => dateSet.has(e.date));
+    }
+    
+    return {
+      dates: last30Dates,
+      brands
+    };
+  }, [timeline]);
+
+  const timelineBrands = filteredTimeline?.brands || {};
+  const timelineDates = filteredTimeline?.dates || [];
 
   if (loading && !industryData) {
     return (
