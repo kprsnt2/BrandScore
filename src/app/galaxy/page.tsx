@@ -391,7 +391,7 @@ export default function GalaxyPage() {
         <div className="absolute inset-0 flex items-center justify-center z-20 bg-[#05050c]">
           <div className="text-center">
             <div className="w-16 h-16 border-[3px] border-purple-500/30 border-t-purple-500 rounded-full animate-spin mx-auto mb-6" />
-            <p className="text-gray-400 text-sm">Generating brand universe...</p>
+            <p className="text-sm" style={{ color: 'var(--rs-text-secondary)' }}>Generating brand universe...</p>
           </div>
         </div>
       )}
@@ -399,15 +399,15 @@ export default function GalaxyPage() {
       {/* Title */}
       <div className="absolute top-20 left-5 z-10 pointer-events-none">
         <h1 className="text-lg font-bold text-white/70">Brand Galaxy</h1>
-        <p className="text-[10px] text-gray-600 mt-0.5">{stats.brands} stars · {stats.industries} nebulae</p>
+        <p className="text-[10px] mt-0.5" style={{ color: 'var(--rs-text-muted)' }}>{stats.brands} stars · {stats.industries} nebulae</p>
       </div>
 
       {/* Nav */}
       <div className="absolute top-20 right-5 z-10 flex gap-2">
-        <Link href="/dashboard" className="text-[10px] text-gray-500 hover:text-white transition-colors bg-black/50 border border-white/[0.06] px-2.5 py-1.5 rounded-lg backdrop-blur-sm">
+        <Link href="/dashboard" className="text-[10px] hover:text-white transition-colors bg-black/50 border border-white/[0.06] px-2.5 py-1.5 rounded-lg backdrop-blur-sm" style={{ color: 'var(--rs-text-muted)' }}>
           Dashboard
         </Link>
-        <Link href="/intelligence" className="text-[10px] text-gray-500 hover:text-white transition-colors bg-black/50 border border-white/[0.06] px-2.5 py-1.5 rounded-lg backdrop-blur-sm">
+        <Link href="/intelligence" className="text-[10px] hover:text-white transition-colors bg-black/50 border border-white/[0.06] px-2.5 py-1.5 rounded-lg backdrop-blur-sm" style={{ color: 'var(--rs-text-muted)' }}>
           Intelligence
         </Link>
       </div>
@@ -420,7 +420,7 @@ export default function GalaxyPage() {
           ).slice(0, 12).map(([id, color]) => (
             <div key={id} className="flex items-center gap-1">
               <span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: color, boxShadow: `0 0 3px ${color}` }} />
-              <span className="text-[8px] text-gray-600 capitalize">{id.replace(/-/g, ' ')}</span>
+              <span className="text-[8px] capitalize" style={{ color: 'var(--rs-text-muted)' }}>{id.replace(/-/g, ' ')}</span>
             </div>
           ))}
         </div>
@@ -433,11 +433,11 @@ export default function GalaxyPage() {
             <span className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{ backgroundColor: getColor(hovered.industry_id), boxShadow: `0 0 6px ${getColor(hovered.industry_id)}` }} />
             <h3 className="text-xs font-bold text-white truncate">{hovered.brand}</h3>
           </div>
-          <p className="text-[9px] text-gray-500 mb-2">{hovered.industry_name}</p>
+          <p className="text-[9px] mb-2" style={{ color: 'var(--rs-text-muted)' }}>{hovered.industry_name}</p>
 
           <div className="flex items-baseline gap-1 mb-3">
             <span className="text-xl font-bold text-white tabular-nums">{hovered.score}</span>
-            <span className="text-[9px] text-gray-600">/100</span>
+            <span className="text-[9px]" style={{ color: 'var(--rs-text-muted)' }}>/100</span>
           </div>
 
           <div className="space-y-1">
@@ -448,18 +448,18 @@ export default function GalaxyPage() {
               { l: 'Acc', v: hovered.accuracy, m: 10 },
             ].map(d => (
               <div key={d.l} className="flex items-center gap-2">
-                <span className="text-[8px] text-gray-600 w-6">{d.l}</span>
+                <span className="text-[8px] w-6" style={{ color: 'var(--rs-text-muted)' }}>{d.l}</span>
                 <div className="flex-1 h-1 bg-white/[0.05] rounded-full overflow-hidden">
                   <div className="h-full rounded-full" style={{
                     width: `${(d.v / d.m) * 100}%`,
                     backgroundColor: getColor(hovered.industry_id),
                   }} />
                 </div>
-                <span className="text-[8px] text-gray-500 tabular-nums w-6 text-right">{d.v}</span>
+                <span className="text-[8px] tabular-nums w-6 text-right" style={{ color: 'var(--rs-text-muted)' }}>{d.v}</span>
               </div>
             ))}
           </div>
-          <p className="text-[8px] text-gray-700 mt-2 text-center">click star to explore →</p>
+          <p className="text-[8px] mt-2 text-center" style={{ color: 'var(--rs-text-faint)' }}>click star to explore →</p>
         </div>
       )}
     </div>

@@ -120,7 +120,7 @@ export default function ArenaPage() {
           <h1 className="text-4xl sm:text-6xl font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-purple-300 to-red-400 tracking-tight leading-none">
             Battle Arena
           </h1>
-          <p className="text-gray-400 max-w-2xl mx-auto text-sm sm:text-base font-light leading-relaxed">
+          <p className="max-w-2xl mx-auto text-sm sm:text-base font-light leading-relaxed" style={{ color: 'var(--rs-text-secondary)' }}>
             Compare two brands in a head-to-head visibility debate. Our consensus model analyzes historical visibility metrics and runs a live debate between agent personas.
           </p>
         </header>
@@ -145,7 +145,7 @@ export default function ArenaPage() {
                 >
                   {ALL_BRANDS.map(b => <option key={b} value={b}>{b}</option>)}
                 </select>
-                <div className="absolute right-5 top-1/2 -translate-y-1/2 pointer-events-none text-gray-500 group-hover:text-blue-400 transition-colors">
+                <div className="absolute right-5 top-1/2 -translate-y-1/2 pointer-events-none transition-colors" style={{ color: 'var(--rs-text-muted)' }}>
                   <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="2.5" stroke="currentColor" className="w-5 h-5">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
                   </svg>
@@ -176,7 +176,7 @@ export default function ArenaPage() {
                 >
                   {ALL_BRANDS.map(b => <option key={b} value={b}>{b}</option>)}
                 </select>
-                <div className="absolute right-5 top-1/2 -translate-y-1/2 pointer-events-none text-gray-500 group-hover:text-red-400 transition-colors">
+                <div className="absolute right-5 top-1/2 -translate-y-1/2 pointer-events-none transition-colors" style={{ color: 'var(--rs-text-muted)' }}>
                   <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="2.5" stroke="currentColor" className="w-5 h-5">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
                   </svg>
@@ -223,17 +223,17 @@ export default function ArenaPage() {
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
                 <div>
                   <h3 className="text-xl font-bold text-white">Score Match-up</h3>
-                  <p className="text-xs text-gray-500 font-mono mt-0.5">HISTORICAL TIMELINE DATA</p>
+                  <p className="text-xs font-mono mt-0.5" style={{ color: 'var(--rs-text-muted)' }}>HISTORICAL TIMELINE DATA</p>
                 </div>
                 <div className="flex items-center gap-4 bg-white/[0.02] border border-white/5 rounded-xl px-4 py-2 text-xs font-semibold">
                   <div className="flex items-center gap-1.5">
                     <span className="w-2.5 h-2.5 rounded bg-blue-500 shadow-[0_0_6px_#3b82f6]" />
-                    <span className="text-gray-300">{brandA} ({avgA})</span>
+                    <span style={{ color: 'var(--rs-text-secondary)' }}>{brandA} ({avgA})</span>
                   </div>
                   <div className="h-3 w-px bg-white/10" />
                   <div className="flex items-center gap-1.5">
                     <span className="w-2.5 h-2.5 rounded bg-red-500 shadow-[0_0_6px_#ef4444]" />
-                    <span className="text-gray-300">{brandB} ({avgB})</span>
+                    <span style={{ color: 'var(--rs-text-secondary)' }}>{brandB} ({avgB})</span>
                   </div>
                 </div>
               </div>
@@ -245,7 +245,7 @@ export default function ArenaPage() {
                 <div className="absolute inset-0 flex flex-col justify-between pointer-events-none">
                   {[100, 75, 50, 25, 0].map((val) => (
                     <div key={val} className="w-full flex items-center gap-2">
-                      <span className="text-[10px] text-gray-600 font-mono w-5 text-right">{val}</span>
+                      <span className="text-[10px] font-mono w-5 text-right" style={{ color: 'var(--rs-text-muted)' }}>{val}</span>
                       <div className="flex-1 border-b border-white/[0.04] border-dashed" />
                     </div>
                   ))}
@@ -262,7 +262,7 @@ export default function ArenaPage() {
                         {/* Unified Tooltip at column group level */}
                         {(ptA || ptB) && (
                           <div className="absolute -top-20 left-1/2 -translate-x-1/2 border border-purple-500/30 text-white text-[10px] px-3 py-2 rounded-xl opacity-0 group-hover/bar:opacity-100 whitespace-nowrap pointer-events-none z-30 transition-all duration-200 shadow-xl shadow-black/90 font-mono min-w-[130px] flex flex-col gap-1 backdrop-blur-md" style={{ background: 'var(--rs-bg-elevated)' }}>
-                            <div className="text-gray-500 border-b border-white/[0.06] pb-1 mb-0.5 text-center font-bold">
+                            <div className="border-b border-white/[0.06] pb-1 mb-0.5 text-center font-bold" style={{ color: 'var(--rs-text-muted)' }}>
                               {new Date((ptA || ptB)!.run_date).toLocaleDateString(undefined, {month: 'short', day: 'numeric'})}
                             </div>
                             {ptA && (
@@ -296,7 +296,7 @@ export default function ArenaPage() {
 
                         </div>
                         <div className="h-6 mt-3 border-t border-white/[0.05] w-full flex justify-center pt-2">
-                          <span className="text-[9px] text-gray-500 font-mono truncate max-w-full">
+                          <span className="text-[9px] font-mono truncate max-w-full" style={{ color: 'var(--rs-text-muted)' }}>
                             {ptA?.run_date ? new Date(ptA.run_date).toLocaleDateString(undefined, {month: 'short', day: 'numeric'}) : ''}
                           </span>
                         </div>
@@ -308,7 +308,7 @@ export default function ArenaPage() {
               </div>
 
               {/* Quick Insight Bar */}
-              <div className="mt-8 pt-6 border-t border-white/[0.05] flex items-center gap-3 text-xs text-gray-400 font-mono">
+              <div className="mt-8 pt-6 border-t border-white/[0.05] flex items-center gap-3 text-xs font-mono" style={{ color: 'var(--rs-text-secondary)' }}>
                 <span className="uppercase tracking-wider">Verdict Advantage:</span>
                 {avgA === avgB ? (
                   <span className="text-purple-400 font-bold bg-purple-500/10 px-2.5 py-1 border border-purple-500/20 rounded-lg">DRAW</span>
@@ -327,9 +327,9 @@ export default function ArenaPage() {
               <div className="flex items-center justify-between mb-6">
                 <div>
                   <h3 className="text-xl font-bold text-white">Simulation Verdict</h3>
-                  <p className="text-xs text-gray-500 font-mono mt-0.5">AGENT DEBATE transcript</p>
+                  <p className="text-xs font-mono mt-0.5" style={{ color: 'var(--rs-text-muted)' }}>AGENT DEBATE transcript</p>
                 </div>
-                <span className="text-[10px] text-gray-500 bg-white/[0.02] border border-white/5 rounded px-2.5 py-1 font-mono uppercase tracking-wider">
+                <span className="text-[10px] bg-white/[0.02] border border-white/5 rounded px-2.5 py-1 font-mono uppercase tracking-wider" style={{ color: 'var(--rs-text-muted)' }}>
                   Model: {results.generatedBy}
                 </span>
               </div>
@@ -342,7 +342,7 @@ export default function ArenaPage() {
                       <div className="absolute -top-2.5 left-4 px-2 py-0.5 bg-blue-500/10 border border-blue-500/20 text-blue-400 text-[10px] font-black uppercase tracking-wider rounded">
                         Agent Pro-{brandA}
                       </div>
-                      <div className="prose prose-sm prose-invert max-w-none text-gray-300 font-light leading-relaxed pt-1">
+                      <div className="prose prose-sm prose-invert max-w-none font-light leading-relaxed pt-1" style={{ color: 'var(--rs-text-secondary)' }}>
                         <ReactMarkdown remarkPlugins={[remarkGfm]}>
                           {parsedDebate.agentA}
                         </ReactMarkdown>
@@ -354,7 +354,7 @@ export default function ArenaPage() {
                       <div className="absolute -top-2.5 left-4 px-2 py-0.5 bg-red-500/10 border border-red-500/20 text-red-400 text-[10px] font-black uppercase tracking-wider rounded">
                         Agent Pro-{brandB}
                       </div>
-                      <div className="prose prose-sm prose-invert max-w-none text-gray-300 font-light leading-relaxed pt-1">
+                      <div className="prose prose-sm prose-invert max-w-none font-light leading-relaxed pt-1" style={{ color: 'var(--rs-text-secondary)' }}>
                         <ReactMarkdown remarkPlugins={[remarkGfm]}>
                           {parsedDebate.agentB}
                         </ReactMarkdown>
@@ -375,7 +375,7 @@ export default function ArenaPage() {
                   </>
                 ) : (
                   // Fallback if parsing failed
-                  <div className="prose prose-invert prose-blue max-w-none prose-headings:font-bold prose-h3:text-lg prose-p:text-gray-300 prose-p:leading-relaxed">
+                  <div className="prose prose-invert prose-blue max-w-none prose-headings:font-bold prose-h3:text-lg prose-p:leading-relaxed" style={{ color: 'var(--rs-text-secondary)' }}>
                     <ReactMarkdown remarkPlugins={[remarkGfm]}>
                       {results.debateMarkdown}
                     </ReactMarkdown>

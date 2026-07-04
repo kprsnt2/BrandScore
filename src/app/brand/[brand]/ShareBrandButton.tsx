@@ -16,7 +16,8 @@ export default function ShareBrandButton({ brand, score }: { brand: string; scor
   return (
     <button
       onClick={handleShare}
-      className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white/[0.05] hover:bg-white/[0.1] border border-white/[0.08] hover:border-white/15 rounded-lg text-xs font-medium text-gray-400 hover:text-white transition-all active:scale-95"
+      className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white/[0.05] hover:bg-white/[0.1] border border-white/[0.08] hover:border-white/15 rounded-lg text-xs font-medium hover:text-white transition-all active:scale-95"
+      style={{ color: 'var(--rs-text-secondary)' }}
       aria-label={`Share ${brand} score`}
     >
       {copied ? (

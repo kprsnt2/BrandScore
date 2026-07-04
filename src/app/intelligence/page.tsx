@@ -99,7 +99,7 @@ function ModelBiasHeatmap({
   const [tooltip, setTooltip] = useState<{ x: number; y: number; text: string } | null>(null);
 
   if (models.length === 0 || industries.length === 0) {
-    return <p className="text-gray-500 text-sm">No per-model data available yet.</p>;
+    return <p style={{ color: 'var(--rs-text-muted)' }} className="text-sm">No per-model data available yet.</p>;
   }
 
   const cellW = 80;
@@ -221,7 +221,7 @@ function ModelBiasHeatmap({
 
       {/* Legend */}
       <div className="flex items-center gap-3 mt-4 justify-center">
-        <span className="text-[10px] text-gray-500">Low</span>
+        <span className="text-[10px]" style={{ color: 'var(--rs-text-muted)' }}>Low</span>
         <div className="flex gap-0.5">
           {[0, 0.2, 0.4, 0.6, 0.8, 1].map(t => (
             <div key={t} className="w-6 h-3 rounded-sm" style={{
@@ -229,7 +229,7 @@ function ModelBiasHeatmap({
             }} />
           ))}
         </div>
-        <span className="text-[10px] text-gray-500">High</span>
+        <span className="text-[10px]" style={{ color: 'var(--rs-text-muted)' }}>High</span>
       </div>
     </div>
   );
@@ -401,7 +401,7 @@ export default function IntelligencePage() {
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
           <div className="w-14 h-14 border-[3px] border-primary-500/30 border-t-primary-500 rounded-full animate-spin mx-auto mb-6" />
-          <p className="text-gray-500 text-sm">Loading cross-industry intelligence...</p>
+          <p className="text-sm font-medium" style={{ color: 'var(--rs-text-secondary)' }}>Loading cross-industry intelligence...</p>
         </div>
       </div>
     );
@@ -412,7 +412,7 @@ export default function IntelligencePage() {
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
           <span className="text-4xl mb-4 block">⚠️</span>
-          <p className="text-gray-400 text-sm">{error || 'No data available'}</p>
+          <p className="text-sm font-medium" style={{ color: 'var(--rs-text-secondary)' }}>{error || 'No data available'}</p>
         </div>
       </div>
     );
@@ -439,11 +439,11 @@ export default function IntelligencePage() {
               AI Visibility Across India
             </span>
           </h1>
-          <p className="text-gray-500 text-base sm:text-lg max-w-xl mx-auto leading-relaxed">
+          <p className="text-base sm:text-lg max-w-xl mx-auto leading-relaxed" style={{ color: 'var(--rs-text-secondary)' }}>
             {coverage.totalBrands} brands · {coverage.totalIndustries} industries · {coverage.daysOfData} days of data
           </p>
           {coverage.latestRunDate && (
-            <p className="text-gray-700 text-xs mt-5">
+            <p className="text-xs mt-5" style={{ color: 'var(--rs-text-muted)' }}>
               Latest data from {new Date(coverage.latestRunDate + 'T00:00:00').toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' })}
             </p>
           )}
@@ -454,7 +454,7 @@ export default function IntelligencePage() {
 
         {/* ── Data Coverage Stats ─────────────────────────────── */}
         <section>
-          <h2 className="text-[10px] font-medium text-gray-500 uppercase tracking-[0.2em] mb-4">
+          <h2 className="text-[10px] font-medium uppercase tracking-[0.2em] mb-4" style={{ color: 'var(--rs-text-muted)' }}>
             Data Coverage
           </h2>
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
@@ -465,10 +465,10 @@ export default function IntelligencePage() {
               { label: 'Days of Data', value: coverage.daysOfData, icon: '📅' },
               { label: 'AI Models', value: models.length, icon: '🤖' },
             ].map(stat => (
-              <div key={stat.label} className="rounded-xl border border-white/[0.04] bg-white/[0.015] p-4 text-center">
+              <div key={stat.label} className="rs-card p-4 text-center">
                 <span className="text-lg block mb-1">{stat.icon}</span>
                 <div className="text-2xl font-bold text-white tabular-nums">{stat.value}</div>
-                <div className="text-[10px] text-gray-500 uppercase tracking-widest mt-1">{stat.label}</div>
+                <div className="text-[10px] uppercase tracking-widest mt-1" style={{ color: 'var(--rs-text-muted)' }}>{stat.label}</div>
               </div>
             ))}
           </div>
@@ -476,7 +476,7 @@ export default function IntelligencePage() {
 
         {/* ── Industry Leaderboard ────────────────────────────── */}
         <section>
-          <h2 className="text-[10px] font-medium text-gray-500 uppercase tracking-[0.2em] mb-4">
+          <h2 className="text-[10px] font-medium uppercase tracking-[0.2em] mb-4" style={{ color: 'var(--rs-text-muted)' }}>
             Industry Leaderboard — Ranked by AI Visibility
           </h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
@@ -488,7 +488,7 @@ export default function IntelligencePage() {
               >
                 {/* Rank badge */}
                 <div className={`absolute -right-2 -top-2 w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold
-                  ${index < 3 ? 'bg-gradient-to-br from-primary-500 to-purple-600 text-white' : 'bg-white/[0.05] text-gray-500 border border-white/[0.06]'}`}>
+                  ${index < 3 ? 'bg-gradient-to-br from-primary-500 to-purple-600 text-white' : 'bg-white/[0.05] border border-white/[0.06]'}`} style={{ color: index < 3 ? '#white' : 'var(--rs-text-muted)' }}>
                   {index + 1}
                 </div>
 
@@ -505,7 +505,7 @@ export default function IntelligencePage() {
                   <span className={`text-3xl font-bold tabular-nums bg-gradient-to-r ${scoreGradient(ind.avg_score)} bg-clip-text text-transparent`}>
                     {ind.avg_score}
                   </span>
-                  <span className="text-[10px] text-gray-600 uppercase tracking-widest">avg score</span>
+                  <span className="text-[10px] uppercase tracking-widest" style={{ color: 'var(--rs-text-muted)' }}>avg score</span>
                 </div>
 
                 {/* Mini breakdown bar */}
@@ -517,7 +517,7 @@ export default function IntelligencePage() {
                 </div>
 
                 {/* Details */}
-                <div className="flex items-center justify-between text-[10px] text-gray-500">
+                <div className="flex items-center justify-between text-[10px]" style={{ color: 'var(--rs-text-muted)' }}>
                   <span>👑 {ind.top_brand} ({ind.top_score})</span>
                   <span>{ind.total_brands} brands</span>
                 </div>
@@ -531,12 +531,12 @@ export default function IntelligencePage() {
           <div className="rounded-xl border border-white/[0.04] bg-white/[0.015] p-5">
             <div className="flex items-center justify-between mb-4">
               <div>
-                <h2 className="text-[10px] font-medium text-gray-500 uppercase tracking-[0.2em] mb-1">
+                <h2 className="text-[10px] font-medium uppercase tracking-[0.2em] mb-1" style={{ color: 'var(--rs-text-muted)' }}>
                   Model Bias Heatmap
                 </h2>
-                <p className="text-xs text-gray-600">How different AI models perceive each industry</p>
+                <p className="text-xs" style={{ color: 'var(--rs-text-muted)' }}>How different AI models perceive each industry</p>
               </div>
-              <span className="text-xs text-gray-600 bg-white/[0.03] px-2 py-1 rounded-md border border-white/[0.04]">
+              <span className="text-xs bg-white/[0.03] px-2 py-1 rounded-md border border-white/[0.04]" style={{ color: 'var(--rs-text-muted)' }}>
                 {models.length} models × {industryLeaderboard.length} industries
               </span>
             </div>
@@ -551,7 +551,7 @@ export default function IntelligencePage() {
         {/* ── Top Movers ─────────────────────────────────────── */}
         {(topMovers.gainers.length > 0 || topMovers.decliners.length > 0) && (
           <section>
-            <h2 className="text-[10px] font-medium text-gray-500 uppercase tracking-[0.2em] mb-4">
+            <h2 className="text-[10px] font-medium uppercase tracking-[0.2em] mb-4" style={{ color: 'var(--rs-text-muted)' }}>
               Top Movers — Across All Industries
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
@@ -570,14 +570,14 @@ export default function IntelligencePage() {
                           <Link href={`/brand/${encodeURIComponent(m.brand)}`} className="text-xs font-medium text-white hover:text-primary-400 transition-colors truncate block">
                             {m.brand}
                           </Link>
-                          <span className="text-[10px] text-gray-600">{meta?.name || m.industry_id}</span>
+                          <span className="text-[10px]" style={{ color: 'var(--rs-text-muted)' }}>{meta?.name || m.industry_id}</span>
                         </div>
                         <span className="text-xs tabular-nums" style={{ color: scoreColor(m.score) }}>{m.score}</span>
                       </div>
                     );
                   })}
                   {topMovers.gainers.length === 0 && (
-                    <p className="text-xs text-gray-600">No gainers in latest run</p>
+                    <p className="text-xs" style={{ color: 'var(--rs-text-muted)' }}>No gainers in latest run</p>
                   )}
                 </div>
               </div>
@@ -597,14 +597,14 @@ export default function IntelligencePage() {
                           <Link href={`/brand/${encodeURIComponent(m.brand)}`} className="text-xs font-medium text-white hover:text-primary-400 transition-colors truncate block">
                             {m.brand}
                           </Link>
-                          <span className="text-[10px] text-gray-600">{meta?.name || m.industry_id}</span>
+                          <span className="text-[10px]" style={{ color: 'var(--rs-text-muted)' }}>{meta?.name || m.industry_id}</span>
                         </div>
                         <span className="text-xs tabular-nums" style={{ color: scoreColor(m.score) }}>{m.score}</span>
                       </div>
                     );
                   })}
                   {topMovers.decliners.length === 0 && (
-                    <p className="text-xs text-gray-600">No decliners in latest run</p>
+                    <p className="text-xs" style={{ color: 'var(--rs-text-muted)' }}>No decliners in latest run</p>
                   )}
                 </div>
               </div>
@@ -616,10 +616,10 @@ export default function IntelligencePage() {
         <section>
           <div className="rounded-xl border border-white/[0.04] bg-white/[0.015] p-5">
             <div className="mb-4">
-              <h2 className="text-[10px] font-medium text-gray-500 uppercase tracking-[0.2em] mb-1">
+              <h2 className="text-[10px] font-medium uppercase tracking-[0.2em] mb-1" style={{ color: 'var(--rs-text-muted)' }}>
                 Score Distribution by Industry
               </h2>
-              <p className="text-xs text-gray-600">Range (min–max), average (●), and median (|) per industry</p>
+              <p className="text-xs" style={{ color: 'var(--rs-text-muted)' }}>Range (min–max), average (●), and median (|) per industry</p>
             </div>
             <ScoreDistributionChart distributions={scoreDistribution} />
           </div>
@@ -629,13 +629,13 @@ export default function IntelligencePage() {
         <section>
           <div className="rounded-xl border border-white/[0.04] bg-white/[0.015] p-5">
             <div className="mb-4">
-              <h2 className="text-[10px] font-medium text-gray-500 uppercase tracking-[0.2em] mb-1">
+              <h2 className="text-[10px] font-medium uppercase tracking-[0.2em] mb-1" style={{ color: 'var(--rs-text-muted)' }}>
                 Score Dimension Correlations
               </h2>
-              <p className="text-xs text-gray-600">Pearson correlation between scoring dimensions across all brands</p>
+              <p className="text-xs" style={{ color: 'var(--rs-text-muted)' }}>Pearson correlation between scoring dimensions across all brands</p>
             </div>
             <CorrelationMatrix matrix={correlationMatrix} />
-            <div className="flex items-center justify-center gap-4 mt-4 text-[10px] text-gray-500">
+            <div className="flex items-center justify-center gap-4 mt-4 text-[10px]" style={{ color: 'var(--rs-text-muted)' }}>
               <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-sm bg-cyan-500/60" /> Positive correlation</span>
               <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-sm bg-red-400/60" /> Negative correlation</span>
             </div>
@@ -643,10 +643,10 @@ export default function IntelligencePage() {
         </section>
 
         {/* ── Footer ─────────────────────────────────────────── */}
-        <div className="flex flex-col sm:flex-row items-center justify-between text-xs text-gray-600 pt-6 border-t border-white/[0.04]">
+        <div className="flex flex-col sm:flex-row items-center justify-between text-xs pt-6 border-t border-white/[0.04]" style={{ color: 'var(--rs-text-muted)' }}>
           <div className="flex items-center gap-3">
             <span>Data range: {coverage.firstRunDate} → {coverage.latestRunDate}</span>
-            <span className="text-gray-800">|</span>
+            <span style={{ color: 'var(--rs-text-faint)' }}>|</span>
             <span>Powered by NVIDIA + Groq</span>
           </div>
           <Link href="/dashboard" className="text-primary-400 hover:text-primary-300 mt-2 sm:mt-0 transition-colors">

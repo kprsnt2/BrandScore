@@ -36,19 +36,19 @@ export default function ReportDetailPage({ params }: { params: Promise<{ slug: s
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#0a0a0f] flex items-center justify-center">
-        <div className="w-12 h-12 border-[3px] border-blue-500/30 border-t-blue-500 rounded-full animate-spin" />
+      <div className="min-h-screen rs-page theme-reports flex items-center justify-center">
+        <div className="w-12 h-12 border-[3px] rounded-full animate-spin" style={{ borderColor: 'hsl(var(--rs-accent) / 0.3)', borderTopColor: 'hsl(var(--rs-accent))' }} />
       </div>
     );
   }
 
   if (error || !report) {
     return (
-      <div className="min-h-screen bg-[#0a0a0f] flex flex-col items-center justify-center text-center px-4">
+      <div className="min-h-screen rs-page theme-reports flex flex-col items-center justify-center text-center px-4">
         <span className="text-4xl mb-4 block">⚠️</span>
         <h1 className="text-2xl font-bold text-white mb-2">Report Not Found</h1>
-        <p className="text-gray-400 mb-6">The requested report could not be found.</p>
-        <Link href="/reports" className="text-blue-400 hover:text-blue-300">
+        <p className="mb-6" style={{ color: 'var(--rs-text-secondary)' }}>The requested report could not be found.</p>
+        <Link href="/reports" className="transition-colors" style={{ color: 'hsl(var(--rs-accent))' }}>
           ← Back to Reports
         </Link>
       </div>
@@ -56,17 +56,17 @@ export default function ReportDetailPage({ params }: { params: Promise<{ slug: s
   }
 
   return (
-    <div className="min-h-screen bg-[#0a0a0f] pt-24 pb-16 px-4">
+    <div className="min-h-screen rs-page theme-reports pt-24 pb-16 px-4">
       <article className="max-w-3xl mx-auto">
-        <Link href="/reports" className="inline-flex items-center text-sm font-medium text-gray-500 hover:text-white transition-colors mb-8">
+        <Link href="/reports" className="inline-flex items-center text-sm font-medium transition-colors mb-8 hover:text-white" style={{ color: 'var(--rs-text-muted)' }}>
           <span className="mr-2">←</span> Back to Reports
         </Link>
         
-        <header className="mb-10 pb-10 border-b border-white/[0.05]">
+        <header className="mb-10 pb-10 border-b" style={{ borderColor: 'var(--rs-border)' }}>
           <h1 className="text-3xl sm:text-4xl font-bold text-white mb-4 leading-tight">
             {report.title}
           </h1>
-          <div className="flex items-center gap-4 text-sm text-gray-400">
+          <div className="flex items-center gap-4 text-sm" style={{ color: 'var(--rs-text-secondary)' }}>
             <time dateTime={report.published_at}>
               {new Date(report.published_at).toLocaleDateString('en-US', {
                 weekday: 'long',
@@ -77,13 +77,13 @@ export default function ReportDetailPage({ params }: { params: Promise<{ slug: s
             </time>
             <span>•</span>
             <span className="flex items-center gap-1.5">
-              <span className="w-2 h-2 rounded-full bg-blue-500"></span>
+              <span className="rs-badge-dot" />
               AI Generated
             </span>
           </div>
         </header>
 
-        <div className="prose prose-invert prose-blue max-w-none prose-headings:font-bold prose-h2:text-2xl prose-h2:mt-10 prose-h2:mb-4 prose-h3:text-xl prose-p:text-gray-300 prose-p:leading-relaxed prose-a:text-blue-400 prose-li:text-gray-300">
+        <div className="prose prose-invert max-w-none prose-headings:font-bold prose-h2:text-2xl prose-h2:mt-10 prose-h2:mb-4 prose-h3:text-xl prose-p:leading-relaxed" style={{ color: 'var(--rs-text-secondary)' }}>
           <ReactMarkdown remarkPlugins={[remarkGfm]}>
             {report.content_md}
           </ReactMarkdown>

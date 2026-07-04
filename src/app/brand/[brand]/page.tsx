@@ -132,9 +132,9 @@ export default async function BrandPage({ params }: Props) {
   const pathD = points.length > 0 ? points.map((p, i) => `${i === 0 ? 'M' : 'L'} ${p.x} ${p.y}`).join(' ') : '';
 
   return (
-    <div className="min-h-screen bg-[#0a0a0f] pt-24 pb-16">
+    <div className="min-h-screen pt-24 pb-16" style={{ background: 'var(--rs-bg-base)' }}>
       <div className="max-w-5xl mx-auto px-4">
-        <Link href="/dashboard" className="inline-flex items-center gap-2 text-gray-500 hover:text-white transition-colors mb-8 text-sm">
+        <Link href="/dashboard" className="inline-flex items-center gap-2 hover:text-white transition-colors mb-8 text-sm" style={{ color: 'var(--rs-text-muted)' }}>
           <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
           </svg>
@@ -149,7 +149,7 @@ export default async function BrandPage({ params }: Props) {
             <div>
               <div className="flex items-center gap-3 mb-4">
                 {industries.map(ind => ind && (
-                  <span key={ind.id} className="px-3 py-1 text-[10px] font-semibold tracking-widest uppercase bg-white/[0.05] text-gray-300 rounded-full border border-white/[0.05]">
+                  <span key={ind.id} className="px-3 py-1 text-[10px] font-semibold tracking-widest uppercase bg-white/[0.05] rounded-full border border-white/[0.05]" style={{ color: 'var(--rs-text-secondary)' }}>
                     {ind.name}
                   </span>
                 ))}
@@ -166,16 +166,16 @@ export default async function BrandPage({ params }: Props) {
                 </h1>
                 <ShareBrandButton brand={latestBreakdown.brand} score={latestBreakdown.score} />
               </div>
-              <p className="text-gray-400">AI Visibility Deep Dive</p>
+              <p style={{ color: 'var(--rs-text-secondary)' }}>AI Visibility Deep Dive</p>
             </div>
             
             <div className="flex flex-col items-start md:items-end">
-              <span className="text-[10px] font-medium text-gray-500 uppercase tracking-[0.2em] mb-2">Overall Score</span>
+              <span className="text-[10px] font-medium uppercase tracking-[0.2em] mb-2" style={{ color: 'var(--rs-text-muted)' }}>Overall Score</span>
               <div className="flex items-baseline gap-2">
                 <span className={`text-6xl sm:text-7xl font-black bg-gradient-to-r ${scoreGradient(latestBreakdown.score)} bg-clip-text text-transparent leading-none`}>
                   {latestBreakdown.score}
                 </span>
-                <span className="text-gray-500 text-xl font-light">/100</span>
+                <span className="text-xl font-light" style={{ color: 'var(--rs-text-muted)' }}>/100</span>
               </div>
               <span className={`text-xs font-medium mt-1`} style={{ color: scoreColor(latestBreakdown.score) }}>
                 {scoreLabel(latestBreakdown.score)}
@@ -201,10 +201,10 @@ export default async function BrandPage({ params }: Props) {
             ].map((metric) => (
               <div key={metric.label} className="bg-white/[0.015] border border-white/[0.04] rounded-xl p-4">
                 <div className="flex justify-between items-end mb-1">
-                  <span className="text-xs text-gray-400 uppercase tracking-wider">{metric.label}</span>
-                  <span className="text-lg font-bold text-white tabular-nums">{metric.value}<span className="text-gray-600 text-sm font-normal">/{metric.max}</span></span>
+                  <span className="text-xs uppercase tracking-wider" style={{ color: 'var(--rs-text-secondary)' }}>{metric.label}</span>
+                  <span className="text-lg font-bold text-white tabular-nums">{metric.value}<span className="text-sm font-normal" style={{ color: 'var(--rs-text-muted)' }}>/{metric.max}</span></span>
                 </div>
-                <p className="text-[10px] text-gray-600 mb-2">{metric.desc}</p>
+                <p className="text-[10px] mb-2" style={{ color: 'var(--rs-text-muted)' }}>{metric.desc}</p>
                 <div className="h-1.5 bg-white/[0.03] rounded-full overflow-hidden">
                   <div 
                     className="h-full rounded-full transition-all duration-1000 ease-out" 
@@ -263,7 +263,7 @@ export default async function BrandPage({ params }: Props) {
                 </div>
               </div>
             ) : (
-              <div className="flex items-center justify-center h-48 text-gray-500">
+              <div className="flex items-center justify-center h-48" style={{ color: 'var(--rs-text-muted)' }}>
                 Not enough historical data yet.
               </div>
             )}
@@ -277,7 +277,7 @@ export default async function BrandPage({ params }: Props) {
               <span className="w-1.5 h-1.5 rounded-full bg-cyan-500"></span>
               Per-Model Scores
             </h3>
-            <p className="text-[11px] text-gray-500 mb-5 -mt-3">How each AI model scored this brand independently</p>
+            <p className="text-[11px] mb-5 -mt-3" style={{ color: 'var(--rs-text-muted)' }}>How each AI model scored this brand independently</p>
 
             <div className="space-y-4">
               {perModelScores.map((ms, idx) => {
@@ -286,7 +286,7 @@ export default async function BrandPage({ params }: Props) {
                 return (
                   <div key={ms.model} className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
                     <div className="flex justify-between items-center sm:w-56 shrink-0">
-                      <span className="text-xs text-gray-300 font-medium truncate">{ms.model}</span>
+                      <span className="text-xs font-medium truncate" style={{ color: 'var(--rs-text-secondary)' }}>{ms.model}</span>
                       <span className="text-sm font-bold tabular-nums sm:hidden" style={{ color: scoreColor(ms.score) }}>{ms.score}</span>
                     </div>
                     <div className="flex-1 flex gap-[2px] h-3 rounded-full overflow-hidden bg-white/[0.03] w-full">
@@ -301,7 +301,7 @@ export default async function BrandPage({ params }: Props) {
               })}
             </div>
 
-            <div className="flex flex-wrap gap-x-5 gap-y-2 mt-5 text-[10px] text-gray-400 tracking-wide pt-3 border-t border-white/[0.04]">
+            <div className="flex flex-wrap gap-x-5 gap-y-2 mt-5 text-[10px] tracking-wide pt-3 border-t border-white/[0.04]" style={{ color: 'var(--rs-text-secondary)' }}>
               <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-sm" style={{backgroundColor: '#22d3ee', opacity:1}}></span> Recommendation</span>
               <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-sm" style={{backgroundColor: '#22d3ee', opacity:0.65}}></span> Sentiment</span>
               <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-sm" style={{backgroundColor: '#22d3ee', opacity:0.4}}></span> Prominence</span>
@@ -324,9 +324,9 @@ export default async function BrandPage({ params }: Props) {
                 <Link key={b.brand} href={`/brand/${encodeURIComponent(b.brand)}`}
                   className="flex items-center justify-between px-4 py-2.5 rounded-lg hover:bg-white/[0.03] transition-colors">
                   <div className="flex items-center gap-3">
-                    <span className="text-xs text-gray-600 font-medium w-6 text-right tabular-nums">#{rankingContext!.rank - rankingContext!.above.length + i}</span>
+                    <span className="text-xs font-medium w-6 text-right tabular-nums" style={{ color: 'var(--rs-text-muted)' }}>#{rankingContext!.rank - rankingContext!.above.length + i}</span>
                     <BrandLogo brand={b.brand} size={20} />
-                    <span className="text-sm text-gray-400">{b.brand}</span>
+                    <span className="text-sm" style={{ color: 'var(--rs-text-secondary)' }}>{b.brand}</span>
                   </div>
                   <span className="text-sm font-medium tabular-nums" style={{ color: scoreColor(b.score) }}>{b.score}</span>
                 </Link>
@@ -347,16 +347,16 @@ export default async function BrandPage({ params }: Props) {
                 <Link key={b.brand} href={`/brand/${encodeURIComponent(b.brand)}`}
                   className="flex items-center justify-between px-4 py-2.5 rounded-lg hover:bg-white/[0.03] transition-colors">
                   <div className="flex items-center gap-3">
-                    <span className="text-xs text-gray-600 font-medium w-6 text-right tabular-nums">#{rankingContext!.rank + i + 1}</span>
+                    <span className="text-xs font-medium w-6 text-right tabular-nums" style={{ color: 'var(--rs-text-muted)' }}>#{rankingContext!.rank + i + 1}</span>
                     <BrandLogo brand={b.brand} size={20} />
-                    <span className="text-sm text-gray-400">{b.brand}</span>
+                    <span className="text-sm" style={{ color: 'var(--rs-text-secondary)' }}>{b.brand}</span>
                   </div>
                   <span className="text-sm font-medium tabular-nums" style={{ color: scoreColor(b.score) }}>{b.score}</span>
                 </Link>
               ))}
             </div>
 
-            <p className="text-[10px] text-gray-600 mt-4 pt-3 border-t border-white/[0.04]">
+            <p className="text-[10px] mt-4 pt-3 border-t border-white/[0.04]" style={{ color: 'var(--rs-text-muted)' }}>
               Showing brands ranked around {latestBreakdown.brand} in the {industries[0]?.name || 'industry'} category
             </p>
           </div>

@@ -182,7 +182,7 @@ export default function ChatPage() {
                       </div>
                       
                       {/* Content */}
-                      <div className="prose prose-sm max-w-none prose-invert prose-p:text-gray-300 prose-p:leading-relaxed prose-strong:text-purple-300 prose-strong:font-semibold prose-code:text-purple-300 prose-code:bg-purple-500/10 prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded prose-code:text-xs prose-code:before:content-none prose-code:after:content-none prose-table:text-xs prose-th:text-left prose-th:text-gray-400 prose-th:font-semibold prose-td:text-gray-300">
+                      <div className="prose prose-sm max-w-none prose-invert prose-p:text-[var(--rs-text-secondary)] prose-p:leading-relaxed prose-strong:text-purple-300 prose-strong:font-semibold prose-code:text-purple-300 prose-code:bg-purple-500/10 prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded prose-code:text-xs prose-code:before:content-none prose-code:after:content-none prose-table:text-xs prose-th:text-left prose-th:text-[var(--rs-text-secondary)] prose-th:font-semibold prose-td:text-[var(--rs-text-secondary)]">
                         <ReactMarkdown remarkPlugins={[remarkGfm]}>
                           {msg.content}
                         </ReactMarkdown>
@@ -280,7 +280,7 @@ export default function ChatPage() {
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 placeholder={hasMessages ? "Ask a follow-up question..." : "Ask anything about brands, scores, or trends..."}
-                className="w-full bg-transparent pl-5 pr-14 py-4 text-white focus:outline-none text-sm placeholder-gray-600"
+                className="w-full bg-transparent pl-5 pr-14 py-4 text-white focus:outline-none text-sm placeholder:text-[var(--rs-text-muted)]"
                 style={{ caretColor: 'rgb(var(--rs-accent-rgb))' }}
                 disabled={loading}
               />

@@ -172,7 +172,7 @@ function StabilityDonut({ stability }: { stability: StabilityData }) {
         {segments.map(seg => (
           <div key={seg.key} className="flex items-center gap-2 text-xs">
             <span className="w-2.5 h-2.5 rounded-sm flex-shrink-0" style={{ backgroundColor: seg.color, opacity: 0.8 }} />
-            <span className="text-gray-400">{seg.label}</span>
+            <span style={{ color: 'var(--rs-text-secondary)' }}>{seg.label}</span>
             <span className="text-white font-medium ml-auto tabular-nums">{seg.pct}%</span>
           </div>
         ))}
@@ -207,7 +207,7 @@ export default function AnalyticsPage() {
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
           <div className="w-14 h-14 border-[3px] border-purple-500/30 border-t-purple-500 rounded-full animate-spin mx-auto mb-6" />
-          <p className="text-gray-500 text-sm">Running anomaly detection & trend analysis...</p>
+          <p className="text-sm" style={{ color: 'var(--rs-text-muted)' }}>Running anomaly detection & trend analysis...</p>
         </div>
       </div>
     );
@@ -218,7 +218,7 @@ export default function AnalyticsPage() {
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
           <span className="text-4xl mb-4 block">⚠️</span>
-          <p className="text-gray-400 text-sm">{error || 'No data available'}</p>
+          <p className="text-sm" style={{ color: 'var(--rs-text-secondary)' }}>{error || 'No data available'}</p>
         </div>
       </div>
     );
@@ -245,7 +245,7 @@ export default function AnalyticsPage() {
               & Trend Forecasting
             </span>
           </h1>
-          <p className="text-gray-500 text-base sm:text-lg max-w-xl mx-auto leading-relaxed">
+          <p className="text-base sm:text-lg max-w-xl mx-auto leading-relaxed" style={{ color: 'var(--rs-text-muted)' }}>
             Statistical analysis of {meta.brandsAnalyzed} brands across {meta.totalRuns} pipeline runs
           </p>
         </div>
@@ -265,7 +265,7 @@ export default function AnalyticsPage() {
               <div key={s.label} className="rounded-xl border border-white/[0.04] bg-white/[0.015] p-4 text-center">
                 <span className="text-lg block mb-1">{s.icon}</span>
                 <div className="text-2xl font-bold tabular-nums" style={{ color: s.color }}>{s.value}</div>
-                <div className="text-[10px] text-gray-500 uppercase tracking-widest mt-1">{s.label}</div>
+                <div className="text-[10px] uppercase tracking-widest mt-1" style={{ color: 'var(--rs-text-muted)' }}>{s.label}</div>
               </div>
             ))}
           </div>
@@ -276,12 +276,12 @@ export default function AnalyticsPage() {
           <div className="rounded-xl border border-white/[0.04] bg-white/[0.015] p-5">
             <div className="flex items-center justify-between mb-5">
               <div>
-                <h2 className="text-[10px] font-medium text-gray-500 uppercase tracking-[0.2em] mb-1">
+                <h2 className="text-[10px] font-medium uppercase tracking-[0.2em] mb-1" style={{ color: 'var(--rs-text-muted)' }}>
                   🚨 Anomaly Detection — Z-Score Method
                 </h2>
-                <p className="text-xs text-gray-600">Brands with score changes &gt;2 standard deviations from their historical mean</p>
+                <p className="text-xs" style={{ color: 'var(--rs-text-muted)' }}>Brands with score changes &gt;2 standard deviations from their historical mean</p>
               </div>
-              <span className="text-xs text-gray-600 bg-white/[0.03] px-2 py-1 rounded-md border border-white/[0.04]">
+              <span className="text-xs bg-white/[0.03] px-2 py-1 rounded-md border border-white/[0.04]" style={{ color: 'var(--rs-text-muted)' }}>
                 {anomalies.length} detected
               </span>
             </div>
@@ -289,7 +289,7 @@ export default function AnalyticsPage() {
             {anomalies.length === 0 ? (
               <div className="text-center py-8">
                 <span className="text-3xl block mb-2">✅</span>
-                <p className="text-gray-500 text-sm">No anomalies detected — all brands within normal variance</p>
+                <p className="text-sm" style={{ color: 'var(--rs-text-muted)' }}>No anomalies detected — all brands within normal variance</p>
               </div>
             ) : (
               <div className="space-y-2">
@@ -307,9 +307,9 @@ export default function AnalyticsPage() {
                         <Link href={`/brand/${encodeURIComponent(a.brand)}`} className="text-sm font-medium text-white hover:text-primary-400 transition-colors truncate">
                           {a.brand}
                         </Link>
-                        <span className="text-[10px] text-gray-600 hidden sm:inline">{a.industry_name}</span>
+                        <span className="text-[10px] hidden sm:inline" style={{ color: 'var(--rs-text-muted)' }}>{a.industry_name}</span>
                       </div>
-                      <div className="text-[10px] text-gray-500 mt-0.5">
+                      <div className="text-[10px] mt-0.5" style={{ color: 'var(--rs-text-muted)' }}>
                         z={a.z_score} · avg Δ={a.avg_change} · σ={a.std_change}
                       </div>
                     </div>
@@ -317,7 +317,7 @@ export default function AnalyticsPage() {
                       <div className={`text-sm font-bold tabular-nums ${a.type === 'spike' ? 'text-emerald-400' : 'text-red-400'}`}>
                         {a.change > 0 ? '+' : ''}{a.change}
                       </div>
-                      <div className="text-[10px] text-gray-500 tabular-nums">{a.prev_score} → {a.current_score}</div>
+                      <div className="text-[10px] tabular-nums" style={{ color: 'var(--rs-text-muted)' }}>{a.prev_score} → {a.current_score}</div>
                     </div>
                   </div>
                 ))}
@@ -328,20 +328,20 @@ export default function AnalyticsPage() {
 
         {/* ── Trend Forecasting ──────────────────────────────── */}
         <section>
-          <h2 className="text-[10px] font-medium text-gray-500 uppercase tracking-[0.2em] mb-4">
+          <h2 className="text-[10px] font-medium uppercase tracking-[0.2em] mb-4" style={{ color: 'var(--rs-text-muted)' }}>
             📈 Industry Trend Forecasting — Linear Regression
           </h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
             {forecasts.map(f => {
               const latestScore = f.historical[f.historical.length - 1]?.avg_score || 0;
               const trendIcon = f.trend === 'rising' ? '↗️' : f.trend === 'falling' ? '↘️' : '→';
-              const trendColor = f.trend === 'rising' ? 'text-emerald-400' : f.trend === 'falling' ? 'text-red-400' : 'text-gray-400';
+              const trendColor = f.trend === 'rising' ? 'text-emerald-400' : f.trend === 'falling' ? 'text-red-400' : '';
 
               return (
                 <div key={f.industry_id} className="rounded-xl border border-white/[0.04] bg-white/[0.015] p-4">
                   <div className="flex items-center justify-between mb-3">
                     <h3 className="text-xs font-semibold text-white truncate">{f.industry_name}</h3>
-                    <span className={`text-sm ${trendColor}`}>{trendIcon}</span>
+                    <span className={`text-sm ${trendColor}`} style={!trendColor ? { color: 'var(--rs-text-secondary)' } : undefined}>{trendIcon}</span>
                   </div>
 
                   {/* Sparkline */}
@@ -354,17 +354,17 @@ export default function AnalyticsPage() {
 
                   <div className="flex items-center justify-between text-[10px]">
                     <div>
-                      <span className="text-gray-500">Current </span>
+                      <span style={{ color: 'var(--rs-text-muted)' }}>Current </span>
                       <span className="font-medium" style={{ color: scoreColor(latestScore) }}>{latestScore}</span>
                     </div>
                     <div>
-                      <span className="text-gray-500">Forecast </span>
+                      <span style={{ color: 'var(--rs-text-muted)' }}>Forecast </span>
                       <span className="font-medium text-purple-400">{f.forecast[2]?.predicted_score || '—'}</span>
                     </div>
                   </div>
                   <div className="flex items-center justify-between text-[10px] mt-1">
-                    <span className="text-gray-600">slope={f.slope}/day</span>
-                    <span className="text-gray-600">R²={f.r2}</span>
+                    <span style={{ color: 'var(--rs-text-muted)' }}>slope={f.slope}/day</span>
+                    <span style={{ color: 'var(--rs-text-muted)' }}>R²={f.r2}</span>
                     {f.weekly_momentum !== 0 && (
                       <span className={f.weekly_momentum > 0 ? 'text-emerald-500' : 'text-red-400'}>
                         {f.weekly_momentum > 0 ? '+' : ''}{f.weekly_momentum}/wk
@@ -381,15 +381,15 @@ export default function AnalyticsPage() {
         <section className="grid grid-cols-1 md:grid-cols-2 gap-3">
           {/* Weekly Summary */}
           <div className="rounded-xl border border-white/[0.04] bg-white/[0.015] p-5">
-            <h2 className="text-[10px] font-medium text-gray-500 uppercase tracking-[0.2em] mb-4">
+            <h2 className="text-[10px] font-medium uppercase tracking-[0.2em] mb-4" style={{ color: 'var(--rs-text-muted)' }}>
               📊 Weekly Report
             </h2>
             <div className="space-y-4">
               <div className="flex items-center justify-between">
-                <span className="text-xs text-gray-400">Avg Score</span>
+                <span className="text-xs" style={{ color: 'var(--rs-text-secondary)' }}>Avg Score</span>
                 <div className="flex items-center gap-2">
-                  <span className="text-xs text-gray-600">{weeklySummary.avgScore.previous}</span>
-                  <span className="text-gray-700">→</span>
+                  <span className="text-xs" style={{ color: 'var(--rs-text-muted)' }}>{weeklySummary.avgScore.previous}</span>
+                  <span style={{ color: 'var(--rs-text-faint)' }}>→</span>
                   <span className="text-sm font-bold" style={{ color: scoreColor(weeklySummary.avgScore.recent) }}>
                     {weeklySummary.avgScore.recent}
                   </span>
@@ -401,14 +401,14 @@ export default function AnalyticsPage() {
 
               {weeklySummary.topImprovers.length > 0 && (
                 <div>
-                  <h3 className="text-[10px] text-gray-600 uppercase tracking-widest mb-2">Weekly Improvers</h3>
+                  <h3 className="text-[10px] uppercase tracking-widest mb-2" style={{ color: 'var(--rs-text-muted)' }}>Weekly Improvers</h3>
                   {weeklySummary.topImprovers.map(m => {
                     const meta = INDUSTRIES.find(i => i.id === m.industry_id);
                     return (
                       <div key={m.brand + m.industry_id} className="flex items-center justify-between py-1">
                         <div className="flex items-center gap-1.5 min-w-0">
                           <Link href={`/brand/${encodeURIComponent(m.brand)}`} className="text-xs text-white hover:text-primary-400 truncate">{m.brand}</Link>
-                          <span className="text-[9px] text-gray-700">{meta?.name?.slice(0, 12)}</span>
+                          <span className="text-[9px]" style={{ color: 'var(--rs-text-faint)' }}>{meta?.name?.slice(0, 12)}</span>
                         </div>
                         <span className="text-xs text-emerald-400 font-bold tabular-nums">+{m.change}</span>
                       </div>
@@ -419,14 +419,14 @@ export default function AnalyticsPage() {
 
               {weeklySummary.topDecliners.length > 0 && (
                 <div>
-                  <h3 className="text-[10px] text-gray-600 uppercase tracking-widest mb-2">Weekly Decliners</h3>
+                  <h3 className="text-[10px] uppercase tracking-widest mb-2" style={{ color: 'var(--rs-text-muted)' }}>Weekly Decliners</h3>
                   {weeklySummary.topDecliners.map(m => {
                     const meta = INDUSTRIES.find(i => i.id === m.industry_id);
                     return (
                       <div key={m.brand + m.industry_id} className="flex items-center justify-between py-1">
                         <div className="flex items-center gap-1.5 min-w-0">
                           <Link href={`/brand/${encodeURIComponent(m.brand)}`} className="text-xs text-white hover:text-primary-400 truncate">{m.brand}</Link>
-                          <span className="text-[9px] text-gray-700">{meta?.name?.slice(0, 12)}</span>
+                          <span className="text-[9px]" style={{ color: 'var(--rs-text-faint)' }}>{meta?.name?.slice(0, 12)}</span>
                         </div>
                         <span className="text-xs text-red-400 font-bold tabular-nums">{m.change}</span>
                       </div>
@@ -439,10 +439,10 @@ export default function AnalyticsPage() {
 
           {/* Score Stability */}
           <div className="rounded-xl border border-white/[0.04] bg-white/[0.015] p-5">
-            <h2 className="text-[10px] font-medium text-gray-500 uppercase tracking-[0.2em] mb-4">
+            <h2 className="text-[10px] font-medium uppercase tracking-[0.2em] mb-4" style={{ color: 'var(--rs-text-muted)' }}>
               🎯 Score Stability Report
             </h2>
-            <p className="text-xs text-gray-600 mb-4">Distribution of score changes between latest runs</p>
+            <p className="text-xs mb-4" style={{ color: 'var(--rs-text-muted)' }}>Distribution of score changes between latest runs</p>
             <StabilityDonut stability={stability} />
           </div>
         </section>
@@ -451,16 +451,16 @@ export default function AnalyticsPage() {
         <section>
           <div className="rounded-xl border border-white/[0.04] bg-white/[0.015] p-5">
             <div className="mb-4">
-              <h2 className="text-[10px] font-medium text-gray-500 uppercase tracking-[0.2em] mb-1">
+              <h2 className="text-[10px] font-medium uppercase tracking-[0.2em] mb-1" style={{ color: 'var(--rs-text-muted)' }}>
                 🌊 Brand Volatility Index
               </h2>
-              <p className="text-xs text-gray-600">Brands ranked by Coefficient of Variation (CV%) — higher CV = more unpredictable</p>
+              <p className="text-xs" style={{ color: 'var(--rs-text-muted)' }}>Brands ranked by Coefficient of Variation (CV%) — higher CV = more unpredictable</p>
             </div>
 
             <div className="overflow-x-auto">
               <table className="w-full text-xs">
                 <thead>
-                  <tr className="text-[10px] text-gray-500 uppercase tracking-widest border-b border-white/[0.04]">
+                  <tr className="text-[10px] uppercase tracking-widest border-b border-white/[0.04]" style={{ color: 'var(--rs-text-muted)' }}>
                     <th className="text-left py-2 pr-3">#</th>
                     <th className="text-left py-2 pr-3">Brand</th>
                     <th className="text-left py-2 pr-3 hidden sm:table-cell">Industry</th>
@@ -474,20 +474,20 @@ export default function AnalyticsPage() {
                 <tbody>
                   {volatilityIndex.map((v, i) => (
                     <tr key={v.brand + v.industry_id} className="border-b border-white/[0.02] hover:bg-white/[0.02]">
-                      <td className="py-2 pr-3 text-gray-600">{i + 1}</td>
+                      <td className="py-2 pr-3" style={{ color: 'var(--rs-text-muted)' }}>{i + 1}</td>
                       <td className="py-2 pr-3">
                         <Link href={`/brand/${encodeURIComponent(v.brand)}`} className="text-white hover:text-primary-400 transition-colors">
                           {v.brand}
                         </Link>
                       </td>
-                      <td className="py-2 pr-3 text-gray-500 hidden sm:table-cell">{v.industry_name}</td>
+                      <td className="py-2 pr-3 hidden sm:table-cell" style={{ color: 'var(--rs-text-muted)' }}>{v.industry_name}</td>
                       <td className="py-2 px-2 text-right tabular-nums" style={{ color: scoreColor(v.avg_score) }}>{v.avg_score}</td>
-                      <td className="py-2 px-2 text-right tabular-nums text-gray-400">{v.min_score}–{v.max_score}</td>
-                      <td className="py-2 px-2 text-right tabular-nums text-gray-400">{v.stddev}</td>
+                      <td className="py-2 px-2 text-right tabular-nums" style={{ color: 'var(--rs-text-secondary)' }}>{v.min_score}–{v.max_score}</td>
+                      <td className="py-2 px-2 text-right tabular-nums" style={{ color: 'var(--rs-text-secondary)' }}>{v.stddev}</td>
                       <td className="py-2 px-2 text-right tabular-nums font-medium" style={{ color: v.cv > 15 ? '#f87171' : v.cv > 10 ? '#facc15' : '#34d399' }}>
                         {v.cv}%
                       </td>
-                      <td className="py-2 pl-2 text-right tabular-nums text-gray-600">{v.data_points}</td>
+                      <td className="py-2 pl-2 text-right tabular-nums" style={{ color: 'var(--rs-text-muted)' }}>{v.data_points}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -497,10 +497,10 @@ export default function AnalyticsPage() {
         </section>
 
         {/* ── Footer ─────────────────────────────────────────── */}
-        <div className="flex flex-col sm:flex-row items-center justify-between text-xs text-gray-600 pt-6 border-t border-white/[0.04]">
+        <div className="flex flex-col sm:flex-row items-center justify-between text-xs pt-6 border-t border-white/[0.04]" style={{ color: 'var(--rs-text-muted)' }}>
           <div className="flex items-center gap-3">
             <span>Based on {meta.totalRuns} pipeline runs</span>
-            <span className="text-gray-800">|</span>
+            <span style={{ color: 'var(--rs-text-faint)' }}>|</span>
             <span>Z-score threshold: σ &gt; 2.0</span>
           </div>
           <div className="flex gap-4 mt-2 sm:mt-0">

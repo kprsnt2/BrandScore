@@ -62,7 +62,7 @@ function TimelineChart({ data, brands, dates }: { data: { [brand: string]: Timel
     return (
       <div className="flex flex-col items-center justify-center h-[260px] border border-dashed rounded-xl" style={{ borderColor: 'var(--rs-border-hover)', background: 'var(--rs-bg-surface)' }}>
         <span className="px-3 py-1 bg-purple-500/20 text-purple-300 text-xs font-semibold rounded-full mb-3 uppercase tracking-widest border border-purple-500/30">New Industry</span>
-        <p className="text-gray-400 text-sm">Historical trends will appear after the next pipeline run.</p>
+        <p className="text-sm" style={{ color: 'var(--rs-text-secondary)' }}>Historical trends will appear after the next pipeline run.</p>
       </div>
     );
   }
@@ -148,7 +148,7 @@ function TimelineChart({ data, brands, dates }: { data: { [brand: string]: Timel
           className="absolute pointer-events-none rounded-lg px-3 py-2 text-xs shadow-xl z-10"
           style={{ background: 'var(--rs-bg-elevated)', border: '1px solid var(--rs-border-hover)', left: `${(tooltip.x / W) * 100}%`, top: `${(tooltip.y / H) * 100 - 15}%`, transform: 'translate(-50%, -100%)' }}
         >
-          <div className="text-gray-400">{new Date(tooltip.date + 'T00:00:00').toLocaleDateString('en-IN', { month: 'short', day: 'numeric', year: 'numeric' })}</div>
+          <div style={{ color: 'var(--rs-text-secondary)' }}>{new Date(tooltip.date + 'T00:00:00').toLocaleDateString('en-IN', { month: 'short', day: 'numeric', year: 'numeric' })}</div>
           <div className="text-white font-semibold">{tooltip.brand}: {tooltip.score}</div>
         </div>
       )}
@@ -156,7 +156,7 @@ function TimelineChart({ data, brands, dates }: { data: { [brand: string]: Timel
       {/* Legend */}
       <div className="flex flex-wrap gap-x-5 gap-y-1 mt-3 px-1">
         {brands.slice(0, 5).map((b, i) => (
-          <div key={b} className="flex items-center gap-1.5 text-[11px] text-gray-400">
+          <div key={b} className="flex items-center gap-1.5 text-[11px]" style={{ color: 'var(--rs-text-secondary)' }}>
             <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: CHART_COLORS[i % CHART_COLORS.length] }} />
             {b}
           </div>
@@ -183,7 +183,7 @@ function ScoreBreakdownChart({ brands }: { brands: BrandData[] }) {
         return (
           <div key={brand.brand} className="flex flex-col sm:flex-row sm:items-center gap-1.5 sm:gap-3">
             <div className="flex justify-between items-center sm:w-52 shrink-0">
-              <div className="flex items-center gap-2 min-w-0"><BrandLogo brand={brand.brand} size={20} rank={index} /><span className="text-xs text-gray-300 pr-2 truncate font-medium">{brand.brand}</span></div>
+              <div className="flex items-center gap-2 min-w-0"><BrandLogo brand={brand.brand} size={20} rank={index} /><span className="text-xs pr-2 truncate font-medium" style={{ color: 'var(--rs-text-secondary)' }}>{brand.brand}</span></div>
               <span className="text-sm font-bold sm:hidden tabular-nums" style={{ color: scoreColor(brand.score) }}>{brand.score}</span>
             </div>
             <div className="flex-1 flex gap-[2px] h-3 rounded-full overflow-hidden bg-white/[0.03] w-full">
@@ -196,7 +196,7 @@ function ScoreBreakdownChart({ brands }: { brands: BrandData[] }) {
           </div>
         );
       })}
-      <div className="flex flex-wrap gap-x-5 gap-y-2 mt-4 text-[10px] text-gray-400 tracking-wide pt-2">
+      <div className="flex flex-wrap gap-x-5 gap-y-2 mt-4 text-[10px] tracking-wide pt-2" style={{ color: 'var(--rs-text-secondary)' }}>
         <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-sm" style={{backgroundColor: '#22d3ee', opacity:1}}></span> Recommendation</span>
         <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-sm" style={{backgroundColor: '#22d3ee', opacity:0.65}}></span> Sentiment</span>
         <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-sm" style={{backgroundColor: '#22d3ee', opacity:0.4}}></span> Prominence</span>
@@ -245,7 +245,7 @@ function AIInsightCard({ insight, loading, industryName }: AIInsightCardProps) {
     return (
       <div className="rounded-xl border border-dashed px-5 py-4 mb-8 flex items-center gap-3" style={{ borderColor: 'var(--rs-border)', background: 'var(--rs-bg-surface)' }}>
         <span className="text-lg">🤖</span>
-        <p className="text-xs text-gray-600">
+        <p className="text-xs" style={{ color: 'var(--rs-text-muted)' }}>
           {insight?.message || 'AI insights generate daily after the pipeline run.'}
         </p>
       </div>
@@ -278,7 +278,7 @@ function AIInsightCard({ insight, loading, industryName }: AIInsightCardProps) {
       {/* Header */}
       <div className="relative flex items-center gap-2.5 mb-4 flex-wrap">
         <span className="text-base">🤖</span>
-        <h3 className="text-[10px] font-semibold text-gray-400 uppercase tracking-[0.15em]">
+        <h3 className="text-[10px] font-semibold uppercase tracking-[0.15em]" style={{ color: 'var(--rs-text-secondary)' }}>
           AI Insight · {industryName}
         </h3>
         <div className="ml-auto flex items-center gap-2">
@@ -289,7 +289,7 @@ function AIInsightCard({ insight, loading, industryName }: AIInsightCardProps) {
             </span>
           )}
           {/* Model badge */}
-          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-white/[0.05] border border-white/[0.07] text-[9px] text-gray-500 font-medium">
+          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-white/[0.05] border border-white/[0.07] text-[9px] font-medium" style={{ color: 'var(--rs-text-muted)' }}>
             ✨ {modelLabel}
           </span>
         </div>
@@ -305,7 +305,7 @@ function AIInsightCard({ insight, loading, industryName }: AIInsightCardProps) {
       {/* Bullet Points */}
       <ul className="relative space-y-2.5">
         {bullets.map((bullet, i) => (
-          <li key={i} className="text-sm text-gray-300 leading-relaxed">
+          <li key={i} className="text-sm leading-relaxed" style={{ color: 'var(--rs-text-secondary)' }}>
             {bullet}
           </li>
         ))}
@@ -313,7 +313,7 @@ function AIInsightCard({ insight, loading, industryName }: AIInsightCardProps) {
 
       {/* Footer */}
       {dateLabel && (
-        <p className="relative text-[10px] text-gray-600 mt-4 pt-3 border-t border-white/[0.04]">
+        <p className="relative text-[10px] mt-4 pt-3 border-t border-white/[0.04]" style={{ color: 'var(--rs-text-muted)' }}>
           Generated {insight.isToday ? 'today' : 'on'} · {dateLabel}
         </p>
       )}
@@ -429,7 +429,7 @@ function DashboardInner() {
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
           <div className="w-14 h-14 border-[3px] border-primary-500/30 border-t-primary-500 rounded-full animate-spin mx-auto mb-6"></div>
-          <p className="text-gray-500 text-sm">Loading India rAsh Index...</p>
+          <p className="text-sm" style={{ color: 'var(--rs-text-muted)' }}>Loading India rAsh Index...</p>
         </div>
       </div>
     );
@@ -469,17 +469,17 @@ function DashboardInner() {
               <h2 className="text-sm font-medium text-white whitespace-nowrap">
                 Top <span className="text-primary-400">{industryMeta?.name}</span> brands
               </h2>
-              <span className="text-gray-600 text-xs hidden sm:inline">· Top 10</span>
+              <span className="text-xs hidden sm:inline" style={{ color: 'var(--rs-text-muted)' }}>· Top 10</span>
             </div>
             
-            <button onClick={handleShare} className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 bg-white/[0.05] hover:bg-white/[0.1] border border-white/[0.05] rounded-lg text-xs font-medium text-gray-300 transition-colors">
+            <button onClick={handleShare} className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 bg-white/[0.05] hover:bg-white/[0.1] border border-white/[0.05] rounded-lg text-xs font-medium transition-colors" style={{ color: 'var(--rs-text-secondary)' }}>
               <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-5.368m0 5.368l5.662 3.397m-5.662-3.397a3 3 0 110-5.368m0 5.368l5.662-3.397" /></svg>
               {copied ? "? Copied!" : "Share"}
             </button>
             {copied && (
               <span className="text-[11px] text-emerald-400 font-medium animate-pulse">Copied to clipboard!</span>
             )}
-            <button onClick={() => setCompareMode(!compareMode)} className={`hidden sm:flex items-center gap-1.5 px-3 py-1.5 border rounded-lg text-xs font-medium transition-colors ${compareMode ? 'bg-primary-500/20 text-primary-400 border-primary-500/30' : 'bg-white/[0.05] hover:bg-white/[0.1] text-gray-300 border-white/[0.05]'}`}>
+            <button onClick={() => setCompareMode(!compareMode)} className={`hidden sm:flex items-center gap-1.5 px-3 py-1.5 border rounded-lg text-xs font-medium transition-colors ${compareMode ? 'bg-primary-500/20 text-primary-400 border-primary-500/30' : 'bg-white/[0.05] hover:bg-white/[0.1] border-white/[0.05]'}`} style={!compareMode ? { color: 'var(--rs-text-secondary)' } : undefined}>
               ⚔️ Compare
             </button>
           </div>
@@ -491,32 +491,33 @@ function DashboardInner() {
                 placeholder="Search brands..."
                 value={searchQuery}
                 onChange={e => setSearchQuery(e.target.value)}
-                className="w-full bg-white/[0.04] border border-white/[0.08] rounded-lg px-3 py-2 text-sm text-gray-300 focus:outline-none focus:ring-1 focus:ring-primary-500/50 placeholder-gray-600"
+                className="w-full bg-white/[0.04] border border-white/[0.08] rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary-500/50"
+                style={{ color: 'var(--rs-text-secondary)' }}
               />
               {searchQuery.length >= 2 && (
                 <div className="absolute top-full left-0 right-0 mt-1 rounded-lg shadow-xl overflow-hidden z-50" style={{ background: 'var(--rs-bg-elevated)', border: '1px solid var(--rs-border-hover)' }}>
                   {searchResults.length > 0 ? (
                     <>
                       {searchResults.map(res => (
-                        <Link key={res.brand + res.industry_id} href={`/brand/${encodeURIComponent(res.brand)}`} className="flex items-center gap-3 px-4 py-2.5 hover:bg-white/5 text-sm text-gray-300 transition-colors">
+                        <Link key={res.brand + res.industry_id} href={`/brand/${encodeURIComponent(res.brand)}`} className="flex items-center gap-3 px-4 py-2.5 hover:bg-white/5 text-sm transition-colors" style={{ color: 'var(--rs-text-secondary)' }}>
                           <BrandLogo brand={res.brand} size={20} />
                           <div className="flex-1 min-w-0">
                             <div className="font-medium text-white truncate">{res.brand}</div>
-                            <div className="text-xs text-gray-500 flex justify-between mt-0.5">
+                            <div className="text-xs flex justify-between mt-0.5" style={{ color: 'var(--rs-text-muted)' }}>
                               <span>{INDUSTRIES.find(i => i.id === res.industry_id)?.name || res.industry_id}</span>
                               <span className="text-primary-400 font-medium">{res.score}/100</span>
                             </div>
                           </div>
                         </Link>
                       ))}
-                      <Link href={`/?brand=${encodeURIComponent(searchQuery)}`} className="flex items-center gap-2 px-4 py-2.5 border-t border-white/[0.06] hover:bg-primary-500/10 text-xs text-gray-500 hover:text-primary-400 transition-colors">
+                      <Link href={`/?brand=${encodeURIComponent(searchQuery)}`} className="flex items-center gap-2 px-4 py-2.5 border-t border-white/[0.06] hover:bg-primary-500/10 text-xs hover:text-primary-400 transition-colors" style={{ color: 'var(--rs-text-muted)' }}>
                         <span>🤖</span>
                         <span>Analyze &quot;{searchQuery}&quot; with AI →</span>
                       </Link>
                     </>
                   ) : (
                     <div className="px-4 py-3">
-                      <p className="text-xs text-gray-500 mb-2">No brands found in database</p>
+                      <p className="text-xs mb-2" style={{ color: 'var(--rs-text-muted)' }}>No brands found in database</p>
                       <Link href={`/?brand=${encodeURIComponent(searchQuery)}`} className="flex items-center gap-2 text-sm text-primary-400 hover:text-primary-300 font-medium transition-colors">
                         <span>🤖</span>
                         <span>Analyze &quot;{searchQuery}&quot; with AI →</span>
@@ -528,18 +529,18 @@ function DashboardInner() {
             </div>
             <div className="relative flex-none hidden sm:block">
               <select value={selectedModel} onChange={e => setSelectedModel(e.target.value)}
-                className="appearance-none bg-white/[0.04] border border-white/[0.08] rounded-lg px-3 py-2 pr-8 text-sm text-gray-300 w-full cursor-pointer hover:bg-white/[0.07] transition-all focus:outline-none focus:ring-1 focus:ring-primary-500/50">
-                <option value="all" className="bg-rs-elevated text-gray-200">All Models</option>
-                {(industryData?.availableModels || []).map(m => <option key={m} value={m} className="bg-rs-elevated text-gray-200">{m}</option>)}
+                className="appearance-none bg-white/[0.04] border border-white/[0.08] rounded-lg px-3 py-2 pr-8 text-sm w-full cursor-pointer hover:bg-white/[0.07] transition-all focus:outline-none focus:ring-1 focus:ring-primary-500/50" style={{ color: 'var(--rs-text-secondary)' }}>
+                <option value="all" className="bg-rs-elevated text-white">All Models</option>
+                {(industryData?.availableModels || []).map(m => <option key={m} value={m} className="bg-rs-elevated text-white">{m}</option>)}
               </select>
-              <svg className="absolute right-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-500 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
+              <svg className="absolute right-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 pointer-events-none" style={{ color: 'var(--rs-text-muted)' }} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
             </div>
             <div className="relative flex-none">
               <select value={selectedIndustry} onChange={e => { setSelectedIndustry(e.target.value); setSelectedModel('all'); router.replace('/dashboard?industry=' + e.target.value, { scroll: false }); }}
-                className="appearance-none bg-white/[0.04] border border-white/[0.08] rounded-lg px-3 py-2 pr-8 text-sm text-gray-300 w-full cursor-pointer hover:bg-white/[0.07] transition-all focus:outline-none focus:ring-1 focus:ring-primary-500/50">
-                {INDUSTRIES.map(i => <option key={i.id} value={i.id} className="bg-rs-elevated text-gray-200">{i.name}</option>)}
+                className="appearance-none bg-white/[0.04] border border-white/[0.08] rounded-lg px-3 py-2 pr-8 text-sm w-full cursor-pointer hover:bg-white/[0.07] transition-all focus:outline-none focus:ring-1 focus:ring-primary-500/50" style={{ color: 'var(--rs-text-secondary)' }}>
+                {INDUSTRIES.map(i => <option key={i.id} value={i.id} className="bg-rs-elevated text-white">{i.name}</option>)}
               </select>
-              <svg className="absolute right-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-500 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
+              <svg className="absolute right-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 pointer-events-none" style={{ color: 'var(--rs-text-muted)' }} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
             </div>
           </div>
         </div>
@@ -553,7 +554,7 @@ function DashboardInner() {
               <span className="text-3xl">📊</span>
             </div>
             <h2 className="text-xl font-semibold text-white mb-2">No data available</h2>
-            <p className="text-gray-500 text-sm max-w-sm mx-auto">Pipeline hasn&apos;t run yet for this industry.</p>
+            <p className="text-sm max-w-sm mx-auto" style={{ color: 'var(--rs-text-muted)' }}>Pipeline hasn&apos;t run yet for this industry.</p>
           </div>
         ) : (
           <>
@@ -565,7 +566,7 @@ function DashboardInner() {
                     <option value="">Select Brand 1</option>
                     {rankedBrands.map(b => <option key={b.brand} value={b.brand}>{b.brand} (Score: {b.score})</option>)}
                   </select>
-                  <span className="text-gray-500 font-bold italic text-xl">VS</span>
+                  <span className="font-bold italic text-xl" style={{ color: 'var(--rs-text-muted)' }}>VS</span>
                   <select className="flex-1 rounded-lg px-4 py-2.5 text-sm text-white focus:outline-none focus:ring-1 focus:ring-primary-500" style={{ background: 'var(--rs-bg-elevated)', border: '1px solid var(--rs-border-hover)' }}
                     value={brand2} onChange={e => setBrand2(e.target.value)}>
                     <option value="">Select Brand 2</option>
@@ -588,7 +589,7 @@ function DashboardInner() {
                       {/* Score advantage badge */}
                       <div className="text-center mb-6">
                         <div className="inline-block px-4 py-1.5 rounded-full bg-white/5 border border-white/10 text-sm font-medium">
-                          Advantage: <span className={diff > 0 ? 'text-primary-400' : diff < 0 ? 'text-purple-400' : 'text-gray-400'}>{Math.abs(diff)} points to {diff > 0 ? b1.brand : diff < 0 ? b2.brand : 'Tie'}</span>
+                          Advantage: <span className={diff > 0 ? 'text-primary-400' : diff < 0 ? 'text-purple-400' : ''} style={diff === 0 ? { color: 'var(--rs-text-secondary)' } : undefined}>{Math.abs(diff)} points to {diff > 0 ? b1.brand : diff < 0 ? b2.brand : 'Tie'}</span>
                         </div>
                       </div>
 
@@ -596,12 +597,12 @@ function DashboardInner() {
                       <div className="grid grid-cols-3 items-center gap-4 mb-6 px-2">
                         <div className="text-right">
                           <div className="text-3xl font-bold tabular-nums" style={{ color: scoreColor(b1.score) }}>{b1.score}</div>
-                          <div className="text-xs text-gray-400 font-medium truncate">{b1.brand}</div>
+                          <div className="text-xs font-medium truncate" style={{ color: 'var(--rs-text-secondary)' }}>{b1.brand}</div>
                         </div>
-                        <div className="text-center text-[10px] text-gray-600 uppercase tracking-widest font-bold">Overall</div>
+                        <div className="text-center text-[10px] uppercase tracking-widest font-bold" style={{ color: 'var(--rs-text-muted)' }}>Overall</div>
                         <div className="text-left">
                           <div className="text-3xl font-bold tabular-nums" style={{ color: scoreColor(b2.score) }}>{b2.score}</div>
-                          <div className="text-xs text-gray-400 font-medium truncate">{b2.brand}</div>
+                          <div className="text-xs font-medium truncate" style={{ color: 'var(--rs-text-secondary)' }}>{b2.brand}</div>
                         </div>
                       </div>
 
@@ -616,19 +617,19 @@ function DashboardInner() {
                             <div key={m.key} className="grid grid-cols-[1fr_auto_1fr] items-center gap-3">
                               {/* Brand 1 bar (right-aligned) */}
                               <div className="flex items-center gap-2 justify-end">
-                                <span className="text-xs tabular-nums font-semibold text-white">{v1}<span className="text-gray-600">/{m.max}</span></span>
+                                <span className="text-xs tabular-nums font-semibold text-white">{v1}<span style={{ color: 'var(--rs-text-muted)' }}>/{m.max}</span></span>
                                 <div className="w-28 sm:w-40 h-2 bg-white/[0.03] rounded-full overflow-hidden flex justify-end">
                                   <div className="h-full rounded-full transition-all duration-500" style={{ width: `${pct1}%`, backgroundColor: m.color1 }} />
                                 </div>
                               </div>
                               {/* Label */}
-                              <span className="text-[10px] text-gray-500 uppercase tracking-wider font-medium w-24 text-center">{m.label}</span>
+                              <span className="text-[10px] uppercase tracking-wider font-medium w-24 text-center" style={{ color: 'var(--rs-text-muted)' }}>{m.label}</span>
                               {/* Brand 2 bar (left-aligned) */}
                               <div className="flex items-center gap-2">
                                 <div className="w-28 sm:w-40 h-2 bg-white/[0.03] rounded-full overflow-hidden">
                                   <div className="h-full rounded-full transition-all duration-500" style={{ width: `${pct2}%`, backgroundColor: m.color2 }} />
                                 </div>
-                                <span className="text-xs tabular-nums font-semibold text-white">{v2}<span className="text-gray-600">/{m.max}</span></span>
+                                <span className="text-xs tabular-nums font-semibold text-white">{v2}<span style={{ color: 'var(--rs-text-muted)' }}>/{m.max}</span></span>
                               </div>
                             </div>
                           );
@@ -667,7 +668,7 @@ function DashboardInner() {
                       <div className="relative z-10">
                         <div className="flex items-center gap-1.5 mb-5">
                           <div className="w-1.5 h-1.5 rounded-full bg-primary-400"></div>
-                          <span className="text-[10px] text-gray-500 font-medium uppercase tracking-[0.15em]">rAsh Score</span>
+                          <span className="text-[10px] font-medium uppercase tracking-[0.15em]" style={{ color: 'var(--rs-text-muted)' }}>rAsh Score</span>
                         </div>
                         <div className="flex items-baseline gap-2 mb-7">
                           <span className={`text-4xl font-bold tracking-tight bg-gradient-to-r ${scoreGradient(brand.score)} bg-clip-text text-transparent`}>{brand.score}</span>
@@ -733,11 +734,11 @@ function DashboardInner() {
                 <div key={brand.brand}
                   className={`grid grid-cols-12 px-4 sm:px-5 py-3.5 items-center border-b transition-colors duration-150 hover:bg-white/[0.02]`} style={{ borderColor: 'var(--rs-border)' }}>
                   <div className="col-span-1">
-                    <span className={`text-xs font-medium tabular-nums ${index < 3 ? 'text-primary-400' : 'text-gray-600'}`}>{index + 1}</span>
+                    <span className={`text-xs font-medium tabular-nums ${index < 3 ? 'text-primary-400' : ''}`} style={index >= 3 ? { color: 'var(--rs-text-muted)' } : undefined}>{index + 1}</span>
                   </div>
                   <div className="col-span-7 sm:col-span-5 flex items-center gap-2.5 overflow-hidden pr-2">
                     <BrandLogo brand={brand.brand} size={24} rank={index} />
-                    <Link href={`/brand/${encodeURIComponent(brand.brand)}`} className={`text-xs sm:text-sm truncate hover:text-primary-400 transition-colors ${index < 3 ? 'font-semibold text-white' : 'font-medium text-gray-300'}`}>
+                    <Link href={`/brand/${encodeURIComponent(brand.brand)}`} className={`text-xs sm:text-sm truncate hover:text-primary-400 transition-colors ${index < 3 ? 'font-semibold text-white' : 'font-medium'}`} style={index >= 3 ? { color: 'var(--rs-text-secondary)' } : undefined}>
                       {brand.brand}
                     </Link>
                   </div>
@@ -750,7 +751,7 @@ function DashboardInner() {
                         {brand.scoreChange > 0 ? '+' : ''}{brand.scoreChange}
                       </span>
                     ) : (
-                      <span className="text-xs text-gray-700">—</span>
+                      <span className="text-xs" style={{ color: 'var(--rs-text-faint)' }}>—</span>
                     )}
                   </div>
                   <div className="col-span-2 text-right hidden sm:block">
@@ -762,7 +763,7 @@ function DashboardInner() {
                         {Math.abs(brand.rankChange)}
                       </span>
                     ) : (
-                      <span className="text-xs text-gray-700">—</span>
+                      <span className="text-xs" style={{ color: 'var(--rs-text-faint)' }}>—</span>
                     )}
                   </div>
                 </div>
@@ -770,15 +771,15 @@ function DashboardInner() {
             </div>
 
             {/* Footer */}
-            <div className="mt-6 flex flex-col sm:flex-row sm:items-center justify-between px-1 gap-4 text-xs text-gray-600">
+            <div className="mt-6 flex flex-col sm:flex-row sm:items-center justify-between px-1 gap-4 text-xs" style={{ color: 'var(--rs-text-muted)' }}>
               <div className="flex items-center gap-3">
-                <span>Industry Avg: <span className="text-gray-400 font-medium">{industryData.industryAverage.score.toFixed(1)}</span></span>
-                <span className="text-gray-800">|</span>
+                <span>Industry Avg: <span className="font-medium" style={{ color: 'var(--rs-text-secondary)' }}>{industryData.industryAverage.score.toFixed(1)}</span></span>
+                <span style={{ color: 'var(--rs-text-faint)' }}>|</span>
                 <span>All scores /100</span>
               </div>
               <div className="flex flex-col sm:items-end gap-1">
                 <span>{selectedModel === 'all' ? 'All Models' : selectedModel} · Powered by NVIDIA + Groq</span>
-                <span className="text-[10px] text-gray-500">New data loads daily at 00:00 UTC</span>
+                <span className="text-[10px]" style={{ color: 'var(--rs-text-muted)' }}>New data loads daily at 00:00 UTC</span>
               </div>
             </div>
           </>
