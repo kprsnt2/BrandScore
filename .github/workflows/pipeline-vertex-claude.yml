@@ -1,4 +1,4 @@
-name: "Pipeline: NVIDIA GLM"
+name: "Pipeline: Vertex Claude (Sonnet 3.5)"
 
 on:
   schedule:
@@ -28,17 +28,19 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Run Pipeline (NVIDIA GLM)
+      - name: Run Pipeline (Vertex Claude)
         env:
-          NVIDIA_API_KEY: ${{ secrets.NVIDIA_API_KEY }}
+          GCP_SA_KEY: ${{ secrets.GCP_SA_KEY }}
+          GCP_PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
+          GCP_REGION: europe-west1
           NODE_ENV: production
-        run: npx tsx scripts/run-pipeline.ts --provider=nvidia --models=z-ai/glm-5.2,nvidia/nemotron-3-ultra-550b-a55b --api-key-env=NVIDIA_API_KEY
+        run: npx tsx scripts/run-pipeline.ts --provider=vertex-claude --models=claude-3-5-sonnet-v2@20241022,claude-3-haiku@20240307
 
       - name: Commit results
         run: |
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
           git config --local user.name "github-actions[bot]"
           git add data/
-          git diff --staged --quiet || git commit -m "📊 Pipeline [NVIDIA GLM]: $(date -u +%Y-%m-%d)"
+          git diff --staged --quiet || git commit -m "📊 Pipeline [Vertex Claude]: $(date -u +%Y-%m-%d)"
           git pull --rebase origin main
           git push

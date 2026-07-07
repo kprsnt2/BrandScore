@@ -3,6 +3,8 @@ import { queryNvidiaRaw } from './nvidia';
 import { queryGroqRaw } from './groq';
 import { queryOpenAIRaw } from './openai';
 import { queryGeminiRaw } from './gemini';
+import { queryVertexGeminiRaw } from './vertex-gemini';
+import { queryVertexClaudeRaw } from './vertex-claude';
 import { generateBatchIndustryPrompt, parseBatchIndustryResponse, BatchBrandScore } from './prompts';
 import { hasApiKeys } from './env';
 
@@ -53,7 +55,7 @@ export interface PipelineConfig {
   /** Retry delays in ms for failed model queries. Default: [30000, 60000, 90000] */
   retryDelaysMs: number[];
   /** If set, only run this specific model pair instead of all providers */
-  modelPair?: { provider: 'openai' | 'gemini' | 'groq' | 'nvidia'; primary: string; backup: string; apiKeyOverride?: string };
+  modelPair?: { provider: 'openai' | 'gemini' | 'groq' | 'nvidia' | 'vertex-gemini' | 'vertex-claude'; primary: string; backup: string; apiKeyOverride?: string };
 }
 
 // Default retry delays: 30s → 60s → 90s (for GitHub Actions rate limits)
@@ -200,6 +202,8 @@ export class BrandAnalysisPipeline {
           case 'nvidia': return queryNvidiaRaw(prompt, model);
           case 'openai': return queryOpenAIRaw(prompt, model);
           case 'gemini': return queryGeminiRaw(prompt, model);
+          case 'vertex-gemini': return queryVertexGeminiRaw(prompt, model);
+          case 'vertex-claude': return queryVertexClaudeRaw(prompt, model);
         }
       };
 
@@ -222,20 +226,20 @@ export class BrandAnalysisPipeline {
     // === All-providers mode (existing behavior) ===
     const queries: Promise<{ model: string; text: string; error?: unknown }>[] = [];
 
-    // Groq (primary — faster) — with retry
-    if (this.apiKeys.groq) {
+    // Vertex Gemini
+    if (this.apiKeys.vertexGemini) {
       queries.push(
-        withRetry(() => queryGroqRaw(prompt), 'Groq').catch(e => ({
-          text: '', model: 'Groq', error: e
+        withRetry(() => queryVertexGeminiRaw(prompt), 'Vertex Gemini').catch(e => ({
+          text: '', model: 'Vertex Gemini', error: e
         }))
       );
     }
 
-    // NVIDIA (backup) — with retry
-    if (this.apiKeys.nvidia) {
+    // Vertex Claude
+    if (this.apiKeys.vertexClaude) {
       queries.push(
-        withRetry(() => queryNvidiaRaw(prompt), 'NVIDIA').catch(e => ({
-          text: '', model: 'NVIDIA', error: e
+        withRetry(() => queryVertexClaudeRaw(prompt), 'Vertex Claude').catch(e => ({
+          text: '', model: 'Vertex Claude', error: e
         }))
       );
     }
