@@ -72,7 +72,7 @@ async function callOpenAIAPI(
                     model: currentModel,
                     messages,
                     temperature,
-                    max_tokens: maxTokens,
+                    max_completion_tokens: maxTokens,
                 }),
                 signal: controller.signal,
             });
