@@ -458,10 +458,10 @@ function DashboardInner() {
   }
 
   return (
-    <div className="rs-page theme-dashboard">
+    <div className="rs-page">
       {/* Hero */}
       <section className="rs-hero">
-        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-transparent" />
+
 
         <div className="max-w-5xl mx-auto px-4 text-center relative z-10">
           <div className="rs-badge mb-6">
@@ -470,7 +470,7 @@ function DashboardInner() {
           </div>
           <h1 className="text-3xl sm:text-5xl lg:text-6xl font-bold text-white mb-4 leading-[1.1] tracking-tight">
             See who is winning<br />
-            <span className="bg-gradient-to-r from-primary-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">AI Search in India</span>
+            <span className="text-indigo-400">AI Search in India</span>
           </h1>
           <p className="text-base sm:text-lg max-w-xl mx-auto leading-relaxed" style={{ color: 'var(--rs-text-secondary)' }}>
             AI visibility rankings for top Indian brands across 19 industries.
@@ -662,7 +662,7 @@ function DashboardInner() {
                       <div className="mt-6 pt-4 border-t border-white/[0.04] text-center">
                         <Link
                           href={`/arena`}
-                          className="inline-flex items-center gap-2 px-5 py-2 bg-gradient-to-r from-blue-600/10 via-purple-600/10 to-red-600/10 border border-purple-500/20 hover:border-purple-500/40 text-purple-300 hover:text-purple-200 text-xs font-bold uppercase tracking-wider rounded-xl transition-all hover:shadow-lg hover:shadow-purple-500/10"
+                          className="inline-flex items-center gap-2 px-5 py-2 bg-rs-surface border border-rs hover:border-rs-hover text-rs-secondary hover:text-rs-primary text-xs font-bold uppercase tracking-wider rounded-xl transition-all"
                         >
                           <span>⚔️</span>
                           <span>Take to Battle Arena for AI Debate</span>

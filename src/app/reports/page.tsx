@@ -32,7 +32,7 @@ export default function ReportsPage() {
   }, []);
 
   return (
-    <div className="min-h-screen rs-page theme-reports pt-24 pb-16 px-4">
+    <div className="min-h-screen rs-page pt-24 pb-16 px-4">
       <div className="max-w-4xl mx-auto space-y-12">
         <header className="rs-hero text-center">
           <div className="rs-badge mx-auto mb-4">
@@ -65,7 +65,7 @@ export default function ReportsPage() {
                 href={`/reports/${report.slug}`}
                 className="block group"
               >
-                <article className="rs-card-glow p-6 sm:p-8">
+                <article className="rs-card p-6 sm:p-8">
                   <div className="rs-badge mb-3" style={{ fontSize: '0.75rem' }}>
                     {new Date(report.published_at).toLocaleDateString('en-US', {
                       weekday: 'long',

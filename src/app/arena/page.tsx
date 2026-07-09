@@ -106,18 +106,18 @@ export default function ArenaPage() {
   }
 
   return (
-    <div className="relative min-h-screen rs-page theme-arena pt-28 pb-20 px-4 sm:px-6 overflow-hidden">
+    <div className="relative min-h-screen rs-page pt-28 pb-20 px-4 sm:px-6 overflow-hidden">
       {/* Background glow effects */}
       <div className="absolute top-[10%] left-[10%] w-[400px] h-[400px] rounded-full bg-blue-500/5 blur-[120px] pointer-events-none" />
       <div className="absolute bottom-[20%] right-[10%] w-[500px] h-[500px] rounded-full bg-red-500/5 blur-[150px] pointer-events-none" />
 
       <div className="max-w-6xl mx-auto space-y-12 relative z-10">
         <header className="text-center space-y-4">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-gradient-to-r from-blue-500/10 via-purple-500/10 to-red-500/10 border border-purple-500/20 text-purple-300 text-[11px] font-bold tracking-widest uppercase mb-2 shadow-inner">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-rs-surface border border-rs text-rs-secondary text-[11px] font-bold tracking-widest uppercase mb-2">
             <span className="w-1.5 h-1.5 rounded-full bg-purple-400 animate-pulse shadow-[0_0_8px_#c084fc]" />
             AI Multi-Agent Simulation
           </div>
-          <h1 className="text-4xl sm:text-6xl font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-purple-300 to-red-400 tracking-tight leading-none">
+          <h1 className="text-4xl sm:text-6xl font-black text-rs-primary tracking-tight leading-none">
             Battle Arena
           </h1>
           <p className="max-w-2xl mx-auto text-sm sm:text-base font-light leading-relaxed" style={{ color: 'var(--rs-text-secondary)' }}>
@@ -127,7 +127,7 @@ export default function ArenaPage() {
 
         {/* Selection Card */}
         <div className="bg-white/[0.01] backdrop-blur-xl border border-white/[0.05] rounded-3xl p-6 sm:p-10 shadow-2xl relative overflow-hidden">
-          <div className="absolute inset-0 bg-gradient-to-tr from-blue-500/5 via-transparent to-red-500/5 pointer-events-none" />
+          <div className="absolute inset-0 pointer-events-none" />
           
           <div className="grid md:grid-cols-11 items-center gap-8 relative z-10">
             {/* Corner A Select */}
@@ -156,8 +156,8 @@ export default function ArenaPage() {
             {/* VS Badge */}
             <div className="md:col-span-1 flex justify-center">
               <div className="relative w-14 h-14 flex items-center justify-center rounded-full border border-white/10 shadow-lg group" style={{ background: 'var(--rs-bg-elevated)' }}>
-                <div className="absolute inset-0 rounded-full bg-gradient-to-tr from-blue-500/20 to-red-500/20 blur-sm group-hover:blur-md transition-all duration-300" />
-                <span className="text-xl font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-red-400 italic z-10">VS</span>
+                <div className="absolute inset-0 rounded-full blur-sm group-hover:blur-md transition-all duration-300" />
+                <span className="text-xl font-black text-rs-muted italic z-10">VS</span>
               </div>
             </div>
 
@@ -189,7 +189,7 @@ export default function ArenaPage() {
             <button 
               onClick={handleFight}
               disabled={loading}
-              className="relative px-12 py-4 bg-gradient-to-r from-blue-600 via-purple-600 to-red-600 hover:from-blue-500 hover:via-purple-500 hover:to-red-500 text-white font-extrabold text-base tracking-wider rounded-2xl shadow-xl shadow-purple-500/10 hover:shadow-purple-500/30 transition-all duration-300 active:scale-98 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-3 overflow-hidden group"
+              className="relative px-12 py-4 bg-indigo-600 hover:bg-indigo-500 text-white font-extrabold text-base tracking-wider rounded-xl shadow-sm transition-all duration-300 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-3 overflow-hidden group"
             >
               {loading ? (
                 <>
@@ -218,7 +218,7 @@ export default function ArenaPage() {
             
             {/* Chart Column */}
             <div className="backdrop-blur-xl border border-white/[0.05] rounded-3xl p-6 sm:p-8 flex flex-col relative overflow-hidden shadow-2xl" style={{ background: 'var(--rs-bg-surface)' }}>
-              <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-blue-500 to-red-500/60" />
+              <div className="absolute top-0 left-0 right-0 h-1.5 bg-indigo-500" />
               
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
                 <div>
@@ -284,13 +284,13 @@ export default function ArenaPage() {
                           
                           {/* Bar A */}
                           <div 
-                            className="w-1/2 bg-gradient-to-t from-blue-600/30 to-blue-500 hover:to-blue-400 rounded-t-md transition-all duration-300 relative group-hover/bar:shadow-[0_0_15px_rgba(59,130,246,0.3)] cursor-pointer"
+                            className="w-1/2 bg-indigo-500/20 hover:bg-indigo-500/40 rounded-t-md transition-all duration-300 relative cursor-pointer border-t border-indigo-500/50"
                             style={{ height: `${ptA ? ptA.score : 0}%` }}
                           />
 
                           {/* Bar B */}
                           <div 
-                            className="w-1/2 bg-gradient-to-t from-red-600/30 to-red-500 hover:to-red-400 rounded-t-md transition-all duration-300 relative group-hover/bar:shadow-[0_0_15px_rgba(239,68,68,0.3)] cursor-pointer"
+                            className="w-1/2 bg-indigo-500/20 hover:bg-indigo-500/40 rounded-t-md transition-all duration-300 relative cursor-pointer border-t border-indigo-500/50"
                             style={{ height: `${ptB ? ptB.score : 0}%` }}
                           />
 
@@ -322,7 +322,7 @@ export default function ArenaPage() {
 
             {/* Debate Column */}
             <div className="backdrop-blur-xl border border-white/[0.05] rounded-3xl p-6 sm:p-8 flex flex-col shadow-2xl relative" style={{ background: 'var(--rs-bg-surface)' }}>
-              <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-purple-500 to-pink-500/60" />
+              <div className="absolute top-0 left-0 right-0 h-1.5 bg-indigo-500" />
               
               <div className="flex items-center justify-between mb-6">
                 <div>
@@ -362,7 +362,7 @@ export default function ArenaPage() {
                     </div>
 
                     {/* The Judge's Verdict Card */}
-                    <div className="bg-gradient-to-br from-purple-500/[0.03] to-pink-500/[0.03] border border-purple-500/20 rounded-2xl p-5 space-y-2 relative shadow-lg shadow-purple-500/[0.02]">
+                    <div className="bg-rs-surface border border-rs rounded-xl p-5 space-y-2 relative shadow-sm">
                       <div className="absolute -top-2.5 left-4 px-2 py-0.5 bg-purple-500/10 border border-purple-500/20 text-purple-300 text-[10px] font-black uppercase tracking-wider rounded flex items-center gap-1">
                         <span>⚖️</span> The Judge's Verdict
                       </div>

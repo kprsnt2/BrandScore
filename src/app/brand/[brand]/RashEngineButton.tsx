@@ -76,7 +76,7 @@ export default function RashEngineButton({ brand, industry }: { brand: string, i
     <>
       <button 
         onClick={handleGenerate}
-        className="group relative mt-6 px-6 py-3 bg-gradient-to-r from-purple-600 via-fuchsia-600 to-pink-600 hover:from-purple-500 hover:via-fuchsia-500 hover:to-pink-500 text-white text-xs font-bold uppercase tracking-wider rounded-xl shadow-lg shadow-purple-500/10 hover:shadow-purple-500/30 transition-all duration-300 active:scale-95 flex items-center gap-2.5 w-max overflow-hidden"
+        className="group relative mt-6 px-6 py-3 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold uppercase tracking-wider rounded-xl shadow-sm transition-all duration-300 active:scale-95 flex items-center gap-2.5 w-max overflow-hidden"
       >
         <div className="absolute inset-0 bg-white/10 translate-y-full group-hover:translate-y-0 transition-transform duration-300" />
         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="2.5" stroke="currentColor" className="w-4 h-4 text-purple-200 group-hover:animate-bounce">
@@ -92,7 +92,7 @@ export default function RashEngineButton({ brand, industry }: { brand: string, i
             {/* Modal Header */}
             <div className="px-6 py-5 border-b border-white/[0.08] flex justify-between items-center bg-white/[0.01]">
               <div className="flex items-center gap-3">
-                <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-purple-500 to-pink-600 flex items-center justify-center shadow-lg shadow-purple-500/20">
+                <div className="w-9 h-9 rounded-lg bg-indigo-600 flex items-center justify-center shadow-sm">
                   <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="2.5" stroke="currentColor" className="w-5 h-5 text-white">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z" />
                   </svg>
@@ -115,7 +115,7 @@ export default function RashEngineButton({ brand, industry }: { brand: string, i
             </div>
 
             {/* Modal Body */}
-            <div className="p-6 sm:p-8 overflow-y-auto flex-1 bg-gradient-to-b from-[#08080e] to-[#050508]">
+            <div className="p-6 sm:p-8 overflow-y-auto flex-1 bg-rs-base">
               {loading && (
                 <div className="flex flex-col py-12 px-4 space-y-6">
                   {/* Glowing spinner */}

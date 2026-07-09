@@ -36,7 +36,7 @@ export default function ReportDetailPage({ params }: { params: Promise<{ slug: s
 
   if (loading) {
     return (
-      <div className="min-h-screen rs-page theme-reports flex items-center justify-center">
+      <div className="min-h-screen rs-page flex items-center justify-center">
         <div className="w-12 h-12 border-[3px] rounded-full animate-spin" style={{ borderColor: 'hsl(var(--rs-accent) / 0.3)', borderTopColor: 'hsl(var(--rs-accent))' }} />
       </div>
     );
@@ -44,7 +44,7 @@ export default function ReportDetailPage({ params }: { params: Promise<{ slug: s
 
   if (error || !report) {
     return (
-      <div className="min-h-screen rs-page theme-reports flex flex-col items-center justify-center text-center px-4">
+      <div className="min-h-screen rs-page flex flex-col items-center justify-center text-center px-4">
         <span className="text-4xl mb-4 block">⚠️</span>
         <h1 className="text-2xl font-bold text-white mb-2">Report Not Found</h1>
         <p className="mb-6" style={{ color: 'var(--rs-text-secondary)' }}>The requested report could not be found.</p>
@@ -56,7 +56,7 @@ export default function ReportDetailPage({ params }: { params: Promise<{ slug: s
   }
 
   return (
-    <div className="min-h-screen rs-page theme-reports pt-24 pb-16 px-4">
+    <div className="min-h-screen rs-page pt-24 pb-16 px-4">
       <article className="max-w-3xl mx-auto">
         <Link href="/reports" className="inline-flex items-center text-sm font-medium transition-colors mb-8 hover:text-white" style={{ color: 'var(--rs-text-muted)' }}>
           <span className="mr-2">←</span> Back to Reports

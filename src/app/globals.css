@@ -6,48 +6,39 @@
    rAsh Score — Design System Tokens
    ============================================ */
 :root {
-    /* Backgrounds */
-    --rs-bg-base: #08090d;
-    --rs-bg-surface: #0c0d14;
-    --rs-bg-elevated: #10111a;
-    --rs-bg-hover: #141520;
+    /* Backgrounds (Professional Slate) */
+    --rs-bg-base: #0f1115;
+    --rs-bg-surface: #16181d;
+    --rs-bg-elevated: #1c1f26;
+    --rs-bg-hover: #22262f;
 
-    /* Borders */
-    --rs-border: rgba(255, 255, 255, 0.06);
-    --rs-border-hover: rgba(255, 255, 255, 0.12);
-    --rs-border-active: rgba(255, 255, 255, 0.18);
+    /* Borders (Crisp & Structured) */
+    --rs-border: rgba(255, 255, 255, 0.08);
+    --rs-border-hover: rgba(255, 255, 255, 0.15);
+    --rs-border-active: rgba(255, 255, 255, 0.25);
 
-    /* Text */
-    --rs-text-primary: #f0f0f5;
-    --rs-text-secondary: #8b8b9e;
-    --rs-text-muted: #4a4a5e;
-    --rs-text-faint: #2e2e3e;
+    /* Text (High contrast) */
+    --rs-text-primary: #f8fafc;
+    --rs-text-secondary: #94a3b8;
+    --rs-text-muted: #64748b;
+    --rs-text-faint: #334155;
 
-    /* Radii */
-    --rs-radius-sm: 0.625rem;
-    --rs-radius-md: 0.875rem;
-    --rs-radius-lg: 1.25rem;
-    --rs-radius-xl: 1.5rem;
+    /* Radii (Professional, slightly tighter) */
+    --rs-radius-sm: 0.375rem;
+    --rs-radius-md: 0.5rem;
+    --rs-radius-lg: 0.75rem;
+    --rs-radius-xl: 1rem;
 
-    /* Accent (per-page override via class) */
-    --rs-accent: 217 91% 60%;        /* primary-500 blue default */
-    --rs-accent-rgb: 59, 130, 246;
+    /* Unified Accent: Authoritative Indigo */
+    --rs-accent: 238 82% 64%;        /* Indigo 500 */
+    --rs-accent-rgb: 99, 102, 241;
 
     /* Legacy compat */
     --foreground-rgb: 255, 255, 255;
-    --background-start-rgb: 8, 9, 13;
-    --background-end-rgb: 12, 13, 20;
-    --primary-hue: 217;
+    --background-start-rgb: 15, 17, 21;
+    --background-end-rgb: 22, 24, 29;
+    --primary-hue: 238;
 }
-
-/* Per-feature accent overrides */
-.theme-dashboard  { --rs-accent: 217 91% 60%; --rs-accent-rgb: 59, 130, 246; }
-.theme-intelligence { --rs-accent: 160 84% 39%; --rs-accent-rgb: 16, 185, 129; }
-.theme-analytics  { --rs-accent: 38 92% 50%;  --rs-accent-rgb: 245, 158, 11; }
-.theme-reports    { --rs-accent: 350 89% 60%; --rs-accent-rgb: 244, 63, 94; }
-.theme-arena      { --rs-accent: 262 83% 58%; --rs-accent-rgb: 139, 92, 246; }
-.theme-chat       { --rs-accent: 270 95% 65%; --rs-accent-rgb: 168, 85, 247; }
-.theme-galaxy     { --rs-accent: 234 89% 64%; --rs-accent-rgb: 99, 102, 241; }
 
 /* ============================================
    Base Styles
@@ -109,24 +100,25 @@ body {
     background: var(--rs-bg-surface);
     border: 1px solid var(--rs-border);
     border-radius: var(--rs-radius-lg);
-    transition: border-color 0.2s ease, box-shadow 0.3s ease;
+    transition: border-color 0.15s ease;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.2);
 }
 
 .rs-card:hover {
     border-color: var(--rs-border-hover);
 }
 
+/* Fallback for components still using rs-card-glow, maps to standard card */
 .rs-card-glow {
     background: var(--rs-bg-surface);
     border: 1px solid var(--rs-border);
     border-radius: var(--rs-radius-lg);
-    transition: all 0.3s ease;
+    transition: border-color 0.15s ease;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.2);
 }
 
 .rs-card-glow:hover {
-    border-color: hsl(var(--rs-accent) / 0.25);
-    box-shadow: 0 0 30px hsl(var(--rs-accent) / 0.06),
-                0 4px 20px rgba(0, 0, 0, 0.3);
+    border-color: var(--rs-border-hover);
 }
 
 /* Section headers — small caps label above each card/section */
@@ -151,14 +143,6 @@ body {
         padding-top: 5rem;
         padding-bottom: 3.5rem;
     }
-}
-
-.rs-hero::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background: radial-gradient(ellipse 600px 300px at 50% 0%, hsl(var(--rs-accent) / 0.06), transparent);
-    pointer-events: none;
 }
 
 /* Badge */
@@ -198,104 +182,21 @@ body {
 /* ============================================
    Animations
    ============================================ */
-@keyframes shimmer {
-    0% { background-position: -200% 0; }
-    100% { background-position: 200% 0; }
-}
+/* Animations removed for professional look */
 
-@keyframes slide-in {
-    0% { transform: translateX(100%); opacity: 0; }
-    100% { transform: translateX(0); opacity: 1; }
-}
-
-@keyframes fade-in {
-    0% { opacity: 0; transform: translateY(10px); }
-    100% { opacity: 1; transform: translateY(0); }
-}
-
-@keyframes fade-in-up {
-    0% { opacity: 0; transform: translateY(20px); }
-    100% { opacity: 1; transform: translateY(0); }
-}
-
-@keyframes pulse-glow {
-    0%, 100% { box-shadow: 0 0 20px rgba(var(--rs-accent-rgb), 0.3); }
-    50% { box-shadow: 0 0 40px rgba(var(--rs-accent-rgb), 0.5); }
-}
-
-@keyframes float {
-    0%, 100% { transform: translateY(0px); }
-    50% { transform: translateY(-6px); }
-}
-
-@keyframes glow-breathe {
-    0%, 100% { opacity: 0.4; }
-    50% { opacity: 0.8; }
-}
-
-@keyframes spin-slow {
-    from { transform: rotate(0deg); }
-    to { transform: rotate(360deg); }
-}
-
-@keyframes gradient-shift {
-    0%, 100% { background-position: 0% 50%; }
-    50% { background-position: 100% 50%; }
-}
-
-.animate-shimmer {
-    animation: shimmer 2s linear infinite;
-    background: linear-gradient(90deg,
-            rgba(255, 255, 255, 0) 0%,
-            rgba(255, 255, 255, 0.08) 50%,
-            rgba(255, 255, 255, 0) 100%);
-    background-size: 200% 100%;
-}
-
-.animate-slide-in { animation: slide-in 0.3s ease-out forwards; }
-.animate-fade-in { animation: fade-in 0.4s ease-out forwards; }
-.animate-fade-in-up { animation: fade-in-up 0.5s ease-out forwards; }
-.animate-pulse-glow { animation: pulse-glow 2s ease-in-out infinite; }
-.animate-float { animation: float 3s ease-in-out infinite; }
-.animate-glow-breathe { animation: glow-breathe 3s ease-in-out infinite; }
-.animate-spin-slow { animation: spin-slow 3s linear infinite; }
-.animate-gradient { animation: gradient-shift 8s ease infinite; background-size: 200% 200%; }
-
-/* Stagger children fade-in */
-.stagger-children > * {
-    opacity: 0;
-    animation: fade-in-up 0.4s ease-out forwards;
-}
-.stagger-children > *:nth-child(1) { animation-delay: 0.05s; }
-.stagger-children > *:nth-child(2) { animation-delay: 0.1s; }
-.stagger-children > *:nth-child(3) { animation-delay: 0.15s; }
-.stagger-children > *:nth-child(4) { animation-delay: 0.2s; }
-.stagger-children > *:nth-child(5) { animation-delay: 0.25s; }
-.stagger-children > *:nth-child(6) { animation-delay: 0.3s; }
-.stagger-children > *:nth-child(7) { animation-delay: 0.35s; }
-.stagger-children > *:nth-child(8) { animation-delay: 0.4s; }
-.stagger-children > *:nth-child(9) { animation-delay: 0.45s; }
-.stagger-children > *:nth-child(10) { animation-delay: 0.5s; }
-
-/* Gradient text */
+/* Gradient text fallback to solid */
 .gradient-text {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
+    color: var(--rs-text-primary);
 }
 
-/* Accent gradient text */
+/* Accent gradient text fallback to solid */
 .gradient-text-accent {
-    background: linear-gradient(135deg, hsl(var(--rs-accent)), hsl(var(--rs-accent) / 0.6));
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
+    color: hsl(var(--rs-accent));
 }
 
-/* Glow effect */
-.glow { box-shadow: 0 0 20px rgba(var(--rs-accent-rgb), 0.3); }
-.glow-hover:hover { box-shadow: 0 0 30px rgba(var(--rs-accent-rgb), 0.4); }
+/* Glow effect removed */
+.glow {}
+.glow-hover:hover {}
 
 /* Legacy card styles (keeping for compat) */
 .card {

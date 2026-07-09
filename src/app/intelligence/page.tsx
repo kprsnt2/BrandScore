@@ -421,10 +421,10 @@ export default function IntelligencePage() {
   const { industryLeaderboard, modelBias, models, topMovers, scoreDistribution, correlationMatrix, coverage } = data;
 
   return (
-    <div className="min-h-screen rs-page theme-intelligence">
+    <div className="min-h-screen rs-page">
       {/* ── Hero ──────────────────────────────────────────────── */}
       <section className="relative overflow-hidden pt-12 pb-10 sm:pt-20 sm:pb-14">
-        <div className="absolute inset-0 bg-gradient-to-b from-purple-500/[0.04] via-transparent to-transparent" />
+
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[300px] bg-purple-500/5 rounded-full blur-[120px]" />
         <div className="absolute top-20 right-1/4 w-[300px] h-[200px] bg-cyan-500/[0.03] rounded-full blur-[100px]" />
 
@@ -435,7 +435,7 @@ export default function IntelligencePage() {
           </div>
           <h1 className="text-3xl sm:text-5xl lg:text-6xl font-bold text-white mb-4 leading-[1.1] tracking-tight">
             The Big Picture<br />
-            <span className="bg-gradient-to-r from-cyan-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">
+            <span className="text-indigo-400">
               AI Visibility Across India
             </span>
           </h1>
@@ -488,7 +488,7 @@ export default function IntelligencePage() {
               >
                 {/* Rank badge */}
                 <div className={`absolute -right-2 -top-2 w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold
-                  ${index < 3 ? 'bg-gradient-to-br from-primary-500 to-purple-600 text-white' : 'bg-white/[0.05] border border-white/[0.06]'}`} style={{ color: index < 3 ? '#white' : 'var(--rs-text-muted)' }}>
+                  ${index < 3 ? 'bg-rs-elevated text-rs-primary border border-rs' : 'bg-rs-surface border border-rs'}`} style={{ color: index < 3 ? 'var(--rs-text-primary)' : 'var(--rs-text-muted)' }}>
                   {index + 1}
                 </div>
 

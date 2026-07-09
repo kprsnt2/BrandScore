@@ -93,7 +93,7 @@ export default function ChatPage() {
   const hasMessages = messages.length > 0;
 
   return (
-    <div className="rs-page theme-chat flex flex-col" style={{ minHeight: 'calc(100vh - 58px)' }}>
+    <div className="rs-page flex flex-col" style={{ minHeight: 'calc(100vh - 58px)' }}>
 
       {/* Empty State / Welcome */}
       {!hasMessages && (
@@ -103,7 +103,7 @@ export default function ChatPage() {
           
           {/* Logo */}
           <div className="relative mb-8">
-            <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-purple-500 to-violet-600 flex items-center justify-center shadow-xl shadow-purple-500/20 animate-float">
+            <div className="w-16 h-16 rounded-2xl bg-rs-surface border border-rs flex items-center justify-center shadow-sm">
               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="w-8 h-8 text-white">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904 9 18.75l-.813-2.846a4.5 4.5 0 0 0-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 0 0 3.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 0 0 3.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 0 0-3.09 3.09ZM18.259 8.715 18 9.75l-.259-1.035a3.375 3.375 0 0 0-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 0 0 2.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 0 0 2.455 2.456L21.75 6l-1.036.259a3.375 3.375 0 0 0-2.455 2.456ZM16.894 20.567 16.5 21.75l-.394-1.183a2.25 2.25 0 0 0-1.423-1.423L13.5 18.75l1.183-.394a2.25 2.25 0 0 0 1.423-1.423l.394-1.183.394 1.183a2.25 2.25 0 0 0 1.423 1.423l1.183.394-1.183.394a2.25 2.25 0 0 0-1.423 1.423Z" />
               </svg>
@@ -131,7 +131,7 @@ export default function ChatPage() {
                 key={idx}
                 onClick={() => handleSend(sug.text)}
                 disabled={loading}
-                className="group rs-card-glow text-left px-4 py-3.5 flex items-start gap-3 transition-all disabled:opacity-50 disabled:cursor-not-allowed hover:scale-[1.01] active:scale-[0.99]"
+                className="group rs-card text-left px-4 py-3.5 flex items-start gap-3 transition-all disabled:opacity-50 disabled:cursor-not-allowed hover:scale-[1.01] active:scale-[0.99]"
               >
                 <span className="text-base mt-0.5 shrink-0 opacity-60 group-hover:opacity-100 transition-opacity">{sug.icon}</span>
                 <span className="text-[13px] leading-snug" style={{ color: 'var(--rs-text-secondary)' }}>
@@ -167,7 +167,7 @@ export default function ChatPage() {
                       {/* Header */}
                       <div className="flex items-center justify-between mb-3 pb-2.5" style={{ borderBottom: '1px solid var(--rs-border)' }}>
                         <div className="flex items-center gap-2">
-                          <div className="w-5 h-5 rounded-md bg-gradient-to-br from-purple-500 to-violet-600 flex items-center justify-center">
+                          <div className="w-5 h-5 rounded-md bg-indigo-600 flex items-center justify-center">
                             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-3 h-3 text-white">
                               <path d="M9.813 15.904 9 18.75l-.813-2.846a4.5 4.5 0 0 0-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 0 0 3.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 0 0 3.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 0 0-3.09 3.09Z" />
                             </svg>
@@ -271,7 +271,7 @@ export default function ChatPage() {
           {/* Input form */}
           <form onSubmit={handleSubmit} className="relative group">
             {/* Focus glow */}
-            <div className="absolute -inset-1 bg-gradient-to-r from-purple-500/20 via-violet-500/20 to-purple-500/20 rounded-2xl blur-lg opacity-0 group-focus-within:opacity-100 transition-opacity duration-500 pointer-events-none" />
+
             
             <div className="relative flex items-center rounded-2xl overflow-hidden" style={{ background: 'var(--rs-bg-surface)', border: '1px solid var(--rs-border)' }}>
               <input
