@@ -2,17 +2,17 @@
  * Vertex AI Claude Provider
  * Connects to Google Cloud Vertex AI REST API for Anthropic Claude models.
  * 
- * Primary: claude-3-5-sonnet-v2@20241022 or claude-sonnet-4
- * Backup: claude-3-haiku@20240307
+ * Primary: claude-sonnet-5
+ * Backup: claude-sonnet-4@20250514
  * 
  * Note: Model naming conventions in Vertex AI Model Garden differ slightly from Anthropic API.
- * e.g., 'claude-3-5-sonnet-v2@20241022'
+ * As of mid-2026, Claude Sonnet 5 uses a dateless ID format.
  */
 import { getAccessToken, getProjectId, getRegion } from './gcp-auth';
 
 // User can override the exact model string via the pipeline arguments
-const VERTEX_CLAUDE_PRIMARY = "claude-3-5-sonnet-v2@20241022";
-const VERTEX_CLAUDE_FALLBACK = "claude-3-haiku@20240307";
+const VERTEX_CLAUDE_PRIMARY = "claude-sonnet-5";
+const VERTEX_CLAUDE_FALLBACK = "claude-sonnet-4@20250514";
 
 interface VertexClaudeResponse {
     content: {

@@ -2,15 +2,15 @@
  * Vertex AI Gemini Provider
  * Connects to Google Cloud Vertex AI REST API for Gemini models.
  * 
- * Primary: gemini-2.5-flash
- * Backup: gemini-2.5-flash-lite
+ * Primary: gemini-3.5-flash
+ * Backup: gemini-2.5-flash
  */
 import { getAccessToken, getProjectId, getRegion } from './gcp-auth';
 import { generateStructuredBrandPrompt, parseAIScoreResponse, AIScoreResponse } from './prompts';
 
-const VERTEX_PRIMARY_MODEL = "gemini-2.5-flash";
+const VERTEX_PRIMARY_MODEL = "gemini-3.5-flash";
 const VERTEX_FALLBACK_MODELS = [
-    "gemini-2.5-flash-lite",
+    "gemini-2.5-flash",
 ];
 
 interface VertexGeminiResponse {
