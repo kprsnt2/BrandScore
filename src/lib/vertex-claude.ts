@@ -12,7 +12,7 @@ import { getAccessToken, getProjectId, getRegion } from './gcp-auth';
 
 // User can override the exact model string via the pipeline arguments
 const VERTEX_CLAUDE_PRIMARY = "claude-sonnet-5";
-const VERTEX_CLAUDE_FALLBACK = "claude-sonnet-4@20250514";
+const VERTEX_CLAUDE_FALLBACK = "claude-sonnet-4";
 
 interface VertexClaudeResponse {
     content: {
@@ -51,8 +51,8 @@ async function callVertexClaudeAPI(
             const controller = new AbortController();
             const timeout = setTimeout(() => controller.abort(), 60000); // 60s timeout for Claude
 
-            // Vertex AI Endpoint for Anthropic
-            const url = `https://${region}-aiplatform.googleapis.com/v1/projects/${projectId}/locations/${region}/publishers/anthropic/models/${currentModel}:rawPredict`;
+            // Vertex AI Global Endpoint for Anthropic (Claude models use global, not regional)
+            const url = `https://aiplatform.googleapis.com/v1/projects/${projectId}/locations/global/publishers/anthropic/models/${currentModel}:rawPredict`;
 
             const response = await fetch(url, {
                 method: "POST",

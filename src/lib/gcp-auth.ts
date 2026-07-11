@@ -37,5 +37,5 @@ export function getProjectId(): string {
  * Get the GCP region.
  */
 export function getRegion(): string {
-    return process.env.GCP_REGION || 'europe-west1';
+    return process.env.GCP_REGION || 'us-central1';
 }

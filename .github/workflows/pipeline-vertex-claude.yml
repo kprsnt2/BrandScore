@@ -40,7 +40,7 @@ jobs:
           GCP_PROJECT_ID: rashscore
           GCP_REGION: us-central1
           NODE_ENV: production
-        run: npx tsx scripts/run-pipeline.ts --provider=vertex-claude --models=claude-sonnet-5,claude-sonnet-4@20250514
+        run: npx tsx scripts/run-pipeline.ts --provider=vertex-claude --models=claude-sonnet-5,claude-sonnet-4
 
       - name: Commit results
         run: |
