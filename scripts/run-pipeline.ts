@@ -109,7 +109,7 @@ async function main() {
 
   // === Parse CLI arguments ===
   const args = process.argv.slice(2);
-  const providerArg = args.find(a => a.startsWith('--provider='))?.split('=')[1] as 'openai' | 'gemini' | 'groq' | 'nvidia' | undefined;
+  const providerArg = args.find(a => a.startsWith('--provider='))?.split('=')[1] as 'openai' | 'gemini' | 'groq' | 'nvidia' | 'vertex-gemini' | 'vertex-claude' | 'vertex-grok' | undefined;
   const modelsArg = args.find(a => a.startsWith('--models='))?.split('=')[1];
   const apiKeyArg = args.find(a => a.startsWith('--api-key-env='))?.split('=')[1];
 

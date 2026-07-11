@@ -68,7 +68,7 @@ export function getEnv(): Env {
 /**
  * Check if API keys are configured
  */
-export function hasApiKeys(): { nvidia: boolean; groq: boolean; openai: boolean; gemini: boolean; vertexGemini: boolean; vertexClaude: boolean } {
+export function hasApiKeys(): { nvidia: boolean; groq: boolean; openai: boolean; gemini: boolean; vertexGemini: boolean; vertexClaude: boolean; vertexGrok: boolean } {
     const env = getEnv();
     
     // In GitHub actions, GCP credentials are provided via WIF (Application Default Credentials).
@@ -82,6 +82,7 @@ export function hasApiKeys(): { nvidia: boolean; groq: boolean; openai: boolean;
         gemini: env.GEMINI_API_KEY.length > 0,
         vertexGemini: hasGcp,
         vertexClaude: hasGcp,
+        vertexGrok: hasGcp,
     };
 }
 

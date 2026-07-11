@@ -5,6 +5,7 @@ import { queryOpenAIRaw } from './openai';
 import { queryGeminiRaw } from './gemini';
 import { queryVertexGeminiRaw } from './vertex-gemini';
 import { queryVertexClaudeRaw } from './vertex-claude';
+import { queryVertexGrokRaw } from './vertex-grok';
 import { generateBatchIndustryPrompt, parseBatchIndustryResponse, BatchBrandScore } from './prompts';
 import { hasApiKeys } from './env';
 
@@ -55,7 +56,7 @@ export interface PipelineConfig {
   /** Retry delays in ms for failed model queries. Default: [30000, 60000, 90000] */
   retryDelaysMs: number[];
   /** If set, only run this specific model pair instead of all providers */
-  modelPair?: { provider: 'openai' | 'gemini' | 'groq' | 'nvidia' | 'vertex-gemini' | 'vertex-claude'; primary: string; backup: string; apiKeyOverride?: string };
+  modelPair?: { provider: 'openai' | 'gemini' | 'groq' | 'nvidia' | 'vertex-gemini' | 'vertex-claude' | 'vertex-grok'; primary: string; backup: string; apiKeyOverride?: string };
 }
 
 // Default retry delays: 30s → 60s → 90s (for GitHub Actions rate limits)
@@ -204,6 +205,7 @@ export class BrandAnalysisPipeline {
           case 'gemini': return queryGeminiRaw(prompt, model);
           case 'vertex-gemini': return queryVertexGeminiRaw(prompt, model);
           case 'vertex-claude': return queryVertexClaudeRaw(prompt, model);
+          case 'vertex-grok': return queryVertexGrokRaw(prompt, model);
         }
       };
 
@@ -240,6 +242,15 @@ export class BrandAnalysisPipeline {
       queries.push(
         withRetry(() => queryVertexClaudeRaw(prompt), 'Vertex Claude').catch(e => ({
           text: '', model: 'Vertex Claude', error: e
+        }))
+      );
+    }
+
+    // Vertex Grok
+    if (this.apiKeys.vertexGrok) {
+      queries.push(
+        withRetry(() => queryVertexGrokRaw(prompt), 'Vertex Grok').catch(e => ({
+          text: '', model: 'Vertex Grok', error: e
         }))
       );
     }
