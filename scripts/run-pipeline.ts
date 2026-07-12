@@ -135,7 +135,7 @@ async function main() {
   console.log(`📊 ${industries.length} industries, ${totalBrandCount} brands total`);
 
   // === Build pipeline config ===
-  let modelPair: { provider: 'openai' | 'gemini' | 'groq' | 'nvidia'; primary: string; backup: string; apiKeyOverride?: string } | undefined;
+  let modelPair: { provider: 'openai' | 'gemini' | 'groq' | 'nvidia' | 'vertex-gemini' | 'vertex-claude' | 'vertex-grok'; primary: string; backup: string; apiKeyOverride?: string } | undefined;
   let delayBetweenIndustries = 10000; // default 10s
 
   if (providerArg && modelsArg) {
