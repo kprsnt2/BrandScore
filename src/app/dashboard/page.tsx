@@ -49,6 +49,21 @@ const CHART_COLORS = [
   '#fb923c', '#60a5fa', '#e879f9', '#4ade80', '#f87171',
 ];
 
+/** Map raw model strings to clean display names */
+function getModelDisplayName(raw: string): string {
+  const s = raw.toLowerCase();
+  if (s.includes('grok')) return 'Grok';
+  if (s.includes('gpt') || s.includes('openai')) return 'ChatGPT';
+  if (s.includes('gemini')) return 'Gemini';
+  if (s.includes('claude') || s.includes('anthropic')) return 'Claude';
+  if (s.includes('llama') || s.includes('groq')) return 'Groq';
+  if (s.includes('deepseek')) return 'DeepSeek';
+  if (s.includes('mistral')) return 'Mistral';
+  if (s.includes('nvidia') || s.includes('nemotron')) return 'NVIDIA';
+  if (s.includes('minimax')) return 'MiniMax';
+  return raw;
+}
+
 
 
 // ========== SVG Line Chart Component ==========
@@ -263,11 +278,7 @@ function AIInsightCard({ insight, loading, industryName }: AIInsightCardProps) {
     .map(line => line.trim())
     .filter(line => line.length > 0);
 
-  const modelLabel = insight.generatedBy?.includes('nvidia') || insight.generatedBy?.includes('nemotron')
-    ? 'NVIDIA'
-    : insight.generatedBy?.includes('groq') || insight.generatedBy?.includes('llama') || insight.generatedBy?.includes('gpt-oss')
-    ? 'Groq'
-    : insight.generatedBy || 'AI';
+  const modelLabel = insight.generatedBy ? getModelDisplayName(insight.generatedBy) : 'AI';
 
   const dateLabel = insight.date
     ? new Date(insight.date + 'T00:00:00').toLocaleDateString('en-IN', {
@@ -553,7 +564,7 @@ function DashboardInner() {
               <select value={selectedModel} onChange={e => setSelectedModel(e.target.value)}
                 className="appearance-none bg-white/[0.04] border border-white/[0.08] rounded-lg px-3 py-2 pr-8 text-sm w-full cursor-pointer hover:bg-white/[0.07] transition-all focus:outline-none focus:ring-1 focus:ring-primary-500/50" style={{ color: 'var(--rs-text-secondary)' }}>
                 <option value="all" className="bg-rs-elevated text-white">All Models</option>
-                {(industryData?.availableModels || []).map(m => <option key={m} value={m} className="bg-rs-elevated text-white">{m}</option>)}
+                {(industryData?.availableModels || []).map(m => <option key={m} value={m} className="bg-rs-elevated text-white">{getModelDisplayName(m)}</option>)}
               </select>
               <svg className="absolute right-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 pointer-events-none" style={{ color: 'var(--rs-text-muted)' }} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
             </div>

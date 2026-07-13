@@ -112,25 +112,75 @@ export async function getAllRunDates(): Promise<string[]> {
   return rows.map(r => r.run_date);
 }
 
-/** Get brand results for a run + industry, optionally filtered by model */
+/** Get brand results for a run + industry, optionally filtered by model.
+ *  When model is specified, searches across all runs on the same date
+ *  (since each model may be in a different run). */
 export async function getBrandResults(runId: number, industryId: string, model?: string): Promise<BrandRow[]> {
   const db = await getDb();
   if (model && model !== 'all') {
+    // Model-specific: search across all runs on the same date
+    const runRow = rowToObject<{ run_date: string }>(db.exec(
+      `SELECT run_date FROM pipeline_runs WHERE id = ${runId}`
+    ));
+    if (!runRow) return [];
+    const allRunIds = rowsToObjects<{ id: number }>(db.exec(
+      `SELECT id FROM pipeline_runs WHERE run_date = '${runRow.run_date}'`
+    ));
+    const ids = allRunIds.map(r => r.id);
+    if (ids.length === 0) return [];
     return rowsToObjects<BrandRow>(db.exec(
-      `SELECT * FROM brand_results WHERE run_id = ${runId} AND industry_id = '${industryId}' AND model = '${model}' AND score > 0 ORDER BY score DESC`
+      `SELECT * FROM brand_results WHERE run_id IN (${ids.join(',')}) AND industry_id = '${industryId}' AND model = '${model}' AND score > 0 ORDER BY score DESC`
     ));
   }
-  // "all" = aggregated rows (model IS NULL)
-  return rowsToObjects<BrandRow>(db.exec(
+  // "all" = aggregated rows (model IS NULL) from the latest run that has them
+  // First try the given runId
+  const result = rowsToObjects<BrandRow>(db.exec(
     `SELECT * FROM brand_results WHERE run_id = ${runId} AND industry_id = '${industryId}' AND model IS NULL AND score > 0 ORDER BY score DESC`
+  ));
+  if (result.length > 0) return result;
+  // Fallback: check other runs on the same date (the aggregated row may be on a different run)
+  const runRow = rowToObject<{ run_date: string }>(db.exec(
+    `SELECT run_date FROM pipeline_runs WHERE id = ${runId}`
+  ));
+  if (!runRow) return [];
+  return rowsToObjects<BrandRow>(db.exec(
+    `SELECT * FROM brand_results WHERE run_id IN (SELECT id FROM pipeline_runs WHERE run_date = '${runRow.run_date}') AND industry_id = '${industryId}' AND model IS NULL AND score > 0 ORDER BY score DESC`
   ));
 }
 
-/** Get available models for a run + industry */
+/** Get all run IDs for the latest date that has data for a given industry */
+export async function getLatestDateRunIds(industryId: string): Promise<{ runIds: number[]; runDate: string | null }> {
+  const db = await getDb();
+  // Find the latest date that has data for this industry
+  const dateResult = rowToObject<{ run_date: string }>(db.exec(
+    `SELECT pr.run_date FROM pipeline_runs pr JOIN brand_results br ON br.run_id = pr.id WHERE br.industry_id = '${industryId}' ORDER BY pr.run_date DESC, pr.id DESC LIMIT 1`
+  ));
+  if (!dateResult) return { runIds: [], runDate: null };
+
+  // Get all run IDs for that date
+  const runRows = rowsToObjects<{ id: number }>(db.exec(
+    `SELECT DISTINCT pr.id FROM pipeline_runs pr JOIN brand_results br ON br.run_id = pr.id WHERE pr.run_date = '${dateResult.run_date}' AND br.industry_id = '${industryId}' ORDER BY pr.id`
+  ));
+  return { runIds: runRows.map(r => r.id), runDate: dateResult.run_date };
+}
+
+/** Get available models for an industry across all runs on the latest date */
 export async function getAvailableModels(runId: number, industryId: string): Promise<string[]> {
   const db = await getDb();
+  // Get all runs for the same date as this run
+  const runRow = rowToObject<{ run_date: string }>(db.exec(
+    `SELECT run_date FROM pipeline_runs WHERE id = ${runId}`
+  ));
+  if (!runRow) return [];
+
+  const allRunIds = rowsToObjects<{ id: number }>(db.exec(
+    `SELECT id FROM pipeline_runs WHERE run_date = '${runRow.run_date}'`
+  ));
+  const ids = allRunIds.map(r => r.id);
+  if (ids.length === 0) return [];
+
   const rows = rowsToObjects<{ model: string }>(db.exec(
-    `SELECT DISTINCT model FROM brand_results WHERE run_id = ${runId} AND industry_id = '${industryId}' AND model IS NOT NULL ORDER BY model`
+    `SELECT DISTINCT model FROM brand_results WHERE run_id IN (${ids.join(',')}) AND industry_id = '${industryId}' AND model IS NOT NULL ORDER BY model`
   ));
   return rows.map(r => r.model);
 }
