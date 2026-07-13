@@ -62,8 +62,12 @@ export default function ReportDetailPage({ params }: { params: Promise<{ slug: s
           <span className="mr-2">←</span> Back to Reports
         </Link>
         
-        <header className="mb-10 pb-10 border-b" style={{ borderColor: 'var(--rs-border)' }}>
-          <h1 className="text-3xl sm:text-4xl font-bold text-white mb-4 leading-tight">
+        <header className="mb-10 pb-10 border-b relative" style={{ borderColor: 'var(--rs-border)' }}>
+          <div className="rs-badge mb-6 inline-flex items-center gap-2 border-blue-500/20 bg-blue-500/10 text-blue-400">
+            <span className="rs-badge-dot bg-blue-400" />
+            AI Intelligence Report
+          </div>
+          <h1 className="text-4xl sm:text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-br from-white to-gray-400 mb-6 leading-tight tracking-tight">
             {report.title}
           </h1>
           <div className="flex items-center gap-4 text-sm" style={{ color: 'var(--rs-text-secondary)' }}>
@@ -87,6 +91,26 @@ export default function ReportDetailPage({ params }: { params: Promise<{ slug: s
           <ReactMarkdown remarkPlugins={[remarkGfm]}>
             {report.content_md}
           </ReactMarkdown>
+        </div>
+
+        {/* Custom Report CTA */}
+        <div className="mt-16 p-8 sm:p-10 rs-card text-center border rounded-2xl relative overflow-hidden group transition-all duration-300 hover:border-blue-500/50" style={{ borderColor: 'var(--rs-border)' }}>
+           <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 via-transparent to-purple-500/5 opacity-50 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
+           <div className="relative z-10 flex flex-col items-center">
+             <div className="w-12 h-12 mb-4 rounded-full bg-blue-500/10 flex items-center justify-center text-blue-400 text-xl">
+               📊
+             </div>
+             <h3 className="text-2xl font-bold text-white mb-3">Need Deeper Insights?</h3>
+             <p className="mb-8 max-w-lg mx-auto text-sm sm:text-base" style={{ color: 'var(--rs-text-secondary)' }}>
+                Get a comprehensive, customized AI visibility report tailored specifically to your brand, competitors, and industry niche.
+             </p>
+             <a 
+               href="mailto:hey@rashscore.live?subject=Custom%20Report%20Inquiry" 
+               className="inline-flex items-center justify-center px-6 py-3 rounded-lg font-medium transition-all duration-300 bg-white text-black hover:bg-gray-100 hover:scale-105 shadow-lg shadow-white/10"
+             >
+                Contact for Custom Reports
+             </a>
+           </div>
         </div>
       </article>
     </div>
