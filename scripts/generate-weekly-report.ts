@@ -163,12 +163,14 @@ Guidelines:
     // Extract title from first line
     const lines = text.trim().split('\n');
     let title = 'Weekly AI Brand Visibility Report';
+    let bodyText = text.trim();
     if (lines[0].startsWith('# ')) {
       title = lines[0].replace('# ', '').trim();
+      bodyText = lines.slice(1).join('\n').trim();
     }
 
     const safeTitle = title.replace(/'/g, "''");
-    const safeText = text.replace(/'/g, "''");
+    const safeText = bodyText.replace(/'/g, "''");
 
     db.exec(`
       INSERT INTO reports (slug, title, content_md)
