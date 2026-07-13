@@ -59,4 +59,5 @@ jobs:
           git config --local user.name "github-actions[bot]"
           git add public/videos/latest_report_intro.mp4
           git diff --staged --quiet || git commit -m "🎥 Weekly video: $(date -u +%Y-%m-%d)"
+          git pull --rebase origin main
           git push
