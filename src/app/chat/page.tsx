@@ -100,12 +100,12 @@ export default function ChatPage() {
 
       {/* Empty State / Welcome */}
       {!hasMessages && (
-        <div className="flex-grow flex flex-col items-center justify-center px-4 py-12 relative z-10 animate-fade-in">
+        <div className="flex-grow flex flex-col items-center justify-center px-4 py-8 sm:py-10 relative z-10 animate-fade-in">
           
           {/* Logo with double glowing borders */}
-          <div className="relative mb-6">
+          <div className="relative mb-5">
             <div className="absolute -inset-1 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-2xl blur-md opacity-45" />
-            <div className="relative w-16 h-16 rounded-2xl bg-[#16181d] border border-white/[0.08] flex items-center justify-center shadow-lg">
+            <div className="relative w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-[#16181d] border border-white/[0.08] flex items-center justify-center shadow-lg">
               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.8" stroke="currentColor" className="w-8 h-8 text-indigo-400">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904 9 18.75l-.813-2.846a4.5 4.5 0 0 0-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 0 0 3.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 0 0 3.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 0 0-3.09 3.09ZM18.259 8.715 18 9.75l-.259-1.035a3.375 3.375 0 0 0-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 0 0 2.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 0 0 2.455 2.456L21.75 6l-1.036.259a3.375 3.375 0 0 0-2.455 2.456ZM16.894 20.567 16.5 21.75l-.394-1.183a2.25 2.25 0 0 0-1.423-1.423L13.5 18.75l1.183-.394a2.25 2.25 0 0 0 1.423-1.423l.394-1.183.394 1.183a2.25 2.25 0 0 0 1.423 1.423l1.183.394-1.183.394a2.25 2.25 0 0 0-1.423 1.423Z" />
               </svg>
@@ -115,10 +115,10 @@ export default function ChatPage() {
             </div>
           </div>
           
-          <h1 className="text-3xl sm:text-4xl font-black mb-2 text-center text-white tracking-tight">
+          <h1 className="text-4xl sm:text-5xl font-black mb-3 text-center text-white tracking-tight">
             Ask the <span className="gradient-text">Data</span>
           </h1>
-          <p className="text-sm max-w-md text-center leading-relaxed mb-3" style={{ color: 'var(--rs-text-secondary)' }}>
+          <p className="text-base max-w-2xl text-center leading-relaxed mb-4 text-balance" style={{ color: 'var(--rs-text-secondary)' }}>
             Natural language → SQL execution. Query 285 brands across 19 industries in real time.
           </p>
           <div className="flex items-center gap-2 mb-8 bg-white/[0.02] border border-white/[0.06] rounded-full px-3 py-1">
@@ -127,18 +127,18 @@ export default function ChatPage() {
           </div>
 
           {/* Suggestion Grid */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 w-full max-w-xl">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 w-full max-w-5xl">
             {SUGGESTIONS.map((sug, idx) => (
               <button
                 key={idx}
                 onClick={() => handleSend(sug.text)}
                 disabled={loading}
-                className="group rs-card text-left px-4 py-4 flex items-start gap-3 bg-[#16181d]/40 border-white/[0.06] hover:border-indigo-500/20 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed hover:scale-[1.01] active:scale-[0.99] backdrop-blur-sm"
+                className="group rs-card text-left px-4 py-5 flex items-start gap-3 bg-[#16181d]/40 border-white/[0.06] hover:border-indigo-500/20 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed hover:scale-[1.01] active:scale-[0.99] backdrop-blur-sm"
               >
-                <div className="w-8 h-8 rounded-lg bg-indigo-500/10 flex items-center justify-center text-sm mt-0.5 shrink-0 group-hover:bg-indigo-500/20 transition-colors">
+                <div className="w-10 h-10 rounded-xl bg-indigo-500/10 flex items-center justify-center text-sm mt-0.5 shrink-0 group-hover:bg-indigo-500/20 transition-colors">
                   {sug.icon}
                 </div>
-                <span className="text-[13px] leading-snug font-medium align-middle my-auto" style={{ color: 'var(--rs-text-secondary)' }}>
+                <span className="text-sm leading-snug font-semibold align-middle my-auto" style={{ color: 'var(--rs-text-secondary)' }}>
                   {sug.text}
                 </span>
               </button>
@@ -150,7 +150,7 @@ export default function ChatPage() {
       {/* Messages */}
       {hasMessages && (
         <div className="flex-grow overflow-y-auto px-4 sm:px-6 pt-6 pb-4 relative z-10">
-          <div className="max-w-3xl mx-auto space-y-5">
+          <div className="max-w-4xl mx-auto space-y-5">
             {messages.map((msg, i) => (
               <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'} animate-fade-in`}>
                 <div className="max-w-[88%] sm:max-w-[82%] relative">
@@ -249,8 +249,8 @@ export default function ChatPage() {
       )}
 
       {/* Input Area — always at bottom */}
-      <div className="shrink-0 px-4 sm:px-6 pb-5 pt-3 z-20" style={{ background: `linear-gradient(to top, var(--rs-bg-base) 70%, transparent)` }}>
-        <div className="max-w-3xl mx-auto">
+      <div className="shrink-0 px-4 sm:px-6 pb-5 pt-3 z-20 sticky bottom-0" style={{ background: `linear-gradient(to top, var(--rs-bg-base) 70%, transparent)` }}>
+        <div className="max-w-4xl mx-auto">
           {/* Quick suggestions when in conversation */}
           {hasMessages && !loading && (
             <div className="flex gap-2 mb-3 overflow-x-auto no-scrollbar whitespace-nowrap pb-1">
