@@ -222,6 +222,7 @@ export class BrandAnalysisPipeline {
         console.log(`    ✓ ${result.model}: ${scores.length} brands parsed`);
         return [{ model: result.model, scores }];
       }
+      console.warn(`    ⚠️ Raw response from ${result.model} (unparseable):\n${result.text.slice(0, 500)}`);
       throw new Error(`${result.model} returned unparseable response`);
     }
 
@@ -273,6 +274,7 @@ export class BrandAnalysisPipeline {
         console.log(`    ✓ ${result.model}: ${scores.length} brands parsed`);
         parsed.push({ model: result.model, scores });
       } else {
+        console.warn(`    ⚠️ Raw response from ${result.model} (unparseable):\n${result.text.slice(0, 500)}`);
         console.warn(`    ⚠ ${result.model}: could not parse response`);
       }
     }

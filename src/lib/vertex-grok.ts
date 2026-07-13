@@ -49,7 +49,7 @@ async function callVertexGrokAPI(
     for (const currentModel of modelsToTry) {
         try {
             const controller = new AbortController();
-            const timeout = setTimeout(() => controller.abort(), 60000); // 60s timeout
+            const timeout = setTimeout(() => controller.abort(), 120000); // 120s timeout
 
             // Vertex AI Global Endpoint — OpenAI-compatible chat completions
             const url = `https://aiplatform.googleapis.com/v1/projects/${projectId}/locations/global/endpoints/openapi/chat/completions`;
@@ -63,6 +63,7 @@ async function callVertexGrokAPI(
                 body: JSON.stringify({
                     model: currentModel,
                     messages: [
+                        { role: "system", content: "You are an expert brand intelligence analyst. If the prompt instructs you to check social media or real-time controversies and you do not have search capability, do NOT refuse the request. Instead, use your base knowledge and general public sentiment history to estimate the scores. You MUST respond ONLY with the requested JSON format (do not wrap in markdown or explanation, just return raw JSON matching the requested structure)." },
                         { role: "user", content: prompt }
                     ],
                     max_tokens: maxTokens,

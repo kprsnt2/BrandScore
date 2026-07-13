@@ -46,10 +46,13 @@ async function callVertexGeminiAPI(
     for (const currentModel of modelsToTry) {
         try {
             const controller = new AbortController();
-            const timeout = setTimeout(() => controller.abort(), 30000); // 30s timeout
+            const timeout = setTimeout(() => controller.abort(), 120000); // 120s timeout for batch calls
 
-            // Vertex AI Endpoint
-            const url = `https://${region}-aiplatform.googleapis.com/v1/projects/${projectId}/locations/${region}/publishers/google/models/${currentModel}:generateContent`;
+            // Vertex AI Endpoint (gemini-3.5-flash uses the global endpoint)
+            const isGlobal = region === 'global' || currentModel === 'gemini-3.5-flash';
+            const host = isGlobal ? 'aiplatform.googleapis.com' : `${region}-aiplatform.googleapis.com`;
+            const loc = isGlobal ? 'global' : region;
+            const url = `https://${host}/v1/projects/${projectId}/locations/${loc}/publishers/google/models/${currentModel}:generateContent`;
 
             const response = await fetch(url, {
                 method: "POST",
