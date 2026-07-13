@@ -56,22 +56,26 @@ export default function ReportDetailPage({ params }: { params: Promise<{ slug: s
   }
 
   return (
-    <div className="min-h-screen rs-page pt-24 pb-16 px-4">
-      <article className="max-w-3xl mx-auto">
-        <Link href="/reports" className="inline-flex items-center text-sm font-medium transition-colors mb-8 hover:text-white" style={{ color: 'var(--rs-text-muted)' }}>
+    <div className="min-h-screen rs-page pt-24 pb-16 px-4 relative overflow-hidden">
+      {/* Ambient background glows */}
+      <div className="absolute top-[10%] left-[20%] w-[400px] h-[400px] rounded-full bg-indigo-500/[0.02] blur-[120px] pointer-events-none" />
+      <div className="absolute top-[35%] right-[20%] w-[350px] h-[350px] rounded-full bg-purple-500/[0.02] blur-[120px] pointer-events-none" />
+
+      <article className="max-w-3xl mx-auto relative z-10 animate-fade-in">
+        <Link href="/reports" className="inline-flex items-center text-sm font-bold uppercase tracking-wider transition-colors mb-8 hover:text-indigo-400" style={{ color: 'var(--rs-text-muted)' }}>
           <span className="mr-2">←</span> Back to Reports
         </Link>
         
         <header className="mb-10 pb-10 border-b relative" style={{ borderColor: 'var(--rs-border)' }}>
-          <div className="rs-badge mb-6 inline-flex items-center gap-2 border-blue-500/20 bg-blue-500/10 text-blue-400">
-            <span className="rs-badge-dot bg-blue-400" />
+          <div className="rs-badge mb-6 inline-flex items-center gap-2 border-indigo-500/20 bg-indigo-500/10 text-indigo-400 hover:scale-105 transition-all">
+            <span className="rs-badge-dot bg-indigo-400" />
             AI Intelligence Report
           </div>
-          <h1 className="text-4xl sm:text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-br from-white to-gray-400 mb-6 leading-tight tracking-tight">
-            {report.title}
+          <h1 className="text-4xl sm:text-5xl font-black mb-6 leading-[1.15] tracking-tight">
+            <span className="gradient-text">{report.title}</span>
           </h1>
-          <div className="flex items-center gap-4 text-sm" style={{ color: 'var(--rs-text-secondary)' }}>
-            <time dateTime={report.published_at}>
+          <div className="flex flex-wrap items-center gap-4 text-xs sm:text-sm" style={{ color: 'var(--rs-text-secondary)' }}>
+            <time dateTime={report.published_at} className="font-semibold text-white">
               {new Date(report.published_at).toLocaleDateString('en-US', {
                 weekday: 'long',
                 year: 'numeric',
@@ -80,14 +84,14 @@ export default function ReportDetailPage({ params }: { params: Promise<{ slug: s
               })}
             </time>
             <span>•</span>
-            <span className="flex items-center gap-1.5">
-              <span className="rs-badge-dot" />
+            <span className="flex items-center gap-1.5 bg-white/[0.03] border border-white/[0.06] px-2.5 py-0.5 rounded-full text-xs font-medium">
+              <span className="rs-badge-dot bg-purple-400" />
               AI Generated
             </span>
           </div>
         </header>
 
-        <div className="prose prose-invert max-w-none prose-headings:font-bold prose-h2:text-2xl prose-h2:mt-10 prose-h2:mb-4 prose-h3:text-xl prose-p:leading-relaxed" style={{ color: 'var(--rs-text-secondary)' }}>
+        <div className="prose prose-invert max-w-none prose-headings:font-bold prose-h2:text-2xl prose-h2:mt-10 prose-h2:mb-4 prose-h3:text-xl prose-p:leading-relaxed prose-p:text-slate-300" style={{ color: 'var(--rs-text-secondary)' }}>
           <ReactMarkdown remarkPlugins={[remarkGfm]}>
             {report.content_md}
           </ReactMarkdown>

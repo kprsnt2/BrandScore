@@ -93,48 +93,52 @@ export default function ChatPage() {
   const hasMessages = messages.length > 0;
 
   return (
-    <div className="rs-page flex flex-col" style={{ minHeight: 'calc(100vh - 58px)' }}>
+    <div className="rs-page flex flex-col relative overflow-hidden" style={{ minHeight: 'calc(100vh - 58px)' }}>
+      {/* Background ambient glows */}
+      <div className="absolute top-[10%] left-[20%] w-[450px] h-[450px] rounded-full bg-indigo-500/[0.03] blur-[140px] pointer-events-none" />
+      <div className="absolute bottom-[20%] right-[10%] w-[350px] h-[350px] rounded-full bg-purple-500/[0.03] blur-[120px] pointer-events-none" />
 
       {/* Empty State / Welcome */}
       {!hasMessages && (
-        <div className="flex-grow flex flex-col items-center justify-center px-4 py-12 relative">
-          {/* Background ambient glow */}
-          <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] rounded-full blur-[160px] pointer-events-none" style={{ background: 'rgba(var(--rs-accent-rgb), 0.04)' }} />
+        <div className="flex-grow flex flex-col items-center justify-center px-4 py-12 relative z-10 animate-fade-in">
           
-          {/* Logo */}
-          <div className="relative mb-8">
-            <div className="w-16 h-16 rounded-2xl bg-rs-surface border border-rs flex items-center justify-center shadow-sm">
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="w-8 h-8 text-white">
+          {/* Logo with double glowing borders */}
+          <div className="relative mb-6">
+            <div className="absolute -inset-1 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-2xl blur-md opacity-45" />
+            <div className="relative w-16 h-16 rounded-2xl bg-[#16181d] border border-white/[0.08] flex items-center justify-center shadow-lg">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.8" stroke="currentColor" className="w-8 h-8 text-indigo-400">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904 9 18.75l-.813-2.846a4.5 4.5 0 0 0-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 0 0 3.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 0 0 3.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 0 0-3.09 3.09ZM18.259 8.715 18 9.75l-.259-1.035a3.375 3.375 0 0 0-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 0 0 2.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 0 0 2.455 2.456L21.75 6l-1.036.259a3.375 3.375 0 0 0-2.455 2.456ZM16.894 20.567 16.5 21.75l-.394-1.183a2.25 2.25 0 0 0-1.423-1.423L13.5 18.75l1.183-.394a2.25 2.25 0 0 0 1.423-1.423l.394-1.183.394 1.183a2.25 2.25 0 0 0 1.423 1.423l1.183.394-1.183.394a2.25 2.25 0 0 0-1.423 1.423Z" />
               </svg>
             </div>
-            <div className="absolute -bottom-1 -right-1 w-5 h-5 rounded-full bg-emerald-500 border-2 flex items-center justify-center" style={{ borderColor: 'var(--rs-bg-base)' }}>
-              <span className="text-[8px] text-white font-bold">✓</span>
+            <div className="absolute -bottom-1.5 -right-1.5 w-6 h-6 rounded-full bg-emerald-500 border-4 flex items-center justify-center" style={{ borderColor: 'var(--rs-bg-base)' }}>
+              <span className="text-[9px] text-white font-black">✓</span>
             </div>
           </div>
           
-          <h1 className="text-2xl sm:text-3xl font-bold text-white mb-2 text-center">
-            Ask the Data
+          <h1 className="text-3xl sm:text-4xl font-black mb-2 text-center text-white tracking-tight">
+            Ask the <span className="gradient-text">Data</span>
           </h1>
-          <p className="text-sm max-w-md text-center leading-relaxed mb-2" style={{ color: 'var(--rs-text-secondary)' }}>
-            Natural language → SQL. Query 285 brands across 19 industries in real time.
+          <p className="text-sm max-w-md text-center leading-relaxed mb-3" style={{ color: 'var(--rs-text-secondary)' }}>
+            Natural language → SQL execution. Query 285 brands across 19 industries in real time.
           </p>
-          <div className="flex items-center gap-2 mb-10">
+          <div className="flex items-center gap-2 mb-8 bg-white/[0.02] border border-white/[0.06] rounded-full px-3 py-1">
             <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-            <span className="text-[10px] font-mono uppercase tracking-wider" style={{ color: 'var(--rs-text-muted)' }}>Read-only · Secure · Live Data</span>
+            <span className="text-[9px] font-semibold uppercase tracking-widest text-slate-400">Read-only · Secure · Live Data</span>
           </div>
 
           {/* Suggestion Grid */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 w-full max-w-xl">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 w-full max-w-xl">
             {SUGGESTIONS.map((sug, idx) => (
               <button
                 key={idx}
                 onClick={() => handleSend(sug.text)}
                 disabled={loading}
-                className="group rs-card text-left px-4 py-3.5 flex items-start gap-3 transition-all disabled:opacity-50 disabled:cursor-not-allowed hover:scale-[1.01] active:scale-[0.99]"
+                className="group rs-card text-left px-4 py-4 flex items-start gap-3 bg-[#16181d]/40 border-white/[0.06] hover:border-indigo-500/20 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed hover:scale-[1.01] active:scale-[0.99] backdrop-blur-sm"
               >
-                <span className="text-base mt-0.5 shrink-0 opacity-60 group-hover:opacity-100 transition-opacity">{sug.icon}</span>
-                <span className="text-[13px] leading-snug" style={{ color: 'var(--rs-text-secondary)' }}>
+                <div className="w-8 h-8 rounded-lg bg-indigo-500/10 flex items-center justify-center text-sm mt-0.5 shrink-0 group-hover:bg-indigo-500/20 transition-colors">
+                  {sug.icon}
+                </div>
+                <span className="text-[13px] leading-snug font-medium align-middle my-auto" style={{ color: 'var(--rs-text-secondary)' }}>
                   {sug.text}
                 </span>
               </button>
@@ -149,11 +153,7 @@ export default function ChatPage() {
           <div className="max-w-3xl mx-auto space-y-5">
             {messages.map((msg, i) => (
               <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'} animate-fade-in`}>
-                <div className={`max-w-[88%] sm:max-w-[82%] relative ${
-                  msg.role === 'user' 
-                    ? '' 
-                    : ''
-                }`}>
+                <div className="max-w-[88%] sm:max-w-[82%] relative">
                   {/* User message */}
                   {msg.role === 'user' && (
                     <div className="rounded-2xl rounded-br-md px-5 py-3.5 text-[14px] leading-relaxed text-white shadow-lg" style={{ background: 'linear-gradient(135deg, rgba(var(--rs-accent-rgb), 0.9), rgba(139,92,246,0.85))' }}>
@@ -163,26 +163,26 @@ export default function ChatPage() {
 
                   {/* Assistant message */}
                   {msg.role === 'assistant' && (
-                    <div className="rounded-2xl rounded-bl-md p-5 shadow-lg" style={{ background: 'var(--rs-bg-surface)', border: '1px solid var(--rs-border)' }}>
+                    <div className="rounded-2xl rounded-bl-md p-5 shadow-lg bg-[#16181d]/50 backdrop-blur-md border border-white/[0.06]">
                       {/* Header */}
                       <div className="flex items-center justify-between mb-3 pb-2.5" style={{ borderBottom: '1px solid var(--rs-border)' }}>
                         <div className="flex items-center gap-2">
-                          <div className="w-5 h-5 rounded-md bg-indigo-600 flex items-center justify-center">
+                          <div className="w-5 h-5 rounded bg-gradient-to-r from-indigo-500 to-purple-500 flex items-center justify-center">
                             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-3 h-3 text-white">
                               <path d="M9.813 15.904 9 18.75l-.813-2.846a4.5 4.5 0 0 0-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 0 0 3.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 0 0 3.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 0 0-3.09 3.09Z" />
                             </svg>
                           </div>
-                          <span className="text-[10px] font-semibold uppercase tracking-widest" style={{ color: 'var(--rs-text-muted)' }}>rAsh AI</span>
+                          <span className="text-[10px] font-bold uppercase tracking-widest text-white">rAsh AI</span>
                         </div>
                         {msg.generatedBy && (
-                          <span className="text-[9px] font-mono px-2 py-0.5 rounded-full" style={{ background: 'rgba(var(--rs-accent-rgb), 0.08)', color: 'rgba(var(--rs-accent-rgb), 0.7)', border: '1px solid rgba(var(--rs-accent-rgb), 0.12)' }}>
+                          <span className="text-[9px] font-mono px-2 py-0.5 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-300">
                             {msg.generatedBy}
                           </span>
                         )}
                       </div>
                       
                       {/* Content */}
-                      <div className="prose prose-sm max-w-none prose-invert prose-p:text-[var(--rs-text-secondary)] prose-p:leading-relaxed prose-strong:text-purple-300 prose-strong:font-semibold prose-code:text-purple-300 prose-code:bg-purple-500/10 prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded prose-code:text-xs prose-code:before:content-none prose-code:after:content-none prose-table:text-xs prose-th:text-left prose-th:text-[var(--rs-text-secondary)] prose-th:font-semibold prose-td:text-[var(--rs-text-secondary)]">
+                      <div className="prose prose-sm max-w-none prose-invert prose-p:text-[var(--rs-text-secondary)] prose-p:leading-relaxed prose-strong:text-indigo-300 prose-strong:font-bold prose-code:text-indigo-300 prose-code:bg-indigo-500/10 prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded prose-code:text-xs prose-code:before:content-none prose-code:after:content-none prose-table:text-xs prose-th:text-left prose-th:text-[var(--rs-text-secondary)] prose-th:font-semibold prose-td:text-[var(--rs-text-secondary)]">
                         <ReactMarkdown remarkPlugins={[remarkGfm]}>
                           {msg.content}
                         </ReactMarkdown>
@@ -192,31 +192,31 @@ export default function ChatPage() {
                       {msg.sql && (
                         <div className="mt-4 pt-3" style={{ borderTop: '1px solid var(--rs-border)' }}>
                           <details className="group/sql">
-                            <summary className="cursor-pointer text-[10px] font-semibold font-mono uppercase tracking-wider select-none outline-none flex items-center gap-1.5 transition-colors" style={{ color: 'var(--rs-text-muted)' }}>
-                              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="2" stroke="currentColor" className="w-3 h-3 transition-transform group-open/sql:rotate-90">
+                            <summary className="cursor-pointer text-[10px] font-semibold font-mono uppercase tracking-wider select-none outline-none flex items-center gap-1.5 transition-colors text-slate-500 hover:text-indigo-400">
+                              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="2.5" stroke="currentColor" className="w-3 h-3 transition-transform group-open/sql:rotate-90">
                                 <path strokeLinecap="round" strokeLinejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5" />
                               </svg>
                               SQL Execution
                             </summary>
                             
-                            <div className="mt-3 rounded-xl overflow-hidden" style={{ background: 'var(--rs-bg-base)', border: '1px solid var(--rs-border)' }}>
+                            <div className="mt-3 rounded-xl overflow-hidden bg-[#0f1115] border border-white/[0.06]">
                               {/* Editor Header */}
-                              <div className="px-4 py-2.5 flex items-center justify-between" style={{ background: 'var(--rs-bg-elevated)', borderBottom: '1px solid var(--rs-border)' }}>
+                              <div className="px-4 py-2.5 flex items-center justify-between bg-white/[0.02]" style={{ borderBottom: '1px solid var(--rs-border)' }}>
                                 <div className="flex items-center gap-1.5">
                                   <span className="w-2.5 h-2.5 rounded-full bg-red-500/50" />
                                   <span className="w-2.5 h-2.5 rounded-full bg-yellow-500/50" />
                                   <span className="w-2.5 h-2.5 rounded-full bg-green-500/50" />
-                                  <span className="text-[9px] font-mono ml-2" style={{ color: 'var(--rs-text-muted)' }}>query.sql</span>
+                                  <span className="text-[9px] font-mono ml-2 text-slate-500">query.sql</span>
                                 </div>
                                 <button
                                   onClick={() => copyToClipboard(msg.sql || '', i)}
-                                  className="text-[9px] font-mono px-2.5 py-1 rounded-md transition-all hover:bg-white/[0.05]"
-                                  style={{ color: 'var(--rs-text-secondary)', border: '1px solid var(--rs-border)' }}
+                                  className="text-[9px] font-mono px-2.5 py-1 rounded-md transition-all hover:bg-white/[0.05] text-slate-400 hover:text-white"
+                                  style={{ border: '1px solid var(--rs-border)' }}
                                 >
                                   {copiedIndex === i ? '✓ Copied' : 'Copy'}
                                 </button>
                               </div>
-                              <pre className="p-4 text-xs font-mono text-purple-300/80 overflow-x-auto whitespace-pre-wrap leading-relaxed">
+                              <pre className="p-4 text-xs font-mono text-indigo-300/80 overflow-x-auto whitespace-pre-wrap leading-relaxed">
                                 {msg.sql}
                               </pre>
                             </div>
@@ -232,13 +232,13 @@ export default function ChatPage() {
             {/* Loading indicator */}
             {loading && (
               <div className="flex justify-start animate-fade-in">
-                <div className="rounded-2xl rounded-bl-md px-5 py-4 flex items-center gap-3" style={{ background: 'var(--rs-bg-surface)', border: '1px solid var(--rs-border)' }}>
+                <div className="rounded-2xl rounded-bl-md px-5 py-4 flex items-center gap-3 bg-[#16181d]/50 border border-white/[0.06]">
                   <div className="flex gap-1">
-                    <span className="w-2 h-2 rounded-full bg-purple-500 animate-bounce" />
-                    <span className="w-2 h-2 rounded-full bg-purple-500 animate-bounce [animation-delay:0.15s]" />
-                    <span className="w-2 h-2 rounded-full bg-purple-500 animate-bounce [animation-delay:0.3s]" />
+                    <span className="w-2 h-2 rounded-full bg-indigo-500 animate-bounce" />
+                    <span className="w-2 h-2 rounded-full bg-indigo-500 animate-bounce [animation-delay:0.15s]" />
+                    <span className="w-2 h-2 rounded-full bg-indigo-500 animate-bounce [animation-delay:0.3s]" />
                   </div>
-                  <span className="text-xs font-mono" style={{ color: 'var(--rs-text-muted)' }}>Querying database...</span>
+                  <span className="text-xs font-mono text-slate-500">Querying database...</span>
                 </div>
               </div>
             )}
@@ -259,8 +259,7 @@ export default function ChatPage() {
                   key={idx}
                   onClick={() => handleSend(sug.text)}
                   disabled={loading}
-                  className="shrink-0 text-[11px] px-3 py-1.5 rounded-lg transition-all disabled:opacity-50" 
-                  style={{ background: 'var(--rs-bg-surface)', border: '1px solid var(--rs-border)', color: 'var(--rs-text-secondary)' }}
+                  className="shrink-0 text-[11px] px-3 py-1.5 rounded-lg transition-all disabled:opacity-50 bg-[#16181d]/40 border border-white/[0.06] hover:border-indigo-500/20 text-slate-400 hover:text-white" 
                 >
                   {sug.icon} {sug.text.length > 30 ? sug.text.slice(0, 30) + '…' : sug.text}
                 </button>
@@ -271,16 +270,16 @@ export default function ChatPage() {
           {/* Input form */}
           <form onSubmit={handleSubmit} className="relative group">
             {/* Focus glow */}
-
+            <div className="absolute -inset-0.5 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-2xl blur opacity-25 group-focus-within:opacity-50 transition duration-500" />
             
-            <div className="relative flex items-center rounded-2xl overflow-hidden" style={{ background: 'var(--rs-bg-surface)', border: '1px solid var(--rs-border)' }}>
+            <div className="relative flex items-center rounded-2xl overflow-hidden bg-[#16181d]/90 border border-white/[0.08] backdrop-blur-md">
               <input
                 ref={inputRef}
                 type="text"
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 placeholder={hasMessages ? "Ask a follow-up question..." : "Ask anything about brands, scores, or trends..."}
-                className="w-full bg-transparent pl-5 pr-14 py-4 text-white focus:outline-none text-sm placeholder:text-[var(--rs-text-muted)]"
+                className="w-full bg-transparent pl-5 pr-14 py-4 text-white focus:outline-none text-sm placeholder:text-slate-500"
                 style={{ caretColor: 'rgb(var(--rs-accent-rgb))' }}
                 disabled={loading}
               />
@@ -298,7 +297,7 @@ export default function ChatPage() {
           </form>
           
           <div className="text-center mt-2.5">
-            <span className="text-[10px] font-mono tracking-wider" style={{ color: 'var(--rs-text-faint)' }}>
+            <span className="text-[10px] font-mono tracking-wider text-slate-500">
               Secure SQL · Read-only · Data refreshes hourly
             </span>
           </div>
