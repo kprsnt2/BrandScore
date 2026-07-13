@@ -32,21 +32,21 @@ export default function ReportsPage() {
   }, []);
 
   return (
-    <div className="min-h-screen rs-page pt-24 pb-16 px-4 relative overflow-hidden">
+    <div className="min-h-screen rs-page py-8 sm:py-10 px-4 relative overflow-hidden">
       {/* Ambient background glows */}
-      <div className="absolute top-[10%] left-[25%] w-[300px] h-[300px] rounded-full bg-indigo-500/[0.02] blur-[120px] pointer-events-none" />
-      <div className="absolute top-[30%] right-[25%] w-[300px] h-[300px] rounded-full bg-purple-500/[0.02] blur-[120px] pointer-events-none" />
+      <div className="absolute top-[6%] left-[15%] w-[420px] h-[420px] rounded-full bg-indigo-500/[0.035] blur-[120px] pointer-events-none" />
+      <div className="absolute top-[18%] right-[12%] w-[380px] h-[380px] rounded-full bg-purple-500/[0.035] blur-[120px] pointer-events-none" />
 
-      <div className="max-w-4xl mx-auto space-y-12 relative z-10 animate-fade-in">
-        <header className="rs-hero text-center">
+      <div className="max-w-5xl mx-auto space-y-10 relative z-10 animate-fade-in">
+        <header className="rs-hero text-center rounded-[2rem] border border-white/[0.06] bg-white/[0.02] px-4 sm:px-8">
           <div className="rs-badge mx-auto mb-4 hover:scale-105 transition-all duration-300">
             <span className="rs-badge-dot bg-indigo-400" />
             AI-Generated Intelligence
           </div>
-          <h1 className="text-4xl sm:text-6xl font-black mb-4 text-white tracking-tight leading-none">
+          <h1 className="text-4xl sm:text-6xl lg:text-7xl font-black mb-5 text-white tracking-tight leading-[0.95] text-balance">
             Weekly <span className="gradient-text">Reports</span>
           </h1>
-          <p style={{ color: 'var(--rs-text-secondary)' }} className="max-w-2xl mx-auto text-sm sm:text-base leading-relaxed">
+          <p style={{ color: 'var(--rs-text-secondary)' }} className="max-w-3xl mx-auto text-base sm:text-lg leading-relaxed text-balance">
             Automated intelligence reports mapping the biggest market shifts and overall top brand visibility rankings across Indian commerce.
           </p>
         </header>
@@ -66,7 +66,7 @@ export default function ReportsPage() {
             </p>
           </div>
         ) : (
-          <div className="grid gap-6">
+          <div className="grid gap-5 sm:grid-cols-2">
             {reports.map((report, idx) => (
               <Link 
                 key={report.slug} 
@@ -74,7 +74,7 @@ export default function ReportsPage() {
                 className="block group"
                 style={{ animationDelay: `${idx * 100}ms` }}
               >
-                <article className="rs-card p-6 sm:p-8 bg-[#16181d]/40 border-white/[0.06] hover:border-indigo-500/30 transition-all duration-300 backdrop-blur-sm relative overflow-hidden">
+                <article className="rs-card h-full p-6 sm:p-7 bg-[#16181d]/60 border-white/[0.06] hover:border-indigo-500/30 transition-all duration-300 backdrop-blur-sm relative overflow-hidden">
                   {/* Styled side stripe */}
                   <div className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-indigo-500 to-purple-500 opacity-30 group-hover:opacity-100 transition-opacity duration-300" />
                   

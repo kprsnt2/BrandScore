@@ -29,7 +29,7 @@ export default function BrandInput({ onSubmit, loading }: BrandInputProps) {
     ];
 
     return (
-        <div className="w-full max-w-2xl mx-auto animate-slide-up">
+        <div className="w-full max-w-3xl mx-auto animate-slide-up">
             <form onSubmit={handleSubmit} className="space-y-4">
                 {/* Brand Name Input */}
                 <div className="relative group">
@@ -42,14 +42,14 @@ export default function BrandInput({ onSubmit, loading }: BrandInputProps) {
                             value={brand}
                             onChange={(e) => setBrand(e.target.value)}
                             placeholder="Enter your brand name..."
-                            className="w-full px-6 py-4.5 pr-44 text-lg bg-[#16181d]/80 backdrop-blur-md border border-white/[0.08] rounded-2xl
+                            className="w-full h-16 px-5 sm:px-6 pr-36 sm:pr-48 text-base sm:text-lg bg-[#16181d]/90 backdrop-blur-md border border-white/[0.08] rounded-2xl
                              focus:outline-none focus:border-indigo-500/50 text-white placeholder-slate-500 transition-all duration-300"
                             disabled={loading}
                         />
                         <button
                             type="submit"
                             disabled={loading || !brand.trim()}
-                            className="absolute right-2 top-1/2 -translate-y-1/2 px-6 py-3
+                            className="absolute right-2 top-1/2 -translate-y-1/2 px-4 sm:px-7 py-3
                              bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 rounded-xl
                              font-bold text-white transition-all duration-300 hover:scale-[1.02] active:scale-[0.98]
                              disabled:opacity-40 disabled:scale-100 disabled:cursor-not-allowed shadow-md hover:shadow-indigo-500/20"
@@ -70,9 +70,9 @@ export default function BrandInput({ onSubmit, loading }: BrandInputProps) {
                 </div>
 
                 {/* Category Selection */}
-                <div className="flex items-center gap-3 bg-white/[0.02] border border-white/[0.06] rounded-xl px-4 py-2.5 max-w-sm mx-auto justify-between backdrop-blur-sm">
+                <div className="flex items-center gap-3 bg-white/[0.02] border border-white/[0.06] rounded-2xl px-4 py-3 max-w-xl mx-auto justify-between backdrop-blur-sm">
                     <span className="text-slate-400 text-xs font-semibold uppercase tracking-wider">
-                        Industry Sector:
+                        Industry:
                     </span>
                     <select
                         id="category"
