@@ -7,6 +7,7 @@ on:
 
 permissions:
   contents: write
+  id-token: write
 
 jobs:
   run-insights:
@@ -29,10 +30,18 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: ${{ secrets.GCP_WIF_PROVIDER }}
+          service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
+
       - name: Generate AI Insights
         env:
           NVIDIA_API_KEY: ${{ secrets.NVIDIA_API_KEY }}
           GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
+          GCP_PROJECT_ID: rashscore
+          GCP_REGION: us-central1
           NODE_ENV: production
         run: npx tsx scripts/run-insights.ts
 

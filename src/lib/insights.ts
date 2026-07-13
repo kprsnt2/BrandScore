@@ -14,6 +14,7 @@
  */
 
 import { getEnv } from './env';
+import { queryVertexGeminiRaw } from './vertex-gemini';
 
 export interface InsightRow {
   id: number;
@@ -122,16 +123,17 @@ const RETRY_DELAYS_MS = [30_000, 60_000, 90_000];
 const NVIDIA_BASE_URL = "https://integrate.api.nvidia.com/v1";
 const GROQ_BASE_URL = "https://api.groq.com/openai/v1";
 
-// All models to try in order (Groq primary → Groq fallbacks → NVIDIA primary → NVIDIA fallbacks)
+// All models to try in order (Vertex Gemini primary → Groq backup → NVIDIA fallback)
 interface ModelConfig {
-  provider: 'nvidia' | 'groq';
+  provider: 'nvidia' | 'groq' | 'vertex-gemini';
   model: string;
   label: string;
-  baseUrl: string;
-  apiKeyField: 'NVIDIA_API_KEY' | 'GROQ_API_KEY';
+  baseUrl?: string;
+  apiKeyField?: 'NVIDIA_API_KEY' | 'GROQ_API_KEY';
 }
 
 const MODEL_CHAIN: ModelConfig[] = [
+  { provider: 'vertex-gemini', model: 'gemini-3.5-flash', label: 'Gemini 3.5 Flash (Vertex)' },
   { provider: 'groq', model: 'openai/gpt-oss-120b', label: 'GPT-OSS 120B (Groq)', baseUrl: GROQ_BASE_URL, apiKeyField: 'GROQ_API_KEY' },
   { provider: 'groq', model: 'groq/compound', label: 'Compound (Groq)', baseUrl: GROQ_BASE_URL, apiKeyField: 'GROQ_API_KEY' },
   { provider: 'groq', model: 'llama-3.3-70b-versatile', label: 'Llama 3.3 70B (Groq)', baseUrl: GROQ_BASE_URL, apiKeyField: 'GROQ_API_KEY' },
@@ -141,8 +143,13 @@ const MODEL_CHAIN: ModelConfig[] = [
 ];
 
 async function callModel(config: ModelConfig, prompt: string): Promise<string> {
+  if (config.provider === 'vertex-gemini') {
+    const res = await queryVertexGeminiRaw(prompt, config.model);
+    return res.text;
+  }
+
   const env = getEnv();
-  const apiKey = env[config.apiKeyField];
+  const apiKey = config.apiKeyField ? env[config.apiKeyField] : undefined;
   if (!apiKey) throw new Error(`${config.apiKeyField} is not configured`);
 
   const controller = new AbortController();
@@ -194,14 +201,15 @@ export async function generateInsight(
 ): Promise<{ text: string; generatedBy: string }> {
   const env = getEnv();
 
-  // Filter to models we have API keys for
+  // Filter to models we have API keys for or GCP auth
   const availableModels = MODEL_CHAIN.filter(m => {
-    const key = env[m.apiKeyField];
+    if (m.provider === 'vertex-gemini') return true; // GCP credential-based (always assumed available)
+    const key = m.apiKeyField ? env[m.apiKeyField] : undefined;
     return key && key.length > 0;
   });
 
   if (availableModels.length === 0) {
-    throw new Error('No AI provider API keys configured (need NVIDIA_API_KEY or GROQ_API_KEY)');
+    throw new Error('No AI provider API keys configured (need Vertex Gemini, NVIDIA_API_KEY, or GROQ_API_KEY)');
   }
 
   for (let i = 0; i < availableModels.length; i++) {

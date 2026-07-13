@@ -20,11 +20,15 @@ async function main() {
 
   // Check API keys
   const keys = hasApiKeys();
-  if (!keys.nvidia && !keys.groq) {
-    console.error('❌ No NVIDIA or Groq API key configured. Exiting.');
+  if (!keys.nvidia && !keys.groq && !keys.vertexGemini) {
+    console.error('❌ No NVIDIA, Groq, or Vertex Gemini configured. Exiting.');
     process.exit(1);
   }
-  const providers = [keys.nvidia ? 'NVIDIA' : '', keys.groq ? 'Groq' : ''].filter(Boolean).join(' + ');
+  const providers = [
+    keys.vertexGemini ? 'Vertex Gemini' : '',
+    keys.nvidia ? 'NVIDIA' : '',
+    keys.groq ? 'Groq' : ''
+  ].filter(Boolean).join(' + ');
   console.log(`✅ AI providers: ${providers} (with fallback chains)`);
 
   const dbPath = path.join(process.cwd(), 'data', 'brand-intelligence.db');
