@@ -10,6 +10,7 @@ def b64decode(b64_encoded_string: str) -> bytes:
 
 parser = argparse.ArgumentParser(description='Generate a Veo video for a report.')
 parser.add_argument('--title', type=str, default='The rAsh Score Weekly: Tech Giants Dominate AI Share of Voice', help='Title of the report')
+parser.add_argument('--article', type=str, default='', help='A short snippet or summary of the article to guide the video generation')
 args = parser.parse_args()
 
 # Assuming the user has ADC (Application Default Credentials) configured
@@ -20,7 +21,8 @@ client = genai.Client(
     location="us-central1",
 )
 
-prompt = f"A cinematic, fast-paced futuristic intro for a weekly tech report titled '{args.title}'. The video shows glowing 3D AI holograms of global technology hubs, data streams flying across the screen, and sleek robotic elements. The camera pans dynamically over a digital globe with glowing data nodes lighting up in neon blue and purple."
+article_context = f" The video should visually represent the following topics: {args.article}" if args.article else ""
+prompt = f"A cinematic, fast-paced futuristic intro for a weekly tech report titled '{args.title}'. The video shows glowing 3D AI holograms of global technology hubs, data streams flying across the screen, and sleek robotic elements.{article_context} The camera pans dynamically over a digital globe with glowing data nodes lighting up in neon blue and purple."
 
 
 

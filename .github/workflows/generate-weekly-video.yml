@@ -47,8 +47,9 @@ jobs:
           GCP_REGION: us-central1
         run: |
           LATEST_TITLE=$(sqlite3 data/brand-intelligence.db "SELECT title FROM reports ORDER BY published_at DESC LIMIT 1;")
+          LATEST_SNIPPET=$(sqlite3 data/brand-intelligence.db "SELECT snippet FROM reports ORDER BY published_at DESC LIMIT 1;")
           echo "Latest title is: $LATEST_TITLE"
-          python scripts/generate-video.py --title "$LATEST_TITLE"
+          python scripts/generate-video.py --title "$LATEST_TITLE" --article "$LATEST_SNIPPET"
           
           # Move the generated video to the public folder
           mv latest_report_intro.mp4 public/videos/latest_report_intro.mp4 || echo "Video generation failed or file not found"
