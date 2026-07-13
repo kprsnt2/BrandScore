@@ -142,7 +142,7 @@ async function main() {
     const [primary, backup] = modelsArg.split(',');
     const apiKeyOverride = apiKeyArg ? process.env[apiKeyArg] : undefined;
     modelPair = { provider: providerArg, primary, backup, apiKeyOverride };
-    delayBetweenIndustries = 70000; // 70s for RPM compliance
+    delayBetweenIndustries = 12000; // 12s (5 RPM compliance)
     console.log(`🎯 Single model-pair mode: ${providerArg} → ${primary} (backup: ${backup})`);
     if (apiKeyOverride) {
       console.log(`🔑 Using API key from env: ${apiKeyArg}`);
@@ -152,7 +152,7 @@ async function main() {
   const pipeline = new BrandAnalysisPipeline({
     delayBetweenIndustries,
     timeoutMs: 180000,              // 3 min per-model timeout
-    retryDelaysMs: [30000, 60000, 90000],  // 30s, 60s, 90s retry gaps for GitHub Actions
+    retryDelaysMs: [60000, 120000],  // 60s, 120s retry gaps for rate limits
     modelPair,
   });
 
