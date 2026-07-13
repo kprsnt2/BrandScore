@@ -32,21 +32,21 @@ export default function ReportsPage() {
   }, []);
 
   return (
-    <div className="min-h-screen rs-page py-10 sm:py-14 px-4 relative overflow-hidden">
+    <div className="min-h-screen rs-page py-8 sm:py-14 px-4 relative overflow-hidden">
       {/* Ambient background glows */}
       <div className="absolute top-[6%] left-[20%] w-[420px] h-[420px] rounded-full bg-indigo-500/[0.025] blur-[120px] pointer-events-none" />
       <div className="absolute top-[18%] right-[16%] w-[380px] h-[380px] rounded-full bg-purple-500/[0.025] blur-[120px] pointer-events-none" />
 
-      <div className="max-w-6xl mx-auto space-y-10 relative z-10 animate-fade-in">
-        <header className="rounded-[1.75rem] border border-white/[0.08] bg-[#16181d]/60 px-5 py-10 text-left shadow-2xl shadow-black/10 sm:px-8 lg:px-10">
+      <div className="max-w-6xl mx-auto space-y-8 sm:space-y-10 relative z-10 animate-fade-in">
+        <header className="rounded-[1.5rem] sm:rounded-[1.75rem] border border-white/[0.08] bg-[#16181d]/60 px-5 py-8 sm:py-10 text-left shadow-2xl shadow-black/10 sm:px-8 lg:px-10">
           <div className="rs-badge mb-5">
             <span className="rs-badge-dot bg-indigo-400" />
             Market intelligence
           </div>
-          <h1 className="max-w-3xl text-4xl sm:text-5xl lg:text-6xl font-semibold mb-5 text-white tracking-[-0.04em] leading-[1.02] text-balance">
+          <h1 className="max-w-3xl text-3xl sm:text-5xl lg:text-6xl font-semibold mb-5 text-white tracking-[-0.04em] leading-[1.02] text-balance">
             Weekly <span className="gradient-text">Reports</span>
           </h1>
-          <p style={{ color: 'var(--rs-text-secondary)' }} className="max-w-3xl text-base sm:text-lg leading-8 text-balance">
+          <p style={{ color: 'var(--rs-text-secondary)' }} className="max-w-3xl text-base sm:text-lg leading-7 sm:leading-8 text-balance">
             Weekly reports on category momentum, competitive movement, and brand visibility across AI-generated recommendations.
           </p>
         </header>
@@ -66,7 +66,7 @@ export default function ReportsPage() {
             </p>
           </div>
         ) : (
-          <div className="grid gap-4 sm:grid-cols-2">
+          <div className="grid gap-4 md:grid-cols-2">
             {reports.map((report, idx) => (
               <Link 
                 key={report.slug} 
@@ -74,7 +74,7 @@ export default function ReportsPage() {
                 className="block group"
                 style={{ animationDelay: `${idx * 100}ms` }}
               >
-                <article className="rs-card h-full p-6 bg-[#16181d]/70 border-white/[0.08] hover:border-white/[0.16] transition-colors duration-200 backdrop-blur-sm relative overflow-hidden">
+                <article className="rs-card h-full p-5 sm:p-6 bg-[#16181d]/70 border-white/[0.08] hover:border-white/[0.16] transition-colors duration-200 backdrop-blur-sm relative overflow-hidden">
                   {/* Styled side stripe */}
                   <div className="absolute left-0 top-0 bottom-0 w-1 bg-indigo-400 opacity-40 group-hover:opacity-90 transition-opacity duration-200" />
                   

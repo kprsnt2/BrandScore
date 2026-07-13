@@ -100,7 +100,7 @@ export default function ChatPage() {
 
       {/* Empty State / Welcome */}
       {!hasMessages && (
-        <div className="flex-grow flex flex-col items-center justify-center px-4 py-10 sm:py-12 relative z-10 animate-fade-in">
+        <div className="flex-grow flex flex-col items-center justify-center px-4 py-8 sm:py-12 relative z-10 animate-fade-in">
           
           {/* Product mark */}
           <div className="relative mb-5">
@@ -115,25 +115,25 @@ export default function ChatPage() {
             </div>
           </div>
           
-          <h1 className="text-4xl sm:text-5xl font-semibold mb-3 tracking-[-0.03em] text-center text-white">
+          <h1 className="text-3xl sm:text-5xl font-semibold mb-3 tracking-[-0.03em] text-center text-white">
             Ask your <span className="gradient-text">brand data</span>
           </h1>
-          <p className="text-base max-w-2xl text-center leading-relaxed mb-4 text-balance" style={{ color: 'var(--rs-text-secondary)' }}>
+          <p className="text-sm sm:text-base max-w-2xl text-center leading-relaxed mb-4 text-balance" style={{ color: 'var(--rs-text-secondary)' }}>
             Ask plain-language questions across tracked brands, categories, model scores, and pipeline runs.
           </p>
-          <div className="flex items-center gap-2 mb-8 bg-white/[0.02] border border-white/[0.06] rounded-full px-3 py-1">
+          <div className="flex max-w-full items-center gap-2 mb-6 sm:mb-8 bg-white/[0.02] border border-white/[0.06] rounded-full px-3 py-1">
             <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-            <span className="text-[9px] font-semibold uppercase tracking-widest text-slate-400">Read-only · auditable · live data</span>
+            <span className="text-[9px] font-semibold uppercase tracking-[0.16em] text-slate-400">Read-only · auditable · live data</span>
           </div>
 
           {/* Suggestion Grid */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 w-full max-w-4xl">
+          <div className="grid grid-cols-1 gap-3 w-full max-w-4xl sm:grid-cols-2 lg:grid-cols-3">
             {SUGGESTIONS.map((sug, idx) => (
               <button
                 key={idx}
                 onClick={() => handleSend(sug.text)}
                 disabled={loading}
-                className="group rs-card text-left px-4 py-4 flex items-start gap-3 bg-[#16181d]/70 border-white/[0.08] hover:border-white/[0.16] transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed backdrop-blur-sm"
+                className="group rs-card text-left px-4 py-3.5 sm:py-4 flex items-start gap-3 bg-[#16181d]/70 border-white/[0.08] hover:border-white/[0.16] transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed backdrop-blur-sm"
               >
                 <div className="w-10 h-10 rounded-xl bg-white/[0.04] border border-white/[0.06] flex items-center justify-center text-[10px] font-semibold uppercase tracking-wider mt-0.5 shrink-0 text-indigo-300 group-hover:bg-white/[0.06] transition-colors">
                   {sug.icon}
@@ -249,7 +249,7 @@ export default function ChatPage() {
       )}
 
       {/* Input Area — always at bottom */}
-      <div className="shrink-0 px-4 sm:px-6 pb-5 pt-3 z-20 sticky bottom-0" style={{ background: `linear-gradient(to top, var(--rs-bg-base) 70%, transparent)` }}>
+      <div className="shrink-0 px-4 sm:px-6 pb-[calc(1rem+env(safe-area-inset-bottom))] sm:pb-5 pt-3 z-20 sticky bottom-0" style={{ background: `linear-gradient(to top, var(--rs-bg-base) 70%, transparent)` }}>
         <div className="max-w-3xl mx-auto">
           {/* Quick suggestions when in conversation */}
           {hasMessages && !loading && (
@@ -259,7 +259,7 @@ export default function ChatPage() {
                   key={idx}
                   onClick={() => handleSend(sug.text)}
                   disabled={loading}
-                  className="shrink-0 text-[11px] px-3 py-1.5 rounded-lg transition-all disabled:opacity-50 bg-[#16181d]/40 border border-white/[0.06] hover:border-indigo-500/20 text-slate-400 hover:text-white" 
+                  className="shrink-0 text-[11px] px-3 py-1.5 rounded-lg transition-all disabled:opacity-50 bg-[#16181d]/40 border border-white/[0.06] hover:border-indigo-500/20 text-slate-400 hover:text-white"
                 >
                   {sug.icon} {sug.text.length > 30 ? sug.text.slice(0, 30) + '…' : sug.text}
                 </button>
@@ -279,7 +279,7 @@ export default function ChatPage() {
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 placeholder={hasMessages ? "Ask a follow-up question..." : "Ask anything about brands, scores, or trends..."}
-                className="w-full bg-transparent pl-5 pr-14 py-4 text-white focus:outline-none text-sm placeholder:text-slate-500"
+                className="w-full bg-transparent pl-4 sm:pl-5 pr-14 py-3.5 sm:py-4 text-white focus:outline-none text-sm placeholder:text-slate-500"
                 style={{ caretColor: 'rgb(var(--rs-accent-rgb))' }}
                 disabled={loading}
               />
