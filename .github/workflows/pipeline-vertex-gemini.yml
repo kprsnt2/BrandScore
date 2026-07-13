@@ -5,6 +5,10 @@ on:
     - cron: '20 1 * * *'  # 01:20 UTC = 06:50 IST daily
   workflow_dispatch:
 
+concurrency:
+  group: db-write
+  cancel-in-progress: false
+
 permissions:
   contents: write
   id-token: write

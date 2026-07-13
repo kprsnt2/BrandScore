@@ -5,6 +5,10 @@ on:
     - cron: '0 3 * * *'  # 03:00 UTC = 08:30 IST (1.5 hrs after brand pipeline at 01:30 UTC)
   workflow_dispatch:       # Allow manual trigger
 
+concurrency:
+  group: db-write
+  cancel-in-progress: false
+
 permissions:
   contents: write
   id-token: write

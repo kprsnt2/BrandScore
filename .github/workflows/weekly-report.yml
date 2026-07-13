@@ -5,6 +5,10 @@ on:
     - cron: '0 5 * * 6'  # 05:00 UTC = 10:30 IST every Saturday
   workflow_dispatch:       # Allow manual trigger
 
+concurrency:
+  group: db-write
+  cancel-in-progress: false
+
 permissions:
   contents: write
   id-token: write
