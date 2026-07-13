@@ -29,30 +29,27 @@ export default function BrandInput({ onSubmit, loading }: BrandInputProps) {
     ];
 
     return (
-        <div className="w-full max-w-2xl mx-auto animate-slide-up">
-            <form onSubmit={handleSubmit} className="space-y-4">
+        <div className="w-full animate-slide-up">
+            <form onSubmit={handleSubmit} className="space-y-3 sm:space-y-4">
                 {/* Brand Name Input */}
-                <div className="relative group">
-                    {/* Glowing background blur */}
-                    <div className="absolute -inset-0.5 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-2xl blur opacity-30 group-focus-within:opacity-60 transition duration-500" />
-                    
-                    <div className="relative">
+                <div className="relative">
+                    <div className="flex flex-col gap-3 sm:relative sm:block">
                         <input
                             type="text"
                             value={brand}
                             onChange={(e) => setBrand(e.target.value)}
                             placeholder="Enter your brand name..."
-                            className="w-full px-6 py-4.5 pr-44 text-lg bg-[#16181d]/80 backdrop-blur-md border border-white/[0.08] rounded-2xl
-                             focus:outline-none focus:border-indigo-500/50 text-white placeholder-slate-500 transition-all duration-300"
+                            className="w-full h-14 sm:h-16 px-4 sm:px-6 sm:pr-48 text-base sm:text-lg bg-[#0f1115] border border-white/[0.1] rounded-xl
+                             focus:outline-none focus:border-indigo-400/70 focus:ring-4 focus:ring-indigo-500/10 text-white placeholder-slate-500 transition-all duration-200"
                             disabled={loading}
                         />
                         <button
                             type="submit"
                             disabled={loading || !brand.trim()}
-                            className="absolute right-2 top-1/2 -translate-y-1/2 px-6 py-3
-                             bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 rounded-xl
-                             font-bold text-white transition-all duration-300 hover:scale-[1.02] active:scale-[0.98]
-                             disabled:opacity-40 disabled:scale-100 disabled:cursor-not-allowed shadow-md hover:shadow-indigo-500/20"
+                            className="w-full sm:w-auto sm:absolute sm:right-2 sm:top-1/2 sm:-translate-y-1/2 px-4 sm:px-7 py-3
+                             bg-indigo-500 hover:bg-indigo-400 rounded-lg
+                             font-semibold text-white transition-colors duration-200 active:bg-indigo-600
+                             disabled:opacity-40 disabled:cursor-not-allowed shadow-sm"
                         >
                             {loading ? (
                                 <span className="flex items-center gap-2">
@@ -70,16 +67,16 @@ export default function BrandInput({ onSubmit, loading }: BrandInputProps) {
                 </div>
 
                 {/* Category Selection */}
-                <div className="flex items-center gap-3 bg-white/[0.02] border border-white/[0.06] rounded-xl px-4 py-2.5 max-w-sm mx-auto justify-between backdrop-blur-sm">
+                <div className="flex flex-col items-stretch gap-2 bg-white/[0.025] border border-white/[0.08] rounded-xl px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
                     <span className="text-slate-400 text-xs font-semibold uppercase tracking-wider">
-                        Industry Sector:
+                        Industry:
                     </span>
                     <select
                         id="category"
                         value={category}
                         onChange={(e) => setCategory(e.target.value)}
                         disabled={loading}
-                        className="bg-transparent text-sm focus:outline-none text-indigo-300 font-medium cursor-pointer transition-colors hover:text-indigo-200 disabled:opacity-50"
+                        className="w-full min-w-0 bg-transparent text-sm focus:outline-none text-white font-medium cursor-pointer transition-colors hover:text-indigo-200 disabled:opacity-50 sm:w-auto"
                     >
                         {BRAND_CATEGORIES.map((cat) => (
                             <option key={cat.value} value={cat.value} className="bg-[#1c1f26] text-white">
@@ -91,8 +88,8 @@ export default function BrandInput({ onSubmit, loading }: BrandInputProps) {
             </form>
 
             {/* Popular brands suggestions */}
-            <div className="mt-6 flex flex-wrap justify-center items-center gap-2">
-                <span className="text-slate-500 text-xs font-semibold uppercase tracking-wider mr-1">Try:</span>
+            <div className="mt-5 flex flex-wrap items-center gap-2">
+                <span className="text-slate-500 text-xs font-semibold uppercase tracking-wider mr-1">Examples:</span>
                 {popularBrands.map((b) => (
                     <button
                         key={b.name}
@@ -102,8 +99,7 @@ export default function BrandInput({ onSubmit, loading }: BrandInputProps) {
                             onSubmit(b.name, b.category);
                         }}
                         disabled={loading}
-                        className="px-3.5 py-1.5 text-xs bg-white/[0.03] hover:bg-indigo-500/10 border border-white/[0.06] hover:border-indigo-500/30 text-slate-400 
-                       hover:text-white rounded-full transition-all duration-300 disabled:opacity-50 hover:-translate-y-0.5"
+                        className="min-h-8 px-3.5 py-1.5 text-xs bg-white/[0.025] hover:bg-white/[0.05] border border-white/[0.08] hover:border-white/[0.14] text-slate-400 hover:text-white rounded-full transition-colors duration-200 disabled:opacity-50"
                     >
                         {b.name}
                     </button>
