@@ -1,27 +1,16 @@
 import base64
 import time
 import sys
-import sqlite3
-import os
+import argparse
 from google import genai
 from google.genai import types
 
 def b64decode(b64_encoded_string: str) -> bytes:
   return base64.b64decode(b64_encoded_string.encode('utf-8'))
 
-# Fetch latest report from DB
-db_path = os.path.join(os.path.dirname(__file__), '../data/brand-intelligence.db')
-conn = sqlite3.connect(db_path)
-cursor = conn.cursor()
-cursor.execute("SELECT title, snippet FROM reports ORDER BY published_at DESC LIMIT 1")
-row = cursor.fetchone()
-conn.close()
-
-if not row:
-    print("No reports found in the database.")
-    sys.exit(1)
-
-latest_title, latest_snippet = row
+parser = argparse.ArgumentParser(description='Generate a Veo video for a report.')
+parser.add_argument('--title', type=str, default='The rAsh Score Weekly: Tech Giants Dominate AI Share of Voice', help='Title of the report')
+args = parser.parse_args()
 
 # Assuming the user has ADC (Application Default Credentials) configured
 # on Vertex AI. The project is rashscore and location is us-central1.
@@ -31,7 +20,8 @@ client = genai.Client(
     location="us-central1",
 )
 
-prompt = f"A cinematic, fast-paced futuristic intro for a weekly tech report titled '{latest_title}'. The video shows glowing 3D AI holograms of global technology hubs, data streams flying across the screen, and sleek robotic elements. The camera pans dynamically over a digital globe with glowing data nodes lighting up in neon blue and purple."
+prompt = f"A cinematic, fast-paced futuristic intro for a weekly tech report titled '{args.title}'. The video shows glowing 3D AI holograms of global technology hubs, data streams flying across the screen, and sleek robotic elements. The camera pans dynamically over a digital globe with glowing data nodes lighting up in neon blue and purple."
+
 
 
 print(f"Generating video for prompt:\n{prompt}\n")
