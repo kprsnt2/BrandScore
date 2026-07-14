@@ -32,28 +32,52 @@ export async function GET(request: NextRequest) {
     // Get brand results
     const db = await import('@/lib/db').then(m => m.getDb());
     
-    // Find all runs that have data for this industry, ordered by newest first
-    const industryRunsQuery = db.exec(`
-      SELECT DISTINCT run_id 
-      FROM brand_results 
-      WHERE industry_id = '${industryId}' 
-      ORDER BY run_id DESC
+    // Find distinct dates that have data for this industry, ordered by newest first.
+    // We use dates (not run_ids) because multiple runs can share the same date
+    // (one per model), and we need to compare across genuinely different days.
+    const industryDatesQuery = db.exec(`
+      SELECT DISTINCT pr.run_date
+      FROM brand_results br
+      JOIN pipeline_runs pr ON pr.id = br.run_id
+      WHERE br.industry_id = '${industryId}'
+      ORDER BY pr.run_date DESC
     `);
 
-    if (industryRunsQuery.length === 0 || industryRunsQuery[0].values.length === 0) {
+    if (industryDatesQuery.length === 0 || industryDatesQuery[0].values.length === 0) {
       return NextResponse.json({ error: 'No pipeline data available for this industry' }, { status: 404 });
     }
 
-    const currentRunId = industryRunsQuery[0].values[0][0] as number;
+    const currentDate = industryDatesQuery[0].values[0][0] as string;
+
+    // Get the latest run_id on the current date for this industry
+    const currentRunResult = db.exec(`
+      SELECT pr.id FROM pipeline_runs pr
+      JOIN brand_results br ON br.run_id = pr.id
+      WHERE pr.run_date = '${currentDate}' AND br.industry_id = '${industryId}'
+      ORDER BY pr.id DESC LIMIT 1
+    `);
+    const currentRunId = currentRunResult[0].values[0][0] as number;
+
     const brands = await getBrandResults(currentRunId, industryId, model);
     const availableModels = await getAvailableModels(currentRunId, industryId);
     const industryResult = await getIndustryResult(currentRunId, industryId);
 
-    // Get previous run for change calculations
+    // Get previous day's data for change calculations
     let prevBrands: typeof brands = [];
-    if (industryRunsQuery[0].values.length > 1) {
-      const prevRunId = industryRunsQuery[0].values[1][0] as number;
-      prevBrands = await getBrandResults(prevRunId, industryId, model);
+    if (industryDatesQuery[0].values.length > 1) {
+      const prevDate = industryDatesQuery[0].values[1][0] as string;
+      // Get any run_id from the previous date — getBrandResults will find
+      // all runs on that date when looking for a specific model
+      const prevRunResult = db.exec(`
+        SELECT pr.id FROM pipeline_runs pr
+        JOIN brand_results br ON br.run_id = pr.id
+        WHERE pr.run_date = '${prevDate}' AND br.industry_id = '${industryId}'
+        ORDER BY pr.id DESC LIMIT 1
+      `);
+      if (prevRunResult.length > 0 && prevRunResult[0].values.length > 0) {
+        const prevRunId = prevRunResult[0].values[0][0] as number;
+        prevBrands = await getBrandResults(prevRunId, industryId, model);
+      }
     }
 
     // Build prev lookup
