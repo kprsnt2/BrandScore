@@ -2,8 +2,8 @@
  * Gemini AI Provider — Primary model with fallback chain.
  * Uses Google Generative Language API at generativelanguage.googleapis.com.
  *
- * Primary: gemini-2.5-flash
- * Fallback: gemini-2.5-flash-lite
+ * Primary: gemini-flash-latest
+ * Fallback: gemini-flash-lite-latest
  */
 import { getEnv } from "./env";
 import { generateStructuredBrandPrompt, parseAIScoreResponse, AIScoreResponse } from "./prompts";
@@ -11,9 +11,9 @@ import { generateStructuredBrandPrompt, parseAIScoreResponse, AIScoreResponse } 
 const GEMINI_BASE_URL = "https://generativelanguage.googleapis.com/v1beta/models";
 
 // Model configuration
-const GEMINI_PRIMARY_MODEL = "gemini-2.5-flash";
+const GEMINI_PRIMARY_MODEL = "gemini-flash-latest";
 const GEMINI_FALLBACK_MODELS = [
-    "gemini-2.5-flash-lite",
+    "gemini-flash-lite-latest",
 ];
 
 interface GeminiResponse {

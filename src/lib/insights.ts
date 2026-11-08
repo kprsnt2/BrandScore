@@ -133,7 +133,7 @@ interface ModelConfig {
 }
 
 const MODEL_CHAIN: ModelConfig[] = [
-  { provider: 'vertex-gemini', model: 'gemini-3.5-flash', label: 'Gemini 3.5 Flash (Vertex)' },
+  { provider: 'vertex-gemini', model: 'gemini-flash-latest', label: 'Gemini Flash Latest (Vertex)' },
   { provider: 'groq', model: 'openai/gpt-oss-120b', label: 'GPT-OSS 120B (Groq)', baseUrl: GROQ_BASE_URL, apiKeyField: 'GROQ_API_KEY' },
   { provider: 'groq', model: 'groq/compound', label: 'Compound (Groq)', baseUrl: GROQ_BASE_URL, apiKeyField: 'GROQ_API_KEY' },
   { provider: 'groq', model: 'llama-3.3-70b-versatile', label: 'Llama 3.3 70B (Groq)', baseUrl: GROQ_BASE_URL, apiKeyField: 'GROQ_API_KEY' },

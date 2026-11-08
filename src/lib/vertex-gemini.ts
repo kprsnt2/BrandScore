@@ -2,15 +2,15 @@
  * Vertex AI Gemini Provider
  * Connects to Google Cloud Vertex AI REST API for Gemini models.
  * 
- * Primary: gemini-3.5-flash
- * Backup: gemini-2.5-flash
+ * Primary: gemini-flash-latest
+ * Backup: gemini-flash-lite-latest
  */
 import { getAccessToken, getProjectId, getRegion } from './gcp-auth';
 import { generateStructuredBrandPrompt, parseAIScoreResponse, AIScoreResponse } from './prompts';
 
-const VERTEX_PRIMARY_MODEL = "gemini-3.5-flash";
+const VERTEX_PRIMARY_MODEL = "gemini-flash-latest";
 const VERTEX_FALLBACK_MODELS = [
-    "gemini-2.5-flash",
+    "gemini-flash-lite-latest",
 ];
 
 interface VertexGeminiResponse {
@@ -48,8 +48,8 @@ async function callVertexGeminiAPI(
             const controller = new AbortController();
             const timeout = setTimeout(() => controller.abort(), 120000); // 120s timeout for batch calls
 
-            // Vertex AI Endpoint (gemini-3.5-flash uses the global endpoint)
-            const isGlobal = region === 'global' || currentModel === 'gemini-3.5-flash';
+            // Vertex AI Endpoint (gemini-flash-latest uses the global endpoint)
+            const isGlobal = region === 'global' || currentModel === 'gemini-flash-latest';
             const host = isGlobal ? 'aiplatform.googleapis.com' : `${region}-aiplatform.googleapis.com`;
             const loc = isGlobal ? 'global' : region;
             const url = `https://${host}/v1/projects/${projectId}/locations/${loc}/publishers/google/models/${currentModel}:generateContent`;
